@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <mdb.h>
+#include <lmdb.h>
 #include "util/histogram.h"
 #include "util/random.h"
 #include "util/testutil.h"
