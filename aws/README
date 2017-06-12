@@ -1,0 +1,157 @@
+~$ sudo apt-get install awscli
+~$ ### The first root key must be created through the AWS Console
+~$ aws configure
+AWS Access Key ID [None]: <removed>
+AWS Secret Access Key [None]: <removed>
+Default region name [None]: us-east-2
+Default output format [None]: text
+~$ 
+~$ aws s3 mb s3://cafedemocracy-benchmarks --region us-east-2
+make_bucket: cafedemocracy-benchmarks
+~$ aws s3 ls
+2017-06-11 21:06:43 cafedemocracy-benchmarks
+~$ KEY_NAME="dan"
+~$ SSH_PRIV_FILE="~/.ssh/amazon-benchmark-server.pem"
+~$ aws ec2 create-key-pair --key-name $KEY_NAME | sed 's/.*-----BEGIN/-----BEGIN/' | sed 's/END-----.*/END-----' > $SSH_PRIV_FILE
+~$ chmod 600 $SSH_PRIV_FILE
+#~$ aws ec2 import-key-pair --key-name dan-pgp-card --public-key-material "`ssh-add -L`"
+#4c:9d:23:13:66:31:f1:27:41:60:81:7a:85:fa:f3:c9 dan-pgp-card
+~$ aws ec2 create-security-group --group-name global-http-restricted-ssh --description "Allow global access to http/https. Limit ssh"
+sg-<removed>
+~$ aws ec2 authorize-security-group-ingress --group-name global-http-restricted-ssh --protocol tcp --port 80 --cidr 0.0.0.0/0
+~$ aws ec2 authorize-security-group-ingress --group-name global-http-restricted-ssh --protocol tcp --port 443 --cidr 0.0.0.0/0
+~$ aws ec2 authorize-security-group-ingress --group-name global-http-restricted-ssh --protocol tcp --port 22 --cidr 67.217.144.188/32
+~$ SECURITY_GROUP=`aws ec2 describe-security-groups | grep USERIDGROUPPAIRS | head -1 | awk '{print $2}'`
+
+# create-volume
+## --dry-run                     Checks whether you have the required permissions for the action
+## --size (integer)              The size of the volume, in GiBs.
+## --snapshot-id (string)        The snapshot from which to create the volume.
+## --availability-zone (string)  The Availability Zone in which to create the volume.
+## --volume-type (string)        The volume type: standard, io1, gp2, sc1, st1.
+## --iops (integer)              The number of I/O operations per second (IOPS) to provision for the volume.
+## ----encrypted | --no-encrypted (boolean)  Specifies whether the volume should be encrypted.
+## --kms-key-id (string)         The full ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. 
+## --tag-specifications (list)   The tags to apply to the volume during creation:
+### i.e. ResourceType=string,Tags=[{Key=string,Value=string},{Key=string,Value=string}] ...
+# Example: aws ec2 create-volume --region us-east-2 --availability-zone us-east-2c --size 500 --volume-type io1 --iops 1000
+
+# Volume Pricing
+## SSD (gp2) - $0.10 per GB-month
+## SSD (io1) - $0.125 per GB-month of provisioned storage, plus $0.065 per provisioned IOPS-month
+### IOPS - The number of I/O operations per second (IOPS) to provision for the volume, with a maximum ratio of 50 IOPS/GiB. Constraint: Range is 100 to 20000 for Provisioned IOPS SSD volumes
+### 500 Gigs @100 IOPS for one hour: 500 * .125 / 720 + 100 * .065 / 720 = $0.096 
+### 500 Gigs @20000 IOPS for one hour: 500 * .125 / 720 + 20000 * .065 / 720 = $1.89
+## HDD (st1) - $0.045 per GB-month of provisioned storage
+## Cold HDD (sc1) - $0.025 per GB-month of provisioned storage
+## EBS Snapshots - $0.05 per GB-month of data stored
+
+# Debian images as of 2017/06/11
+## debian-jessie-amd64-hvm-2017-01-15-1221-ebs - ami-b2795cd7
+
+~$ aws ec2 describe-vpcs
+VPCS    172.31.0.0/16   dopt-f5833f93   default True    available       vpc-579d3b2e
+
+
+# r4.large - $0.133 per Hour
+# r4.16xlarge - $4.256 per Hour
+~$ aws ec2 run-instances --image-id ami-b2795cd7 --count 1 --instance-type r4.large --key-name dan --security-group-ids $SECURITY_GROUP --associate-public-ip-address
+~$ VOLUME_OUTPUT=`mktemp`
+~$ aws ec2 create-volume --region us-east-2 --availability-zone us-east-2c --size 500 --volume-type io1 --iops 100 > $VOLUME_OUTPUT
+~$ INSTANCE_OUTPUT=`mktemp`
+aws ec2 run-instances --image-id ami-b2795cd7 --count 1 --instance-type r4.large --key-name dan --security-group-ids sg-2de5d744 > $INSTNCE_OUTPUT
+aws ec2 attach-volume --volume-id vol-0caa5505aa584c83b --instance-id i-0340159eaca8b121d --device /dev/xvdb
+
+
+rm $VOLUME_OUTPUT
+rm $INSTANCE_OUTPUT
+
+aws s3 mb s3://cafedemocracy-benchmarks --region us-east-1
+aws s3 ls
+aws ec2 create-key-pair --key-name pachi
+aws ec2 describe-instance-status
+aws ec2 describe-volumes
+aws ec2 create-security-group --group-name jav -description "My Group"
+aws ec2 authorize-security-group-ingress --group-name jav --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 run-instances --image-id ami-aefjoa23 --count 1 --instance-type t2.micro --security-groups jav
+
+
+
+
+
+
+
+
+aws s3 mb s3://bucket-name
+aws s3 rb s3://bucket-name
+aws s3 ls
+aws s3 cp C:\Users\test\Desktop\test.png s3://areik - S3 bucket copy file
+aws ec2 describe-instances --filters "Name=instance-type,Values=t2.micro"
+aws ec2 create-key-pair --key-name mykeypair
+aws ec2 terminate-instances --instance-ids i-5203422c
+aws ec2 create-security-group --group-name my-sg --description "My security group
+aws ec2 describe-security-groups --group-names my-sg
+aws ec2 create-security-group --group-name my-sg --description "My security group" --vpc-id vpc-1a2b3c4d
+aws ec2 authorize-security-group-ingress --group-name my-sg --protocol tcp --port 3389 --cidr 203.0.113.0/24
+aws ec2 delete-security-group --group-name my-sg
+aws ec2 delete-security-group --group-id sg-903004f8
+aws ec2 describe-instance-status
+aws ec2 run-instances --image-id ami-e90dc68a --count 1 --instance-type t2.micro --key-name qwikLABS-L117-359887 --security-groups my-sg
+aws ec2 create-snapshot --volume-id vol-656f37bf --description "This is my root volume snapshot."
+aws ec2 describe-volumes
+aws ec2 describe-snapshots -snapshot-id snap-6ed73e7f
+aws ec2 create-image --instance-id i-873f1723 --name "My server" --description "An AMI for my server" --no-reboot
+aws ec2 run-instances --image-id ami-e90dc68a --count 1 --instance-type t2.micro --key-name qwikLABS-L117-359887 --security-group-ids sg-bb8048df --subnet-id subnet-3d076a58 (launch instance in specific subnet)
+aws elb create-load-balancer --load-balancer-name my-load-balancer --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets subnet-15aaab61 --security-groups sg-a61988c3
+aws elb create-load-balancer --load-balancer-name my-load-balancer --listeners --scheme internal "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets subnet-15aaab61 --security-groups sg-a61988c3
+aws elb register-instances-with-load-balancer --load-balancer-name my-load-balancer --instances i-d6f6fae3
+aws ec2 describe-instances --filters "Name=instance-type,Values=t2.micro,Name=instance-state-name,Values=terminated"
+aws ec2 allocate-address
+aws ec2 associate-address --instance-id i-873f1723 --public-ip 52.77.88.244
+aws ec2 stop-instances --instance-ids i-1a2b3c4d
+aws ec2 start-instances --instance-ids i-1a2b3c4d
+aws ec2 terminate-instances --instance-ids i-1a2b3c4d
+aws ec2 attach-volume --volume-id vol-1234abcd --instance-id i-abcd1234 --device /dev/sdf
+aws ec2 detach-volume --volume-id vol-1234abcd
+
+
+
+==Setup==
+
+sudo apt-get update && sudo apt-get dist-upgrade
+sudo apt-get install vim git automake libtool numactl time
+sudo sed -i 's/^.syntax on/syntax on/' /etc/vim/vimrc
+sudo sed -i 's/^.set background=dark/set background=dark/' /etc/vim/vimrc
+sudo apt-get build-dep liblmdb-dev
+mkdir ~/src
+cd ~/src
+wget https://github.com/LMDB/lmdb/archive/LMDB_0.9.21.tar.gz
+tar -xvzf LMDB_0.9.21.tar.gz
+cd lmdb-LMDB_0.9.21/libraries/liblmdb/
+make
+sudo make install
+cd ~/src
+wget https://github.com/google/snappy/releases/download/1.1.4/snappy-1.1.4.tar.gz
+tar -xvzf snappy-1.1.4.tar.gz
+cd snappy-1.1.4
+./configure && make
+sudo make install
+cd ~/src
+git clone https://github.com/hyc/leveldb.git
+cd leveldb
+git checkout benches
+sed -i 's/liblmdb.a/liblmdb.a \/usr\/local\/lib\/libsnappy.a/' Makefile
+sed -i '58,60d' Makefile
+sed -i 's/BENCHMARKS = db.*/BENCHMARKS = db_bench db_bench_mdb/' Makefile
+sed -i 's/cstdatomic/atomic/g' build_detect_platform
+sed -i 's/cstdatomic/atomic/g' port/atomic_pointer.h
+make bench
+wget http://www.lmdb.tech/bench/ondisk/cmd3-24
+sed -i 's/DUR=1200/DUR=300/' cmd3-24
+sed -i '/ENGINES="$ENGINES/d' cmd3-24
+sed -i 's/ENGINES=""/ENGINES="LMDB"/' cmd3-24
+sudo mkfs -t ext4 /dev/xvdb
+sudo mount /dev/xvdb -o noatime,defaults /mnt
+sudo chown -R admin:admin /mnt
+sh cmd3-24
+
