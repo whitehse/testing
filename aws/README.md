@@ -16,8 +16,8 @@ aws s3 mb s3://cafedemocracy-benchmarks --region us-east-2
 
 ~~~~
 KEY_NAME="dan"
-SECURITY_GROUP_NAME="global-http-restricted-ssh"
-SECURITY_GROUP_DESCRIPTION="Allow global access to http/https. Limit ssh"
+SECURITY_GROUP_NAME="http-from-security-group-ssh-from-home"
+SECURITY_GROUP_DESCRIPTION="Allow http/https, and ICMP, from same security group. Allow SSH from home."
 MY_HOME_IP="203.0.113.234"
 SSH_PRIV_FILE=~/.ssh/amazon-benchmark-server.pem
 VOLUME_OUTPUT=`mktemp`
@@ -30,12 +30,15 @@ chmod 600 $SSH_PRIV_FILE
 ~~~~
 
 ~~~~
-aws ec2 create-security-group --group-name $SECURITY_GROUP_NAME --description "$SECURITY_GROUP_DESCRIPTION"
-aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 80 --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 443 --cidr 0.0.0.0/0
+SECURITY_GROUP_ID=`aws ec2 create-security-group --group-name $SECURITY_GROUP_NAME --description "$SECURITY_GROUP_DESCRIPTION"`
+aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol icmp --port -1 --source-group $SECURITY_GROUP_NAME
+aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 80 --source-group $SECURITY_GROUP_NAME
+aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 443 --source-group $SECURITY_GROUP_NAME
 aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 22 --cidr ${MY_HOME_IP}/32
 SECURITY_GROUP_ID=`aws ec2 describe-security-groups | grep SECURITYGROUPS | grep $SECURITY_GROUP_NAME | sed 's/.*\(sg-[0-9a-f]\+\).*/\1/'`
+# aws ec2 delete-security-group --group-name $SECURITY_GROUP_NAME
 ~~~~
+
 
 ~~~~
 # debian-jessie-amd64-hvm-2017-01-15-1221-ebs: ami-b2795cd7
