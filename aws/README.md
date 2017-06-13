@@ -18,7 +18,7 @@ aws s3 mb s3://cafedemocracy-benchmarks --region us-east-2
 KEY_NAME="dan"
 SECURITY_GROUP_NAME="global-http-restricted-ssh"
 SECURITY_GROUP_DESCRIPTION="Allow global access to http/https. Limit ssh"
-MY_HOME_IP="67.217.144.188"
+MY_HOME_IP="203.0.113.234"
 SSH_PRIV_FILE=~/.ssh/amazon-benchmark-server.pem
 VOLUME_OUTPUT=`mktemp`
 INSTANCE_OUTPUT=`mktemp`
@@ -60,4 +60,48 @@ aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device
 ssh -i $SSH_PRIV_FILE admin@${IPV4_ADDR}
 ~~~~
 
+~~~~
+sudo apt-get update && sudo apt-get dist-upgrade
+sudo apt-get install vim git automake libtool numactl time bc
+sudo sed -i 's/^.syntax on/syntax on/' /etc/vim/vimrc
+sudo sed -i 's/^.set background=dark/set background=dark/' /etc/vim/vimrc
+sudo apt-get build-dep liblmdb-dev
+~~~~
 
+~~~~
+mkdir ~/src
+cd ~/src
+wget https://github.com/LMDB/lmdb/archive/LMDB_0.9.21.tar.gz
+tar -xvzf LMDB_0.9.21.tar.gz
+cd lmdb-LMDB_0.9.21/libraries/liblmdb/
+make
+sudo make install
+cd ~/src
+wget https://github.com/google/snappy/releases/download/1.1.4/snappy-1.1.4.tar.gz
+tar -xvzf snappy-1.1.4.tar.gz
+cd snappy-1.1.4
+./configure && make
+sudo make install
+cd ~/src
+git clone https://github.com/hyc/leveldb.git
+cd leveldb
+git checkout benches
+sed -i 's/liblmdb.a/liblmdb.a \/usr\/local\/lib\/libsnappy.a/' Makefile
+sed -i '58,60d' Makefile
+sed -i 's/BENCHMARKS = db.*/BENCHMARKS = db_bench db_bench_mdb/' Makefile
+sed -i 's/cstdatomic/atomic/g' build_detect_platform
+sed -i 's/cstdatomic/atomic/g' port/atomic_pointer.h
+make bench
+cd ~/src/
+wget http://www.lmdb.tech/bench/ondisk/dorww.c
+gcc -o dorww dorww.c
+wget http://www.lmdb.tech/bench/ondisk/cmd3-24
+sed -i 's/DUR=1200/DUR=300/' cmd3-24
+sed -i '/ENGINES="$ENGINES/d' cmd3-24
+sed -i 's/ENGINES=""/ENGINES="LMDB"/' cmd3-24
+sudo mkfs -t ext4 /dev/xvdb
+sudo mount /dev/xvdb -o noatime,defaults /mnt
+sudo chown -R admin:admin /mnt
+# Make this 8000000000 entries when running on r4.16xlarge to fit within ram.
+sh cmd3-24 > ~/cmd3-24.output
+~~~~
