@@ -1,14 +1,15 @@
 ~~~~
 KEY_NAME="dan"
 SECURITY_GROUP_NAME="http-from-security-group-ssh-from-home"
-SECURITY_GROUP_DESCRIPTION="Allow http/https, and ICMP, from same security group. Allow SSH from home."
-MY_HOME_IP="203.0.113.234"
 SSH_PRIV_FILE=~/.ssh/amazon-benchmark-server.pem
 INSTANCE_OUTPUT=`mktemp`
 MY_STRETCH_AMI="ami-40bb9d25"
+# ~$4.50 per hour
 INSTANCE_TYPE="r4.16xlarge"
 VOLUME_OUTPUT=`mktemp`
 SECURITY_GROUP_ID=`aws ec2 describe-security-groups | grep SECURITYGROUPS | grep $SECURITY_GROUP_NAME | sed 's/.*\(sg-[0-9a-f]\+\).*/\1/'`
+# about $1.50 per hour
+VOLUME_SIZE="500" ; IOPS="20000"
 ~~~~
 
 ~~~~
@@ -20,7 +21,7 @@ IPV4_ADDR=`aws ec2 describe-instances | grep ASSOCIATION | head -1 | awk '{print
 ~~~~
 
 ~~~~
-aws ec2 create-volume --region us-east-2 --availability-zone $AVAILABILITY_ZONE --size 500 --volume-type io1 --iops 20000 > $VOLUME_OUTPUT
+aws ec2 create-volume --region us-east-2 --availability-zone $AVAILABILITY_ZONE --size $VOLUME_SIZE --volume-type io1 --iops 20000 > $VOLUME_OUTPUT
 VOLUME_ID=`cat "$VOLUME_OUTPUT" | awk '{print $7}'`
 sleep 5
 aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device /dev/xvdb
@@ -54,9 +55,9 @@ dstat --nocolor --output ~/cmd3-24-dstat.csv \
 --tcp \
 --udp \
 --unix \
---vm --vm-adv
+--vm --vm-adv > /dev/null &
 cd ~/src/leveldb/
-sh ~/src/libwebsockets-benchmarks/lmdb/cmd3-24 > ~/cmd3-24.output
+time sh ~/src/libwebsockets-benchmarks/lmdb/cmd3-24 > ~/cmd3-24.output
 sed -i '1,6d' ~/cmd3-24-dstat.csv
 cat ~/src/libwebsockets-benchmarks/aws/dstat-header ~/cmd3-24-dstat.csv > ~/dstat-cmd3-24-run.csv
 ~~~~
