@@ -1,0 +1,19 @@
+export TEST_TMPDIR=/mnt
+NUM=38400000
+VSIZE=4000
+WRATE=0
+STATS=200000
+DUR=300
+THR="1 4 16 64 128"
+TIME="numactl -i all /usr/bin/time -f Usr\tSys\t%%\tWall\tRSS\tMajor\tMinor\tVolun\tInvol\tIn\tOut\n%U\t%S\t%P\t%E\t%M\t%F\t%R\t%w\t%c\t%I\t%O"
+
+echo "ENGINE=LMDB"
+date +%Y/%m/%d-%H:%M:%S
+$TIME ./db_bench_mdb --benchmarks=fillseqbatch --stats_interval=$STATS --num=$NUM --value_size=$VSIZE --readahead=0
+date +%Y/%m/%d-%H:%M:%S
+for THREADS in $THR; do
+  echo THREADS=$THREADS
+  $TIME ./db_bench_mdb --benchmarks=readwhilewriting --threads=$THREADS --stats_interval=$STATS --num=$NUM --value_size=$VSIZE --use_existing_db=1 --writes_per_second=$WRATE --duration=$DUR --readahead=0
+  date +%Y/%m/%d-%H:%M:%S
+  du $TEST_TMPDIR
+done
