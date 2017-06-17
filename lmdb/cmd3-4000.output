@@ -1,0 +1,102 @@
+ENGINE=LMDB
+2017/06/17-01:07:57
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:07:57 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+fillseqbatch :       6.524 micros/op 153280 ops/sec;  587.1 MB/s
+154888336	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154888356	/mnt
+2017/06/17-01:12:12
+THREADS=1
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:12:12 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+writer       :      15.885 micros/op 62952 ops/sec; (desired 0 ops/sec)
+readwhilewriting :       2.487 micros/op 402029 ops/sec; (120608999 of 120608999 found)
+2017/06/17-01:17:21
+154934508	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154934528	/mnt
+THREADS=4
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:17:21 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+writer       :      15.183 micros/op 65863 ops/sec; (desired 0 ops/sec)
+readwhilewriting :       0.566 micros/op 1768243 ops/sec; (129149999 of 129149999 found)
+2017/06/17-01:22:26
+154934508	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154934528	/mnt
+THREADS=16
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:22:26 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+writer       :      15.884 micros/op 62957 ops/sec; (desired 0 ops/sec)
+readwhilewriting :       0.136 micros/op 7366169 ops/sec; (137798999 of 137798999 found)
+2017/06/17-01:27:30
+154934508	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154934528	/mnt
+THREADS=64
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:27:30 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+writer       :      22.186 micros/op 45073 ops/sec; (desired 0 ops/sec)
+readwhilewriting :       0.041 micros/op 24175363 ops/sec; (113305999 of 113305999 found)
+2017/06/17-01:32:34
+154951180	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154951200	/mnt
+THREADS=128
+LMDB:       version LMDB 0.9.21: (June 1, 2017)
+Date:       Sat Jun 17 01:32:34 2017
+CPU:        64 * Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz
+CPUCache:   46080 KB
+Keys:       16 bytes each
+Values:     4000 bytes each (2000 bytes after compression)
+Entries:    38400000
+RawSize:    147070.3 MB (estimated)
+FileSize:   73828.1 MB (estimated)
+------------------------------------------------
+writer       :      43.440 micros/op 23020 ops/sec; (desired 0 ops/sec)
+readwhilewriting :       0.040 micros/op 25077758 ops/sec; (58211999 of 58211999 found)
+2017/06/17-01:37:38
+154991256	/mnt/dbbench_mdb-1
+16	/mnt/lost+found
+154991276	/mnt
