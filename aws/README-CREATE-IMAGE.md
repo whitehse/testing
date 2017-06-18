@@ -114,7 +114,9 @@ wget https://github.com/h2o/h2o/archive/v2.2.2.tar.gz
 tar -xvzf v2.2.2.tar.gz
 cd h2o-2.2.2
 cscope -b -R
-cmake -DWITH_BUNDLED_SSL=on .
+mkdir build
+cd build
+cmake -DWITH_BUNDLED_SSL=on -DBUILD_SHARED_LIBS=on ..
 make
 sudo make install
 cat - > /tmp/h2o.conf << EOF
@@ -132,6 +134,7 @@ hosts:
 num-threads: 1
 EOF
 sudo cp /tmp/h2o.conf /usr/local/etc/
+cd ..
 # sudo /usr/local/bin/h2o -c /usr/local/etc/h2o.conf
 ~~~~
 
