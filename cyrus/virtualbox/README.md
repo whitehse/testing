@@ -8,8 +8,8 @@
 #     and the public internet
 #   Is the DNS authority for example.com and example.org
 #   Is a certificate authority
-# example_com - 198.51.100.0/24
-# example_org - 203.0.113.0/24
+# example_com - 198.51.100.0/24 - MIT KDC
+# example_org - 203.0.113.0/24 - Heimdal KDC
 
 vboxmanage createvm --name cyrus-firewall --ostype Debian_64 --register
 vboxmanage modifyvm cyrus-firewall --memory 512 --boot1 disk --boot2 dvd --boot3 net --rtcuseutc on
@@ -32,6 +32,7 @@ vboxmanage modifyvm cyrus-firewall --vrdeport 42000
 vboxmanage startvm cyrus-firewall --type=headless
 rdesktop localhost:42000
 
+Select DHCP (or static as required by the local network)
 selected tasksel tasks: SSH server, standard system utilities
 apt-get install vim iptables-persistent bind9 dnsutils
 set 'PermitRootLogin yes' in /etc/ssh/sshd_config
@@ -44,6 +45,22 @@ iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 add 'recusion yes;' to /etc/bind/named.conf.options
 Create bind zones for example.com, example.org, '100.51.198.in-addr.arpa.', and
 '113.0.203.in-addr.arpa.'.
+
+Certificate Authority:
+http://albertech.blogspot.com/2015/06/iamaca-become-your-own-certificate.html
+
+openssl genrsa -out /root/exampleCA.key 2048
+openssl req -x509 -sha256 -nodes -days 1024 -newkey rsa:2048 -key /root/exampleCA.key -out /root/exampleCA.crt
+
+openssl genrsa -out ldap.example.com.key 2048
+openssl req -new -key ldap.example.com.key -out ldap.example.com.csr
+openssl x509 -req -in ldap.example.com.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out ldap.example.com.crt -days 365
+openssl x509 -in ldap.example.com.crt -text -noout | grep CN
+       Subject: C = US, ST = OK, O = Example, CN = ldap.example.com
+
+
+
+
 ````
 
 # sans-sasl
@@ -81,6 +98,7 @@ cd openldap-2.4.45/
 apt-get install build-essential
 #apt-get build-dep slapd
 apt-get install autoconf automake autopoint autotools-dev comerr-dev debhelper dh-autoreconf dh-strip-nondeterminism gettext intltool-debian libarchive-zip-perl libcroco3 libdb5.3-dev libfile-stripnondeterminism-perl libglib2.0-0 libgmp-dev libgmpxx4ldbl libgnutls-dane0 libidn11-dev libltdl-dev libltdl7 libodbc1 libp11-kit-dev libperl-dev libsigsegv2 libtasn1-6-dev libtool libunbound2 libwrap0-dev m4 nettle-dev odbcinst odbcinst1debian2 pkg-config po-debconf time unixodbc-dev zlib1g-dev libssl-dev
+# Library installation only, without libsasl
 ./configure \
 --prefix=/usr \
 --libexecdir=/usr/lib \
@@ -96,10 +114,6 @@ apt-get install autoconf automake autopoint autotools-dev comerr-dev debhelper d
 --with-cyrus-sasl=no \
 --with-threads \
 --with-tls=openssl
-#--enable-modules \
-#--disable-nbd \
-# --with-subdir=ldap \
-# --with-odbc=unixodbc
 make depend
 make && make install
 halt
@@ -120,6 +134,8 @@ Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the foll
 IP: 198.51.100.6/24
 gateway: 198.51.100.1
 Hostname: mit-host.example.com
+reboot
+
 apt-get install libkrb5-dev
 #apt-get build-dep libsasl2-2
 apt-get install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
@@ -379,12 +395,6 @@ vboxmanage list runningvms
 vboxmanage controlvm mit-host poweroff
 ````
 
-# Generic Heimdal Host
-
-````
-vboxmanage clonevm sans-sasl --name heimdal-host --register
-````
-
 # kdc.example.com
 
 ````
@@ -397,6 +407,7 @@ Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the foll
 IP: 198.51.100.7/24
 gateway: 198.51.100.1
 Hostname: kdc.example.com
+reboot
 
 apt-get install krb5-{admin-server,kdc}
 specify default realm (default_realm = EXAMPLE.COM) in /etc/krb5.conf
@@ -411,14 +422,13 @@ WARNING: no policy specified for dwhite@EXAMPLE.COM; defaulting to no policy
 Enter password for principal "dwhite@EXAMPLE.COM": passw0rd
 Re-enter password for principal "dwhite@EXAMPLE.COM": passw0rd
 Principal "dwhite@EXAMPLE.COM" created.
-kadmin.local:  listprincs
-K/M@EXAMPLE.COM
-dwhite@EXAMPLE.COM
-kadmin/admin@EXAMPLE.COM
-kadmin/changepw@EXAMPLE.COM
-kadmin/kdc.example.com@EXAMPLE.COM
-kiprop/kdc.example.com@EXAMPLE.COM
-krbtgt/EXAMPLE.COM@EXAMPLE.COM
+kadmin.local:  addprinc -randkey host/ldap.example.com
+kadmin.local:  addprinc -randkey ldap/ldap.example.com
+kadmin.local:  ktadd -k ldap.keytab host/ldap.example.com
+kadmin.local:  ktadd -k slapd.keytab ldap/ldap.example.com
+kadmin.local:  q
+
+scp ldap.keytab slapd.keytab root@ldap.example.com:
 ````
 
 # ldap.example.com
@@ -431,7 +441,303 @@ rdesktop localhost:42004
 
 Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
 IP: 198.51.100.8/24
-oateway: 198.51.100.1
-
+Gateway: 198.51.100.1
 Hostname: ldap.example.com
+reboot
+
+kinit -k -t /root/ldap.keytab host/ldap.example.com@EXAMPLE.COM
+echo "pidfile /var/run/slapd.pid" > /etc/slapd.conf
+mkdir /etc/sasl2
+echo "keytab: /root/slapd.keytab" > /etc/sasl2/slapd.conf
+/usr/lib/slapd -f /etc/slapd.conf
+````
+
+# client.example.com
+
+````
+vboxmanage clonevm mit-host --name client-example-com --register
+vboxmanage modifyvm client-example-com --vrdeport 42005
+vboxmanage startvm client-example-com --type=headless
+rdesktop localhost:42005
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 198.51.100.9/24
+Gateway: 198.51.100.1
+Hostname: client.example.com
+reboot
+
+su - dwhite
+kinit dwhite@EXAMPLE.COM
+
+ldapsearch -H ldap://ldap.example.com -x -b "" -s base -LLL supportedSASLMechanisms
+dn:
+supportedSASLMechanisms: SRP
+supportedSASLMechanisms: PASSDSS-3DES-1
+supportedSASLMechanisms: GS2-KRB5
+supportedSASLMechanisms: GS2-IAKERB
+supportedSASLMechanisms: SCRAM-SHA-256
+supportedSASLMechanisms: SCRAM-SHA-1
+supportedSASLMechanisms: GSSAPI
+supportedSASLMechanisms: GSS-SPNEGO
+supportedSASLMechanisms: DIGEST-MD5
+supportedSASLMechanisms: OTP
+supportedSASLMechanisms: CRAM-MD5
+supportedSASLMechanisms: NTLM
+
+ldapwhoami -Y GSSAPI -H ldap://ldap.example.com
+SASL/GSSAPI authentication started
+SASL username: dwhite@EXAMPLE.COM
+SASL SSF: 56
+SASL data security layer installed.
+dn:uid=dwhite@example.com,cn=gssapi,cn=auth
+
+ldapwhoami -Y GS2-KRB5 -H ldap://ldap.example.com
+SASL/GS2-KRB5 authentication started
+SASL username: dwhite@EXAMPLE.COM
+SASL SSF: 0
+dn:uid=dwhite@example.com,cn=gs2-krb5,cn=auth
+
+ldapwhoami -Y GS2-IAKERB -H ldap://ldap.example.com
+SASL/GS2-IAKERB authentication started
+SASL username: dwhite@EXAMPLE.COM
+SASL SSF: 0
+dn:uid=dwhite@example.com,cn=gs2-iakerb,cn=auth
+
+ldapwhoami -Y GSS-SPNEGO -H ldap://ldap.example.com
+SASL/GSS-SPNEGO authentication started
+SASL username: dwhite@EXAMPLE.COM
+SASL SSF: 56
+SASL data security layer installed.
+dn:uid=dwhite@example.com,cn=gss-spnego,cn=auth
+````
+
+# Generic Heimdal Host
+
+````
+vboxmanage clonevm sans-sasl --name heimdal-host --register
+vboxmanage modifyvm heimdal-host --nic1 intnet
+vboxmanage modifyvm heimdal-host --intnet1 "example_org"
+vboxmanage modifyvm heimdal-host --vrdeport 42006
+vboxmanage startvm heimdal-host --type=headless
+rdesktop localhost:42006
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 203.0.113.6/24
+gateway: 203.0.113.1
+Hostname: heimdal-host.example.org
+reboot
+
+#apt-get install heimdal-dev
+# Heimdal, on debian, depends on both libldap and libsasl. Build from
+source, and hope that it doesn't balk on missing libsasl.
+
+#apt-get build-dep heimdal
+apt-get install bison flex libbison-dev libbsd-dev libcap-ng-dev libdb-dev libedit-dev libhesiod-dev libhesiod0 libice-dev libice6 libjson-perl libncurses5-dev libperl4-corelibs-perl libpthread-stubs0-dev libsm-dev libsm6 libsqlite3-dev libtext-unidecode-perl libtinfo-dev libx11-dev libxau-dev libxcb1-dev libxdmcp-dev libxml-libxml-perl libxml-namespacesupport-perl libxml-sax-base-perl libxml-sax-perl libxt-dev libxt6 ss-dev tex-common texinfo unzip x11-common x11proto-core-dev x11proto-input-dev x11proto-kb-dev xorg-sgml-doctools xtrans-dev
+
+cd /usr/src/
+wget https://github.com/heimdal/heimdal/releases/download/heimdal-7.5.0/heimdal-7.5.0.tar.gz
+tar -xvzf heimdal-7.5.0.tar.gz
+cd heimdal-7.5.0
+./configure \
+--prefix=/usr \
+--libexecdir=/usr/sbin \
+--enable-shared \
+--includedir=/usr/include \
+--with-openldap=/usr \
+--with-sqlite3=/usr \
+--with-libedit=/usr \
+--enable-kcm \
+--with-hdbdir=/var/lib/heimdal-kdc \
+--with-openssl=/usr \
+--infodir=/usr/share/info \
+--datarootdir=/usr/share \
+--libdir=/usr/lib \
+--without-krb4
+
+make && make install
+
+apt-get install krb5-config
+remove the default realm from /etc/krb5.conf
+
+#apt-get build-dep libsasl2-2
+apt-get install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
+cd /usr/src/cyrus-sasl-2.1.27
+./configure \
+--prefix=/usr \
+--mandir=/usr/share/man \
+--infodir=/usr/share/info \
+--enable-alwaystrue \
+--enable-srp \
+--enable-srp-setpass \
+--enable-login \
+--enable-ntlm \
+--enable-passdss \
+--enable-share \
+--with-saslauthd=/var/run/saslauthd \
+--with-authdaemond=/var/run/courier \
+--sysconfdir=/etc \
+--enable-httpform \
+--with-devrandom=/dev/urandom \
+--enable-gssapi \
+--enable-gss_mutexes
+#--enable-sql \
+make && make install
+ldconfig
+
+verify no debian ldap or sasl packages have been installed as a dependency
+along the way:
+
+dpkg -l "*ldap*"
+dpkg -l "*sasl*"
+
+These responses are expected at this point:
+
+~$ ldapsearch -Y GSSAPI
+~$ ldapsearch -VV
+~$ strings /usr/sbin/pluginviewer | grep 2\.1\.27
+~$ ldd /usr/sbin/pluginviewer | grep 'krb5\|heim'
+        libheimntlm.so.0 => /usr/lib/libheimntlm.so.0 (0x00007fbb7698b000)
+        libkrb5.so.26 => /usr/lib/libkrb5.so.26 (0x00007fbb766fc000)
+        libheimbase.so.1 => /usr/lib/libheimbase.so.1 (0x00007fbb75b37000)
+
+~$ pluginviewer | grep GS
+pluginviewer | grep GS
+  SRP PASSDSS-3DES-1 SCRAM-SHA-256 SCRAM-SHA-1 GSSAPI GSS-SPNEGO DIGEST-MD5 EXTERNAL OTP CRAM-MD5 NTLM PLAIN LOGIN GS2-KRB5 ANONYMOUS
+  SRP PASSDSS-3DES-1 SCRAM-SHA-256 SCRAM-SHA-1 GSSAPI GSS-SPNEGO DIGEST-MD5 OTP CRAM-MD5 NTLM PLAIN LOGIN GS2-KRB5 ANONYMOUS
+        SASL mechanism: GSSAPI, best SSF: 256, supports setpass: no
+        SASL mechanism: GSS-SPNEGO, best SSF: 256, supports setpass: no
+        SASL mechanism: GS2-KRB5, best SSF: 0, supports setpass: no
+        features: WANT_CLIENT_FIRST|GSS_FRAMING|CHANNEL_BINDING
+  SRP PASSDSS-3DES-1 SCRAM-SHA-256 SCRAM-SHA-1 GSSAPI GSS-SPNEGO DIGEST-MD5 EXTERNAL OTP CRAM-MD5 NTLM PLAIN LOGIN GS2-KRB5 ANONYMOUS
+  SRP PASSDSS-3DES-1 SCRAM-SHA-256 SCRAM-SHA-1 GSSAPI GSS-SPNEGO DIGEST-MD5 EXTERNAL OTP CRAM-MD5 NTLM PLAIN LOGIN GS2-KRB5 ANONYMOUS
+        SASL mechanism: GSSAPI, best SSF: 256
+        SASL mechanism: GSS-SPNEGO, best SSF: 256
+        SASL mechanism: GS2-KRB5, best SSF: 0
+        features: WANT_CLIENT_FIRST|NEED_SERVER_FQDN|GSS_FRAMING|CHANNEL_BINDING
+
+Recompile libldap with sasl support, and compile slapd
+
+cd /usr/src
+mv openldap-2.4.45 openldap-2.4.45-sans-sasl
+tar -xvzf openldap-2.4.45.tgz
+cd openldap-2.4.45
+
+./configure \
+--prefix=/usr \
+--libexecdir=/usr/lib \
+--sysconfdir=/etc \
+--localstatedir=/var \
+--mandir=/usr/share/man \
+--enable-dynamic \
+--enable-syslog \
+--enable-proctitle \
+--enable-ipv6 \
+--enable-local \
+--enable-slapd \
+--enable-dynacl \
+--enable-aci \
+--enable-cleartext \
+--enable-crypt \
+--disable-lmpasswd \
+--enable-spasswd \
+--enable-modules \
+--enable-rewrite \
+--enable-rlookups \
+--enable-slapi \
+--enable-wrappers \
+--enable-backends=mod \
+--disable-ndb \
+--enable-overlays=mod \
+--with-cyrus-sasl \
+--with-threads \
+--with-tls=openssl \
+--with-odbc=unixodbc
+
+make depend
+make && make install
+
+Expected output:
+
+~$ ldapsearch -VV
+~$ ldapsearch -Y GSSAPI
+~$ /usr/lib/slapd -d 2
+
+halt
+vboxmanage list runningvms
+# If necessary
+vboxmanage controlvm heimdal-host poweroff
+`````
+
+# kdc.example.org
+
+````
+vboxmanage clonevm heimdal-host --name kdc-example-org --register
+vboxmanage modifyvm kdc-example-org --vrdeport 42007
+vboxmanage startvm kdc-example-org --type=headless
+rdesktop localhost:42007
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 203.0.113.7/24
+gateway: 203.0.113.1
+Hostname: kdc.example.org
+reboot
+
+specify default realm (default_realm = EXAMPLE.ORG) in /etc/krb5.conf
+
+install -d -m 755 /var/lib/heimdal-kdc
+kstash
+Master key: passw0rd
+Verify password - Master key: passw0rd
+kstash: writing key to `/var/lib/heimdal-kdc/m-key'
+
+install -d -m 755 /etc/heimdal
+~$ kadmin -l
+kadmin> init EXAMPLE.ORG
+Realm max ticket life [unlimited]:
+Realm max renewable ticket life [unlimited]:
+kadmin> add dwhite
+Max ticket life [1 day]:
+Max renewable life [1 week]:
+Principal expiration time [never]:
+Password expiration time [never]:
+Attributes []:
+Policy [default]:
+dwhite@EXAMPLE.ORG's Password: passw0rd
+Verify password - dwhite@EXAMPLE.ORG's Password: passw0rd
+kadmin> add --random-key host/ldap.example.org
+kadmin> add --random-key ldap/ldap.example.org
+kadmin> ext --keytab=/root/ldap.keytab host/ldap.example.org
+kadmin> ext --keytab=/root/slapd.keytab ldap/ldap.example.org
+
+at the end of /etc/krb5.conf, add:
+
+[logging]
+    kdc = FILE:/var/log/kdc.log
+    admin_server = FILE:/var/log/kadmin.log
+    default = FILE:/var/log/krb.log
+
+/usr/sbin/kdc &
+
+scp ldap.keytab slapd.keytab root@ldap.example.org:
+````
+
+# ldap.example.org
+
+````
+vboxmanage clonevm heimdal-host --name ldap-example-org --register
+vboxmanage modifyvm ldap-example-org --vrdeport 42008
+vboxmanage startvm ldap-example-org --type=headless
+rdesktop localhost:42008
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 203.0.113.8/24
+Gateway: 203.0.113.1
+Hostname: ldap.example.org
+reboot
+
+kinit -k -t /root/ldap.keytab host/ldap.example.org@EXAMPLE.ORG
+echo "pidfile /var/run/slapd.pid" > /etc/slapd.conf
+mkdir /etc/sasl2
+echo "keytab: /root/slapd.keytab" > /etc/sasl2/slapd.conf
+/usr/lib/slapd -f /etc/slapd.conf
 ````
