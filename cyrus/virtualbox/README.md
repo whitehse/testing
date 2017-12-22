@@ -47,20 +47,99 @@ Create bind zones for example.com, example.org, '100.51.198.in-addr.arpa.', and
 '113.0.203.in-addr.arpa.'.
 
 Certificate Authority:
-http://albertech.blogspot.com/2015/06/iamaca-become-your-own-certificate.html
+#http://albertech.blogspot.com/2015/06/iamaca-become-your-own-certificate.html
+https://jamielinux.com/docs/openssl-certificate-authority/create-the-root-pair.html
+
+mkdir /root/ca
+cd /root/ca
+mkdir certs crl newcerts private
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+wget -O /root/ca/openssl.cnf https://jamielinux.com/docs/openssl-certificate-authority/_downloads/root-config.txt
+openssl genrsa -aes256 -out private/ca.key.pem 4096
+chmod 400 private/ca.key.pem
+openssl req -config openssl.cnf \
+      -key private/ca.key.pem \
+      -new -x509 -days 7300 -sha256 -extensions v3_ca \
+      -out certs/ca.cert.pem
+chmod 444 certs/ca.cert.pem
+mkdir /root/ca/intermediate
+cd /root/ca/intermediate
+mkdir certs crl csr newcerts private
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+echo 1000 > /root/ca/intermediate/crlnumber
+wget -O /root/ca/intermediate/openssl.cnf https://jamielinux.com/docs/openssl-certificate-authority/_downloads/intermediate-config.txt
+cd /root/ca
+openssl genrsa -aes256 \
+      -out intermediate/private/intermediate.key.pem 4096
+chmod 400 intermediate/private/intermediate.key.pem
+openssl req -config intermediate/openssl.cnf -new -sha256 \
+      -key intermediate/private/intermediate.key.pem \
+      -out intermediate/csr/intermediate.csr.pem
+openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
+      -days 3650 -notext -md sha256 \
+      -in intermediate/csr/intermediate.csr.pem \
+      -out intermediate/certs/intermediate.cert.pem
+# ignore the index.txt.attr error
+chmod 444 intermediate/certs/intermediate.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/intermediate.cert.pem
+openssl verify -CAfile certs/ca.cert.pem \
+      intermediate/certs/intermediate.cert.pem
+cat intermediate/certs/intermediate.cert.pem \
+      certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
+chmod 444 intermediate/certs/ca-chain.cert.pem
+openssl genrsa \
+      -out intermediate/private/ldap.example.com.key.pem 2048
+chmod 400 intermediate/private/ldap.example.com.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/ldap.example.com.key.pem \
+      -new -sha256 -out intermediate/csr/ldap.example.com.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions server_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/ldap.example.com.csr.pem \
+      -out intermediate/certs/ldap.example.com.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/ldap.example.com.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/ldap.example.com.cert.pem
+
+
+
+
+
+
 
 openssl genrsa -out /root/exampleCA.key 2048
 openssl req -x509 -sha256 -nodes -days 1024 -newkey rsa:2048 -key /root/exampleCA.key -out /root/exampleCA.crt
 
+openssl genrsa -out /root/exampleInt.key 2048
+openssl req -new -key /root/exampleInt.key -out exampleInt.csr
+openssl x509 -extensions v3_intermediate_ca -req -in exampleInt.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out exampleInt.crt -days 730
+
+cat exampleInt.crt exampleCA.crt > examplecachain.crt
+
 openssl genrsa -out ldap.example.com.key 2048
 openssl req -new -key ldap.example.com.key -out ldap.example.com.csr
-openssl x509 -req -in ldap.example.com.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out ldap.example.com.crt -days 365
+openssl x509 -req -in ldap.example.com.csr -CA /root/exampleInt.crt -CAkey /root/exampleInt.key -CAcreateserial -out ldap.example.com.crt -days 365
 openssl x509 -in ldap.example.com.crt -text -noout | grep CN
        Subject: C = US, ST = OK, O = Example, CN = ldap.example.com
 
+openssl verify -CAfile exampleCA.crt -untrusted exampleInt.crt ldap.example.com.crt
 
+#openssl genrsa -out dwhite.example.com.key 2048
+#openssl req -new -key dwhite.example.com.key -out dwhite.example.com.csr
+#openssl x509 -req -in dwhite.example.com.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out dwhite.example.com.crt -days 365
+#openssl x509 -in dwhite.example.com.crt -text -noout | grep CN
+        Subject: C = US, ST = OK, O = Example, CN = dwhite@example.com, emailAddress = dwhite@example.com
 
-
+scp exampleCA.crt root@ldap.example.com:/etc/ssl/certs/
+scp exampleCA.crt root@client.example.com:/etc/ssl/certs/
+scp ldap.example.com.key ldap.example.com.crt root@ldap.example.com:
+scp dwhite.example.com.key dwhite.example.com.crt dwhite@client.example.com:
 ````
 
 # sans-sasl
@@ -447,6 +526,13 @@ reboot
 
 kinit -k -t /root/ldap.keytab host/ldap.example.com@EXAMPLE.COM
 echo "pidfile /var/run/slapd.pid" > /etc/slapd.conf
+cat - << EOF > /etc/slapd.conf
+pidfile /var/run/slapd.pid
+TLSCACertificateFile /etc/ssl/certs/exampleCA.crt
+TLSCertificateFile /root/ldap.example.com.crt
+TLSCertificateKeyFile /root/ldap.example.com.key
+EOF
+
 mkdir /etc/sasl2
 echo "keytab: /root/slapd.keytab" > /etc/sasl2/slapd.conf
 /usr/lib/slapd -f /etc/slapd.conf
