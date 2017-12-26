@@ -47,7 +47,6 @@ Create bind zones for example.com, example.org, '100.51.198.in-addr.arpa.', and
 '113.0.203.in-addr.arpa.'.
 
 Certificate Authority:
-#http://albertech.blogspot.com/2015/06/iamaca-become-your-own-certificate.html
 https://jamielinux.com/docs/openssl-certificate-authority/create-the-root-pair.html
 
 mkdir /root/ca
@@ -83,7 +82,6 @@ openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
       -days 3650 -notext -md sha256 \
       -in intermediate/csr/intermediate.csr.pem \
       -out intermediate/certs/intermediate.cert.pem
-# ignore the index.txt.attr error
 chmod 444 intermediate/certs/intermediate.cert.pem
 openssl x509 -noout -text \
       -in intermediate/certs/intermediate.cert.pem
@@ -92,6 +90,7 @@ openssl verify -CAfile certs/ca.cert.pem \
 cat intermediate/certs/intermediate.cert.pem \
       certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
+
 openssl genrsa \
       -out intermediate/private/ldap.example.com.key.pem 2048
 chmod 400 intermediate/private/ldap.example.com.key.pem
@@ -107,39 +106,100 @@ openssl x509 -noout -text \
 openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
       intermediate/certs/ldap.example.com.cert.pem
 
+openssl genrsa \
+      -out intermediate/private/dwhite.example.com.key.pem 2048
+chmod 400 intermediate/private/dwhite.example.com.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/dwhite.example.com.key.pem \
+      -new -sha256 -out intermediate/csr/dwhite.example.com.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions usr_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/dwhite.example.com.csr.pem \
+      -out intermediate/certs/dwhite.example.com.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/dwhite.example.com.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/dwhite.example.com.cert.pem
 
+openssl genrsa \
+      -out intermediate/private/ldap.example.org.key.pem 2048
+chmod 400 intermediate/private/ldap.example.org.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/ldap.example.org.key.pem \
+      -new -sha256 -out intermediate/csr/ldap.example.org.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions server_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/ldap.example.org.csr.pem \
+      -out intermediate/certs/ldap.example.org.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/ldap.example.org.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/ldap.example.org.cert.pem
 
+openssl genrsa \
+      -out intermediate/private/dwhite.example.org.key.pem 2048
+chmod 400 intermediate/private/dwhite.example.org.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/dwhite.example.org.key.pem \
+      -new -sha256 -out intermediate/csr/dwhite.example.org.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions usr_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/dwhite.example.org.csr.pem \
+      -out intermediate/certs/dwhite.example.org.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/dwhite.example.org.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/dwhite.example.org.cert.pem
 
+openssl genrsa \
+      -out intermediate/private/imap.example.com.key.pem 2048
+chmod 400 intermediate/private/imap.example.com.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/imap.example.com.key.pem \
+      -new -sha256 -out intermediate/csr/imap.example.com.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions server_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/imap.example.com.csr.pem \
+      -out intermediate/certs/imap.example.com.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/imap.example.com.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/imap.example.com.cert.pem
 
+openssl genrsa \
+      -out intermediate/private/imap.example.org.key.pem 2048
+chmod 400 intermediate/private/imap.example.org.key.pem
+openssl req -config intermediate/openssl.cnf \
+      -key intermediate/private/imap.example.org.key.pem \
+      -new -sha256 -out intermediate/csr/imap.example.org.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+      -extensions server_cert -days 375 -notext -md sha256 \
+      -in intermediate/csr/imap.example.org.csr.pem \
+      -out intermediate/certs/imap.example.org.cert.pem
+openssl x509 -noout -text \
+      -in intermediate/certs/imap.example.org.cert.pem
+openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
+      intermediate/certs/imap.example.org.cert.pem
 
+scp intermediate/certs/ca-chain.cert.pem root@ldap.example.com:/usr/local/share/ca-certificates/example-chain.crt
+scp intermediate/certs/intermediate.cert.pem root@ldap.example.com:example.pem
+scp intermediate/private/ldap.example.com.key.pem intermediate/certs/ldap.example.com.cert.pem root@ldap.example.com:
+scp intermediate/private/dwhite.example.com.key.pem intermediate/certs/dwhite.example.com.cert.pem dwhite@ldap.example.com:
 
-openssl genrsa -out /root/exampleCA.key 2048
-openssl req -x509 -sha256 -nodes -days 1024 -newkey rsa:2048 -key /root/exampleCA.key -out /root/exampleCA.crt
+scp intermediate/certs/ca-chain.cert.pem root@ldap.example.org:/usr/local/share/ca-certificates/example-chain.crt
+scp intermediate/certs/intermediate.cert.pem root@ldap.example.org:example.pem
+scp intermediate/private/ldap.example.org.key.pem intermediate/certs/ldap.example.org.cert.pem root@ldap.example.org:
+scp intermediate/private/dwhite.example.org.key.pem intermediate/certs/dwhite.example.org.cert.pem dwhite@ldap.example.org:
 
-openssl genrsa -out /root/exampleInt.key 2048
-openssl req -new -key /root/exampleInt.key -out exampleInt.csr
-openssl x509 -extensions v3_intermediate_ca -req -in exampleInt.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out exampleInt.crt -days 730
+scp intermediate/certs/ca-chain.cert.pem root@imap.example.com:/usr/local/share/ca-certificates/example-chain.crt
+scp intermediate/certs/intermediate.cert.pem cyrus@imap.example.com:example.pem
+scp intermediate/private/imap.example.com.key.pem intermediate/certs/imap.example.com.cert.pem cyrus@imap.example.com:
+scp intermediate/private/dwhite.example.com.key.pem intermediate/certs/dwhite.example.com.cert.pem dwhite@imap.example.com:
 
-cat exampleInt.crt exampleCA.crt > examplecachain.crt
-
-openssl genrsa -out ldap.example.com.key 2048
-openssl req -new -key ldap.example.com.key -out ldap.example.com.csr
-openssl x509 -req -in ldap.example.com.csr -CA /root/exampleInt.crt -CAkey /root/exampleInt.key -CAcreateserial -out ldap.example.com.crt -days 365
-openssl x509 -in ldap.example.com.crt -text -noout | grep CN
-       Subject: C = US, ST = OK, O = Example, CN = ldap.example.com
-
-openssl verify -CAfile exampleCA.crt -untrusted exampleInt.crt ldap.example.com.crt
-
-#openssl genrsa -out dwhite.example.com.key 2048
-#openssl req -new -key dwhite.example.com.key -out dwhite.example.com.csr
-#openssl x509 -req -in dwhite.example.com.csr -CA /root/exampleCA.crt -CAkey /root/exampleCA.key -CAcreateserial -out dwhite.example.com.crt -days 365
-#openssl x509 -in dwhite.example.com.crt -text -noout | grep CN
-        Subject: C = US, ST = OK, O = Example, CN = dwhite@example.com, emailAddress = dwhite@example.com
-
-scp exampleCA.crt root@ldap.example.com:/etc/ssl/certs/
-scp exampleCA.crt root@client.example.com:/etc/ssl/certs/
-scp ldap.example.com.key ldap.example.com.crt root@ldap.example.com:
-scp dwhite.example.com.key dwhite.example.com.crt dwhite@client.example.com:
+scp intermediate/certs/ca-chain.cert.pem root@imap.example.org:/usr/local/share/ca-certificates/example-chain.crt
+scp intermediate/certs/intermediate.cert.pem cyrus@imap.example.org:example.pem
+scp intermediate/private/imap.example.org.key.pem intermediate/certs/imap.example.org.cert.pem cyrus@imap.example.org:
+scp intermediate/private/dwhite.example.org.key.pem intermediate/certs/dwhite.example.org.cert.pem dwhite@imap.example.org:
 ````
 
 # sans-sasl
@@ -178,7 +238,7 @@ apt-get install build-essential
 #apt-get build-dep slapd
 apt-get install autoconf automake autopoint autotools-dev comerr-dev debhelper dh-autoreconf dh-strip-nondeterminism gettext intltool-debian libarchive-zip-perl libcroco3 libdb5.3-dev libfile-stripnondeterminism-perl libglib2.0-0 libgmp-dev libgmpxx4ldbl libgnutls-dane0 libidn11-dev libltdl-dev libltdl7 libodbc1 libp11-kit-dev libperl-dev libsigsegv2 libtasn1-6-dev libtool libunbound2 libwrap0-dev m4 nettle-dev odbcinst odbcinst1debian2 pkg-config po-debconf time unixodbc-dev zlib1g-dev libssl-dev
 # Library installation only, without libsasl
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --libexecdir=/usr/lib \
 --sysconfdir=/etc \
@@ -215,11 +275,14 @@ gateway: 198.51.100.1
 Hostname: mit-host.example.com
 reboot
 
-apt-get install libkrb5-dev
+apt-get install libkrb5-dev libkrb5-dbg
+cd /usr/src
+apt-get source libkrb5-dev
+
 #apt-get build-dep libsasl2-2
 apt-get install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
 cd /usr/src/cyrus-sasl-2.1.27
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --mandir=/usr/share/man \
 --infodir=/usr/share/info \
@@ -418,7 +481,7 @@ mv openldap-2.4.45 openldap-2.4.45-sans-sasl
 tar -xvzf openldap-2.4.45.tgz
 cd openldap-2.4.45
 
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --libexecdir=/usr/lib \
 --sysconfdir=/etc \
@@ -505,9 +568,16 @@ kadmin.local:  addprinc -randkey host/ldap.example.com
 kadmin.local:  addprinc -randkey ldap/ldap.example.com
 kadmin.local:  ktadd -k ldap.keytab host/ldap.example.com
 kadmin.local:  ktadd -k slapd.keytab ldap/ldap.example.com
+kadmin.local:  addprinc -randkey host/imap.example.com
+kadmin.local:  addprinc -randkey imap/imap.example.com
+kadmin.local:  addprinc -randkey smtp/imap.example.com
+kadmin.local:  ktadd -k imap.keytab host/imap.example.com
+kadmin.local:  ktadd -k imapd.keytab imap/imap.example.com
+kadmin.local:  ktadd -k smtpd.keytab smtp/imap.example.com
 kadmin.local:  q
 
 scp ldap.keytab slapd.keytab root@ldap.example.com:
+scp imap.keytab imapd.keytab smtpd.keytab root@imap.example.com:
 ````
 
 # ldap.example.com
@@ -524,18 +594,19 @@ Gateway: 198.51.100.1
 Hostname: ldap.example.com
 reboot
 
+update-ca-certificates
 kinit -k -t /root/ldap.keytab host/ldap.example.com@EXAMPLE.COM
 echo "pidfile /var/run/slapd.pid" > /etc/slapd.conf
 cat - << EOF > /etc/slapd.conf
 pidfile /var/run/slapd.pid
-TLSCACertificateFile /etc/ssl/certs/exampleCA.crt
-TLSCertificateFile /root/ldap.example.com.crt
-TLSCertificateKeyFile /root/ldap.example.com.key
+TLSCACertificateFile /root/example.pem
+TLSCertificateFile /root/ldap.example.com.cert.pem
+TLSCertificateKeyFile /root/ldap.example.com.key.pem
 EOF
 
 mkdir /etc/sasl2
 echo "keytab: /root/slapd.keytab" > /etc/sasl2/slapd.conf
-/usr/lib/slapd -f /etc/slapd.conf
+/usr/lib/slapd -f /etc/slapd.conf -h "ldap:// ldaps://"
 ````
 
 # client.example.com
@@ -624,7 +695,7 @@ cd /usr/src/
 wget https://github.com/heimdal/heimdal/releases/download/heimdal-7.5.0/heimdal-7.5.0.tar.gz
 tar -xvzf heimdal-7.5.0.tar.gz
 cd heimdal-7.5.0
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --libexecdir=/usr/sbin \
 --enable-shared \
@@ -648,7 +719,7 @@ remove the default realm from /etc/krb5.conf
 #apt-get build-dep libsasl2-2
 apt-get install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
 cd /usr/src/cyrus-sasl-2.1.27
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --mandir=/usr/share/man \
 --infodir=/usr/share/info \
@@ -708,7 +779,7 @@ mv openldap-2.4.45 openldap-2.4.45-sans-sasl
 tar -xvzf openldap-2.4.45.tgz
 cd openldap-2.4.45
 
-./configure \
+CPPFLAGS=-O0 ./configure \
 --prefix=/usr \
 --libexecdir=/usr/lib \
 --sysconfdir=/etc \
@@ -794,6 +865,12 @@ kadmin> add --random-key host/ldap.example.org
 kadmin> add --random-key ldap/ldap.example.org
 kadmin> ext --keytab=/root/ldap.keytab host/ldap.example.org
 kadmin> ext --keytab=/root/slapd.keytab ldap/ldap.example.org
+kadmin> add --random-key host/imap.example.org
+kadmin> add --random-key imap/imap.example.org
+kadmin> add --random-key smtp/imap.example.org
+kadmin> ext --keytab=/root/imap.keytab host/imap.example.org
+kadmin> ext --keytab=/root/imapd.keytab imap/imap.example.org
+kadmin> ext --keytab=/root/smtpd.keytab smtp/imap.example.org
 
 at the end of /etc/krb5.conf, add:
 
@@ -805,6 +882,7 @@ at the end of /etc/krb5.conf, add:
 /usr/sbin/kdc &
 
 scp ldap.keytab slapd.keytab root@ldap.example.org:
+scp imap.keytab imapd.keytab smtpd.keytab root@imap.example.org:
 ````
 
 # ldap.example.org
@@ -821,9 +899,291 @@ Gateway: 203.0.113.1
 Hostname: ldap.example.org
 reboot
 
+update-ca-certificates
 kinit -k -t /root/ldap.keytab host/ldap.example.org@EXAMPLE.ORG
-echo "pidfile /var/run/slapd.pid" > /etc/slapd.conf
+cat - << EOF > /etc/slapd.conf
+pidfile /var/run/slapd.pid
+TLSCACertificateFile /root/example.pem
+TLSCertificateFile /root/ldap.example.org.cert.pem
+TLSCertificateKeyFile /root/ldap.example.org.key.pem
+EOF
+
 mkdir /etc/sasl2
 echo "keytab: /root/slapd.keytab" > /etc/sasl2/slapd.conf
 /usr/lib/slapd -f /etc/slapd.conf
+````
+
+# imap.example.com
+
+````
+vboxmanage clonevm mit-host --name imap-example-com --register
+vboxmanage modifyvm imap-example-com --vrdeport 42009
+vboxmanage startvm imap-example-com --type=headless
+rdesktop localhost:42009
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 198.51.100.10/24
+Gateway: 198.51.100.1
+Hostname: imap.example.com
+reboot
+
+update-ca-certificates
+
+kinit -k -t /root/imap.keytab host/imap.example.com@EXAMPLE.COM
+
+cd /usr/src
+wget ftp://ftp.cyrusimap.org/cyrus-imapd/cyrus-imapd-3.0.4.tar.gz
+tar -xvzf cyrus-imapd-3.0.4.tar.gz
+cd cyrus-imapd-3.0.4/
+#apt-get build-dep cyrus-imapd
+#apt-get install bison dh-systemd fig2dev flex fontconfig-config fonts-dejavu-core gawk ghostscript groff icu-devtools libavahi-client3 libavahi-common-data libavahi-common3 libbison-dev libcups2 libcupsimage2 libdkim-dev libdkim1d libfontconfig1 libgs9 libgs9-common libical-dev libical2 libice6 libicu-dev libijs-0.35 libjansson-dev libjansson4 libjbig0 libjbig2dec0 libjpeg62-turbo liblcms2-2 libopendkim-dev libopendkim11 libopenjp2-7 libpaper1 libpci-dev libpcre16-3 libpcre3-dev libpcre32-3 libpcrecpp0v5 libsensors4 libsensors4-dev libsm6 libsnmp-base libsnmp-dev libsnmp30 libtiff5 libudev-dev libxapian-dev libxaw7 libxml2-dev libxmu6 libxpm4 libxt6 libzephyr-dev libzephyr4 poppler-data sqlite3 transfig unicode-data x11-common xutils-dev
+
+Minus - fig2dev
+Minus - ghostscript groff
+Minus - libcupsimage2
+Minus - transfig
+Minus - libgs9 libgs9-common
+
+apt-get install bison dh-systemd flex fontconfig-config fonts-dejavu-core gawk icu-devtools libavahi-client3 libavahi-common-data libavahi-common3 libbison-dev libcups2 libdkim-dev libdkim1d libfontconfig1 libical-dev libical2 libice6 libicu-dev libijs-0.35 libjansson-dev libjansson4 libjbig0 libjbig2dec0 libjpeg62-turbo liblcms2-2 libopendkim-dev libopendkim11 libopenjp2-7 libpaper1 libpci-dev libpcre16-3 libpcre3-dev libpcre32-3 libpcrecpp0v5 libsensors4 libsensors4-dev libsm6 libsnmp-base libsnmp-dev libsnmp30 libtiff5 libudev-dev libxapian-dev libxaw7 libxml2-dev libxmu6 libxpm4 libxt6 libzephyr-dev libzephyr4 poppler-data sqlite3 unicode-data x11-common xutils-dev 
+
+The following packages are dependencies for 'apt-get build-dep cyrus-imapd', but depend on libldap/libsasl:
+
+fig2dev
+ghostscript groff
+libcupsimage2
+transfig
+libgs9 libgs9-common
+
+Attempt to build without.
+
+CPPFLAGS=-O0 ./configure \
+--includedir=/usr/include \
+--datadir=/usr/share/cyrus \
+--sharedstatedir=/usr/share/cyrus \
+--localstatedir=/var/lib/cyrus \
+--libexecdir=/usr/lib/cyrus/bin \
+--bindir=/usr/lib/cyrus/bin \
+--sbindir=/usr/lib/cyrus/bin \
+--with-cyrus-prefix=/usr/lib/cyrus \
+--disable-silent-rules \
+--enable-autocreate \
+--enable-idled \
+--enable-nntp \
+--enable-murder \
+--enable-http \
+--enable-replication \
+--enable-gssapi="/usr" \
+--with-cyrus-user=cyrus --with-cyrus-group=mail \
+--with-lock=fcntl \
+--with-ldap \
+--with-krb \
+--with-krbimpl=mit \
+--without-krbdes \
+--with-openssl \
+--with-zlib \
+--with-libcap \
+--with-pidfile=/run/cyrus-master.pid \
+--with-com_err \
+--with-syslogfacility=MAIL \
+--with-gss_impl=mit \
+--with-sasl \
+--with-perl=/usr/bin/perl \
+--with-snmp
+
+make && make install
+ldconfig
+adduser cyrus
+mkdir /var/lib/cyrus
+chown cyrus:mail /var/lib/cyrus
+cp /usr/src/cyrus-imapd-3.0.4/doc/examples/imapd_conf/normal.conf /etc/imapd.conf
+cp /usr/src/cyrus-imapd-3.0.4/doc/examples/cyrus_conf/normal.conf /etc/cyrus.conf
+mkdir /run/cyrus
+chown cyrus:mail /run/cyrus
+mkdir /var/spool/cyrus
+chown cyrus:mail /var/spool/cyrus
+cat - >> /etc/imapd.conf << EOF
+
+defaultdomain: example.com
+tls_server_cert: /home/cyrus/imap.example.com.cert.pem
+tls_server_key: /home/cyrus/imap.example.com.key.pem
+sasl_keytab: /home/cyrus/imapd.keytab
+EOF
+mv /root/imapd.keytab ~cyrus/
+chown cyrus:mail ~cyrus/imapd.keytab
+
+/usr/lib/cyrus/bin/master&
+
+# Postfix
+
+cd /usr/src
+wget http://www.namesdir.com/mirrors/postfix-release/official/postfix-3.2.4.tar.gz
+tar -xvzf postfix-3.2.4.tar.gz
+cd postfix-3.2.4/
+#apt-get build-dep postfix
+apt-get install html2text libcdb-dev libcdb1 liblmdb-dev liblmdb0
+
+TBD
+
+````
+
+# imap.example.org
+
+````
+vboxmanage clonevm heimdal-host --name imap-example-org --register
+vboxmanage modifyvm imap-example-org --vrdeport 42010
+vboxmanage startvm imap-example-org --type=headless
+rdesktop localhost:42010
+
+Modify /etc/network/interfaces, /etc/host, and /etc/hostname to reflect the following:
+IP: 203.0.113.10/24
+Gateway: 203.0.113.1
+Hostname: imap.example.org
+reboot
+
+update-ca-certificates
+
+kinit -k -t /root/imap.keytab host/imap.example.org@EXAMPLE.ORG
+
+cd /usr/src
+wget ftp://ftp.cyrusimap.org/cyrus-imapd/cyrus-imapd-3.0.4.tar.gz
+tar -xvzf cyrus-imapd-3.0.4.tar.gz
+cd cyrus-imapd-3.0.4/
+#apt-get build-dep cyrus-imapd
+#apt-get install bison dh-systemd fig2dev flex fontconfig-config fonts-dejavu-core gawk ghostscript groff icu-devtools libavahi-client3 libavahi-common-data libavahi-common3 libbison-dev libcups2 libcupsimage2 libdkim-dev libdkim1d libfontconfig1 libgs9 libgs9-common libical-dev libical2 libice6 libicu-dev libijs-0.35 libjansson-dev libjansson4 libjbig0 libjbig2dec0 libjpeg62-turbo liblcms2-2 libopendkim-dev libopendkim11 libopenjp2-7 libpaper1 libpci-dev libpcre16-3 libpcre3-dev libpcre32-3 libpcrecpp0v5 libsensors4 libsensors4-dev libsm6 libsnmp-base libsnmp-dev libsnmp30 libtiff5 libudev-dev libxapian-dev libxaw7 libxml2-dev libxmu6 libxpm4 libxt6 libzephyr-dev libzephyr4 poppler-data sqlite3 transfig unicode-data x11-common xutils-dev
+
+Minus - fig2dev
+Minus - ghostscript groff
+Minus - libcupsimage2
+Minus - transfig
+Minus - libgs9 libgs9-common
+
+apt-get install bison dh-systemd flex fontconfig-config fonts-dejavu-core gawk icu-devtools libavahi-client3 libavahi-common-data libavahi-common3 libbison-dev libcups2 libdkim-dev libdkim1d libfontconfig1 libical-dev libical2 libice6 libicu-dev libijs-0.35 libjansson-dev libjansson4 libjbig0 libjbig2dec0 libjpeg62-turbo liblcms2-2 libopendkim-dev libopendkim11 libopenjp2-7 libpaper1 libpci-dev libpcre16-3 libpcre3-dev libpcre32-3 libpcrecpp0v5 libsensors4 libsensors4-dev libsm6 libsnmp-base libsnmp-dev libsnmp30 libtiff5 libudev-dev libxapian-dev libxaw7 libxml2-dev libxmu6 libxpm4 libxt6 libzephyr-dev libzephyr4 poppler-data sqlite3 unicode-data x11-common xutils-dev 
+
+The following packages are dependencies for 'apt-get build-dep cyrus-imapd', but depend on libldap/libsasl:
+
+fig2dev
+ghostscript groff
+libcupsimage2
+transfig
+libgs9 libgs9-common
+
+Attempt to build without.
+
+CPPFLAGS=-O0 ./configure \
+--includedir=/usr/include \
+--datadir=/usr/share/cyrus \
+--sharedstatedir=/usr/share/cyrus \
+--localstatedir=/var/lib/cyrus \
+--libexecdir=/usr/lib/cyrus/bin \
+--bindir=/usr/lib/cyrus/bin \
+--sbindir=/usr/lib/cyrus/bin \
+--with-cyrus-prefix=/usr/lib/cyrus \
+--disable-silent-rules \
+--enable-autocreate \
+--enable-idled \
+--enable-nntp \
+--enable-murder \
+--enable-http \
+--enable-replication \
+--enable-gssapi="/usr" \
+--with-cyrus-user=cyrus --with-cyrus-group=mail \
+--with-lock=fcntl \
+--with-ldap \
+--with-krb \
+--with-krbimpl=mit \
+--without-krbdes \
+--with-openssl \
+--with-zlib \
+--with-libcap \
+--with-pidfile=/run/cyrus-master.pid \
+--with-com_err \
+--with-syslogfacility=MAIL \
+--with-gss_impl=heimdal \
+--with-sasl \
+--with-perl=/usr/bin/perl \
+--with-snmp
+
+make && make install
+ldconfig
+adduser cyrus
+mkdir /var/lib/cyrus
+chown cyrus:mail /var/lib/cyrus
+cp /usr/src/cyrus-imapd-3.0.4/doc/examples/imapd_conf/normal.conf /etc/imapd.conf
+cp /usr/src/cyrus-imapd-3.0.4/doc/examples/cyrus_conf/normal.conf /etc/cyrus.conf
+mkdir /run/cyrus
+chown cyrus:mail /run/cyrus
+mkdir /var/spool/cyrus
+chown cyrus:mail /var/spool/cyrus
+cat - >> /etc/imapd.conf << EOF
+
+defaultdomain: example.org
+tls_server_cert: /home/cyrus/imap.example.org.cert.pem
+tls_server_key: /home/cyrus/imap.example.org.key.pem
+sasl_keytab: /home/cyrus/imapd.keytab
+EOF
+mv /root/imapd.keytab ~cyrus/
+chown cyrus:mail ~cyrus/imapd.keytab
+
+CYRUS_VERBOSE=31 /usr/lib/cyrus/bin/master&
+
+# Postfix
+
+cd /usr/src
+wget http://www.namesdir.com/mirrors/postfix-release/official/postfix-3.2.4.tar.gz
+tar -xvzf postfix-3.2.4.tar.gz
+cd postfix-3.2.4/
+#apt-get build-dep postfix
+apt-get install html2text libcdb-dev libcdb1 liblmdb-dev liblmdb0
+
+TBD
+
+````
+
+# Notes on Heimdal Problem
+
+````
+Critical piece of code:
+
+static int gssapi_get_ssf(context_t *text, sasl_ssf_t *mech_ssf)
+{
+#ifdef HAVE_GSS_INQUIRE_SEC_CONTEXT_BY_OID
+    OM_uint32 maj_stat = 0, min_stat = 0;
+    gss_buffer_set_t bufset = GSS_C_NO_BUFFER_SET;
+    gss_OID ssf_oid = GSS_C_SEC_CONTEXT_SASL_SSF;
+    uint32_t ssf;
+
+    maj_stat = gss_inquire_sec_context_by_oid(&min_stat, text->gss_ctx,
+                                              ssf_oid, &bufset);
+    switch (maj_stat) {
+    case GSS_S_UNAVAILABLE:
+        /* Not supported by the library, fallback to default */
+        goto fallback;
+    case GSS_S_COMPLETE:
+        if ((bufset->count != 1) || (bufset->elements[0].length != 4)) {
+            /* Malformed bufset, fail */
+            (void)gss_release_buffer_set(&min_stat, &bufset);
+            return SASL_FAIL;
+        }
+        memcpy(&ssf, bufset->elements[0].value, 4);
+        (void)gss_release_buffer_set(&min_stat, &bufset);
+        *mech_ssf = ntohl(ssf);
+        return SASL_OK;
+    default:
+        return SASL_FAIL;
+    }
+
+fallback:
+#endif
+    *mech_ssf = K5_MIN_SSF;
+    return SASL_OK;
+}
+
+Both Heimdal and MIT hit #ifdef HAVE_GSS_INQUIRE_SEC_CONTEXT_BY_OID. 
+
+On Heimdal, gss_inquire_sec_context_by_oid returns 851968 (GSS_S_FAILURE)
+
+On MIT, gss_inquire_sec_context_by_oid returns 1048577 (GSS_S_UNAVAILABLE).
+
+set directories /usr/src/krb5-1.15/src/lib/gssapi/mechglue:/usr/src/krb5-1.15/src/util/support
+gssapi.c:699
 ````
