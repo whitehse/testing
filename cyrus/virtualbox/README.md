@@ -299,7 +299,7 @@ CPPFLAGS=-O0 ./configure \
 --enable-httpform \
 --with-devrandom=/dev/urandom \
 --enable-gssapi \
---enable-gss_mutexes
+--enable-gss_mutexes \
 #--enable-sql \
 make && make install
 ldconfig
@@ -511,6 +511,9 @@ CPPFLAGS=-O0 ./configure \
 --with-threads \
 --with-tls=openssl \
 --with-odbc=unixodbc
+--enable-ldapdb \
+--with-ldap=/usr
+
 
 make depend
 make && make install
@@ -736,7 +739,8 @@ CPPFLAGS=-O0 ./configure \
 --enable-httpform \
 --with-devrandom=/dev/urandom \
 --enable-gssapi \
---enable-gss_mutexes
+--enable-gss_mutexes \
+--enable-ldapdb
 #--enable-sql \
 make && make install
 ldconfig
@@ -808,7 +812,9 @@ CPPFLAGS=-O0 ./configure \
 --with-cyrus-sasl \
 --with-threads \
 --with-tls=openssl \
---with-odbc=unixodbc
+--with-odbc=unixodbc \
+--enable-ldapdb \
+--with-ldap=/usr
 
 make depend
 make && make install
