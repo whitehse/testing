@@ -1,3 +1,4 @@
+```
 wget https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.3.0-amd64-netinst.iso
 #wget https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-9.3.0-amd64-xfce-CD-1.iso
 #apt-get install syslinux-utils dosfstools
@@ -37,4 +38,4 @@ find . -print0 | cpio -0 -H newc -ov | gzip -c > ../cd/install.amd/initrd.gz
 cd ../cd
 md5sum `find ! -name "md5sum.txt" ! -path "./isolinux/*" -follow -type f` > md5sum.txt;cd -
 mkisofs -o debian-9.3.0-amd64-netinst-preseed.iso -r -J -no-emul-boot -boot-load-size 4 -boot-info-table -b isolinux/isolinux.bin -c isolinux/boot.cat cd/
-
+```
