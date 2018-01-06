@@ -1193,3 +1193,19 @@ On MIT, gss_inquire_sec_context_by_oid returns 1048577 (GSS_S_UNAVAILABLE).
 set directories /usr/src/krb5-1.15/src/lib/gssapi/mechglue:/usr/src/krb5-1.15/src/util/support
 gssapi.c:699
 ````
+
+# Back test 2.1.26
+
+## ldap.example.com
+
+## ldap.example.org
+
+```bash
+wget ftp://ftp.cyrusimap.org/cyrus-sasl/cyrus-sasl-2.1.26.tar.gz
+tar -xvzf cyrus-sasl-2.1.26.tar.gz
+cd cyrus-sasl-2.1.26
+# 2.1.26 doesn't build against openssl 1.1.0f on my test system. Disable
+# components that use it
+CPPFLAGS=-O0 ./configure --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --enable-alwaystrue --enable-srp --enable-srp-setpass --enable-login --enable-ntlm --enable-passdss --enable-share --with-authdaemond=/var/run/courier --sysconfdir=/etc --enable-httpform --with-devrandom=/dev/urandom --enable-gssapi --enable-gss_mutexes --enable-ldapdb --with-ldap --disable-otp --disable-srp --disable-ntlm --disable-passdss --without-saslauthd
+/usr/lib/slapd -f /etc/slapd.conf -h "ldapi:// ldap:// ldaps://"
+
