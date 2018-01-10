@@ -1,0 +1,28 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Public facing interface
+auto eth0
+iface eth0 inet static
+        address 192.168.27.2
+        netmask 255.255.255.0
+        gateway 192.168.27.1
+
+# Faces the example.com/198.51.100.0/24 network
+# This network will be backed by MIT libraries
+auto eth1
+iface eth1 inet static
+        address 198.51.100.1
+        netmask 255.255.255.0
+
+# Faces the example.org/203.0.113.0/24 network
+# This network will be backed by Heimdal libraries
+auto eth2
+iface eth2 inet static
+        address 203.0.113.1
+        netmask 255.255.255.0
+

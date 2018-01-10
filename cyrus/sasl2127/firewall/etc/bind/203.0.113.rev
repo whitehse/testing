@@ -1,0 +1,14 @@
+$ttl 3600
+113.0.203.in-addr.arpa. IN      SOA     ns.example.com. root.example.com. (
+                   2017122100
+                   10800
+                   3600
+                   432000
+                   38400 )
+
+	IN      NS      ns.example.com.
+7	IN      PTR     kdc.example.org.
+8	IN      PTR     ldap27.example.org.
+9	IN      PTR     ldap26.example.org.
+10	IN      PTR     ldap23.example.org.
+11	IN      PTR     imap.example.org.

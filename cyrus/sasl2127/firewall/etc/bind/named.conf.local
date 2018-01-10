@@ -1,0 +1,27 @@
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "example.com" {
+	type master;
+	file "/etc/bind/example.com";
+};
+
+zone "example.org" {
+	type master;
+	file "/etc/bind/example.org";
+};
+
+zone "100.51.198.in-addr.arpa" {
+	type master;
+	file "/etc/bind/198.51.100.rev";
+};
+
+zone "113.0.203.in-addr.arpa" {
+	type master;
+	file "/etc/bind/203.0.113.rev";
+};

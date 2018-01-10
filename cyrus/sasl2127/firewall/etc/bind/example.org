@@ -1,0 +1,27 @@
+$ttl 172800
+$ORIGIN example.org.
+@       IN      SOA     ns.example.org. root.example.org. (
+                        2017122100
+                        10800
+                        3600
+                        432000
+                        3600 )
+
+;; Nameservers
+                IN      NS      ns.example.com.
+
+kdc		IN	A	203.0.113.7
+kerberos-1	IN	A	203.0.113.7
+ldap27		IN	A	203.0.113.8
+ldap26		IN	A	203.0.113.9
+ldap23		IN	A	203.0.113.10
+imap		IN	A	203.0.113.11
+smtp		IN	A	203.0.113.11
+
+;; Kerberos records
+_kerberos               TXT             "EXAMPLE.ORG"
+_kerberos._udp          SRV 0 0 88      kerberos-1
+_kerberos._tcp          SRV 0 0 88      kerberos-1
+_kerberos-master._udp   SRV 0 0 88      kerberos-1
+_kerberos-adm._tcp      SRV 0 0 749     kerberos-1
+_kpasswd._udp           SRV 0 0 464     kerberos-1
