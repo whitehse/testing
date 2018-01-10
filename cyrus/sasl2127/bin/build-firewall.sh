@@ -45,14 +45,15 @@ truncate -s 10G "$BUILDDIR/firewall.img"
 /sbin/mke2fs -t ext3 "$BUILDDIR/firewall.img"
 
 sudo mount "$BUILDDIR/firewall.img" "$BUILDDIR/firewall"
-sudo debootstrap --arch amd64 --variant minbase --include kmod,less,vim,sudo,openssh-server,ifupdown,iproute2,iputils-ping,iptables,iptables-persistent,bind9,dnsutils,openssl stable "$BUILDDIR/firewall" http://ftp.us.debian.org/debian/
+sudo debootstrap --arch amd64 --variant minbase --include sysvinit-core,kmod,less,vim,sudo,git,wget,openssh-server,ifupdown,iproute2,iputils-ping,iptables,iptables-persistent,bind9,dnsutils,openssl stable "$BUILDDIR/firewall" http://ftp.us.debian.org/debian/
 # Copy git config files over
 #cp -r firewall/* "$BUILDDIR/firewall/"
 sudo rsync -r \
   --chown=root:root \
   firewall/* "$BUILDDIR/firewall/"
 sudo mkdir -p "$BUILDDIR/firewall/lib/modules"
-sudo cp -a /lib/modules/`uname -r`/* "$BUILDDIR/firewall/lib/modules/"
+sudo cp -a /usr/lib/uml/modules/4.9.25 "$BUILDDIR/firewall/lib/modules/"
+install-public-ssh-key "$BUILDDIR/firewall/"
 sudo umount "$BUILDDIR/firewall"
 
 #sudo linux ubd0="$BUILDDIR/firewall.img" mem=128M con=pty con0=fd:0,fd:1 eth0=tuntap,tap27,, eth1=vde,"$BUILDDIR/example.com" eth2=vde,"$BUILDDIR/example.org" umid=firewall
