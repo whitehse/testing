@@ -43,15 +43,13 @@ openssl req -config intermediate/openssl.cnf -new -sha256 \
       -key intermediate/private/intermediate.key.pem \
       -out intermediate/csr/intermediate.csr.pem \
 	  -subj "/C=US/ST=OK/L=Bixby/O=Example Ltd./CN=Intermediate CA"
-echo "y\n" | openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
+echo -n 'y
+y
+' | openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
       -days 3650 -notext -md sha256 \
       -in intermediate/csr/intermediate.csr.pem \
       -out intermediate/certs/intermediate.cert.pem
 chmod 444 intermediate/certs/intermediate.cert.pem
-#openssl x509 -noout -text \
-#      -in intermediate/certs/intermediate.cert.pem
-#openssl verify -CAfile certs/ca.cert.pem \
-#      intermediate/certs/intermediate.cert.pem
 cat intermediate/certs/intermediate.cert.pem \
       certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
 chmod 444 intermediate/certs/ca-chain.cert.pem
@@ -59,20 +57,21 @@ chmod 444 intermediate/certs/ca-chain.cert.pem
 for foo in ldap27.example.com ldap27.example.org ldap26.example.com ldap26.example.org ldap23.example.com ldap23.example.org imap.example.com imap.example.org
 do
   openssl genrsa \
-    -out intermediate/private/${foo}.key.pem 2048
-  chmod 400 intermediate/private/ldap.example.com.key.pem
+    -out intermediate/private/\${foo}.key.pem 2048
+  chmod 400 intermediate/private/\${foo}.key.pem
   openssl req -config intermediate/openssl.cnf \
-    -key intermediate/private/${foo}.key.pem \
-    -new -sha256 -out intermediate/csr/${foo}.csr.pem \
-    -subj "/C=US/ST=OK/L=Bixby/O=Example Ltd./CN=${foo}"
-  echo "y\ny\n" | openssl ca -config intermediate/openssl.cnf \
+    -key intermediate/private/\${foo}.key.pem \
+    -new -sha256 -out intermediate/csr/\${foo}.csr.pem \
+    -subj "/C=US/ST=OK/L=Bixby/O=Example Ltd./CN=\${foo}"
+  echo -n 'y
+y
+' | openssl ca -config intermediate/openssl.cnf \
     -extensions server_cert -days 375 -notext -md sha256 \
-    -in intermediate/csr/${foo}.csr.pem \
-    -out intermediate/certs/${foo}.cert.pem
-  openssl x509 -noout -text \
-    -in intermediate/certs/${foo}.cert.pem
+    -in intermediate/csr/\${foo}.csr.pem \
+    -out intermediate/certs/\${foo}.cert.pem
   openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
-    intermediate/certs/${foo}.cert.pem
+    intermediate/certs/\${foo}.cert.pem
+done
 
 openssl genrsa \
       -out intermediate/private/dwhite.example.com.key.pem 2048
@@ -81,12 +80,12 @@ openssl req -config intermediate/openssl.cnf \
     -key intermediate/private/dwhite.example.com.key.pem \
     -new -sha256 -out intermediate/csr/dwhite.example.com.csr.pem \
     -subj "/C=US/ST=OK/L=Bixby/O=Example Ltd./CN=dwhite@example.com"
-echo "y\ny\n" | openssl ca -config intermediate/openssl.cnf \
+echo -n 'y
+y
+' | openssl ca -config intermediate/openssl.cnf \
       -extensions usr_cert -days 375 -notext -md sha256 \
       -in intermediate/csr/dwhite.example.com.csr.pem \
       -out intermediate/certs/dwhite.example.com.cert.pem
-openssl x509 -noout -text \
-      -in intermediate/certs/dwhite.example.com.cert.pem
 openssl verify -CAfile intermediate/certs/ca-chain.cert.pem \
       intermediate/certs/dwhite.example.com.cert.pem
 EOF
