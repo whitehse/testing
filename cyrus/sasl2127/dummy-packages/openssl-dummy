@@ -1,0 +1,9 @@
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: openssl-dummy
+Provides: openssl,libssl1.1,libssl-dev,libssl-doc,libssl1.0.2,libssl1.0-dev
+Architecture: all
+Version: 1.1.0
+Description: Dummy packages to replace openssl packages

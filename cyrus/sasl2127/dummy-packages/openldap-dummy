@@ -1,0 +1,9 @@
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: openldap-dummy
+Provides: slapd,slapd-smbk5pwd,ldap-utils,libldap-2.4-2,libldap-common,libldap2-dev
+Architecture: all
+Version: 2.4.45
+Description: Dummy packages to replace openldap packages
