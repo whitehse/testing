@@ -52,7 +52,7 @@ sudo rsync -r \
   --chown=root:root \
   firewall/* "$BUILDDIR/firewall/"
 sudo mkdir -p "$BUILDDIR/firewall/lib/modules"
-sudo cp -a /usr/lib/uml/modules/4.9.25 "$BUILDDIR/firewall/lib/modules/"
+sudo cp -a /usr/lib/uml/modules/* "$BUILDDIR/firewall/lib/modules/"
 install-public-ssh-key "$BUILDDIR/firewall/"
 sudo umount "$BUILDDIR/firewall"
 
