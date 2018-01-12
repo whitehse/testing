@@ -1,14 +1,8 @@
-#GSSAPIDelegateCredentials yes
-#KexAlgorithms +diffie-hellman-group1-sha1
-#HostKeyAlgorithms +ssh-dss
 Host firewall
   User root
   HostName 192.168.27.2
-Host kdc.example.com
-  User root
-  ProxyCommand ssh -q firewall nc -q0 ?
+  ForwardAgent yes
 Host *
-  ControlMaster auto
-  ControlPath ~/.ssh/sockets/%r@%h-%p
-  ControlPersist 28800
-
+  User root
+  ProxyCommand ssh -q root@192.168.27.2 nc -q0 %h 22
+  ForwardAgent yes

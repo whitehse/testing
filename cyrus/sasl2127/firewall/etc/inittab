@@ -67,3 +67,4 @@ po::powerokwait:/etc/init.d/powerfail stop
 #
 #T3:23:respawn:/sbin/mgetty -x0 -s 57600 ttyS3
 
+c0:1235:respawn:/sbin/mingetty tty0
