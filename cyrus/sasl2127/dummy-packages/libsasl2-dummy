@@ -1,9 +1,0 @@
-Section: misc
-Priority: optional
-Standards-Version: 3.9.2
-
-Package: libsasl2-dummy
-Provides: sasl2-bin,cyrus-sasl2-doc,libsasl2-2,libsasl2-modules,libsasl2-modules-db,libsasl2-modules-ldap,libsasl2-modules-otp,libsasl2-modules-sql,libsasl2-modules-gssapi-mit,libsasl2-dev,libsasl2-modules-gssapi-heimdal
-Architecture: all
-Version: 2.1.27
-Description: Dummy packages to replace libsasl2 packages

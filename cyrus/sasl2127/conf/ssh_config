@@ -42,7 +42,7 @@ Host imap.example.org
   User root
   HostName 192.168.27.24
   ForwardAgent yes
-Host *
-  User root
-  ProxyCommand ssh -q root@192.168.27.2 nc -q0 %h 22
-  ForwardAgent yes
+#Host *
+#  User root
+#  ProxyCommand ssh -q root@192.168.27.2 nc -q0 %h 22
+#  ForwardAgent yes
