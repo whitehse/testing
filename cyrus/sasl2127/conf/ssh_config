@@ -2,6 +2,46 @@ Host firewall
   User root
   HostName 192.168.27.2
   ForwardAgent yes
+Host kdc.example.com
+  User root
+  HostName 192.168.27.10
+  ForwardAgent yes
+Host ldap27.example.com
+  User root
+  HostName 192.168.27.11
+  ForwardAgent yes
+Host ldap26.example.com
+  User root
+  HostName 192.168.27.12
+  ForwardAgent yes
+Host ldap23.example.com
+  User root
+  HostName 192.168.27.13
+  ForwardAgent yes
+Host imap.example.com
+  User root
+  HostName 192.168.27.14
+  ForwardAgent yes
+Host kdc.example.org
+  User root
+  HostName 192.168.27.20
+  ForwardAgent yes
+Host ldap27.example.org
+  User root
+  HostName 192.168.27.21
+  ForwardAgent yes
+Host ldap26.example.org
+  User root
+  HostName 192.168.27.22
+  ForwardAgent yes
+Host ldap23.example.org
+  User root
+  HostName 192.168.27.23
+  ForwardAgent yes
+Host imap.example.org
+  User root
+  HostName 192.168.27.24
+  ForwardAgent yes
 Host *
   User root
   ProxyCommand ssh -q root@192.168.27.2 nc -q0 %h 22
