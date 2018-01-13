@@ -15,9 +15,9 @@ export HOST="$1"
 ssh -F conf/ssh_config root@$HOST 'bash -s' << EOF
 apt-get -y install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
 cd /usr/src
-git clone https://github.com/cyrusimap/cyrus-sasl.git
-cd cyrus-sasl
-CFLAGS="-O0 -g" ./autogen.sh \
+wget ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.23.tar.gz
+cd cyrus-sasl-2.1.23
+CFLAGS="-O0 -g" ./configure \
 --prefix=/usr \
 --mandir=/usr/share/man \
 --infodir=/usr/share/info \
