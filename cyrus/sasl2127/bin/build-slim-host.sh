@@ -60,7 +60,6 @@ sudo rsync -r \
 sudo mkdir -p "$BUILDDIR/${HOSTNAME}/lib/modules"
 sudo cp -a /usr/lib/uml/modules/* "$BUILDDIR/${HOSTNAME}/lib/modules/"
 install-public-ssh-key "$BUILDDIR/${HOSTNAME}/"
-echo "sudo cp /usr/bin/scp $BUILDDIR/${HOSTNAME}/usr/bin/"
 sudo cp /usr/bin/scp "$BUILDDIR/${HOSTNAME}/usr/bin/"
 sudo chroot "$BUILDDIR/${HOSTNAME}/" /bin/bash -c "echo root:passw0rd | chpasswd"
 sudo umount "$BUILDDIR/${HOSTNAME}"
