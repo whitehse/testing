@@ -1,0 +1,14 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Faces the example.com/198.51.100.0/24 network
+# This network will be backed by MIT libraries
+auto eth0
+iface eth0 inet static
+        address 198.51.100.7
+        netmask 255.255.255.0
+	gateway 198.51.100.1

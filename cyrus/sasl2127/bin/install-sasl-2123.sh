@@ -9,6 +9,12 @@ EOF
   exit 1
 fi
 
+if [ -z "$2" ]; then
+  cat - << EOF
+Must specify a kerberos library: mit,heimdal
+EOF
+fi
+
 export HOST="$1"
 
 # make and gcc are needed on the host
@@ -34,7 +40,8 @@ CFLAGS="-O0 -g" ./configure \
 --enable-httpform \
 --with-devrandom=/dev/urandom \
 --enable-gssapi \
---enable-gss_mutexes
+--enable-gss_mutexes \
+--with-gss_impl=$LIB
 make && make install
 ldconfig
 EOF

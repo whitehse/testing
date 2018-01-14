@@ -14,6 +14,7 @@ if [ -z "$2" ]; then
 Must specificy a kerberos library: mit,heimdal
   exit 1
 EOF
+fi
 
 export HOST="$1"
 export LIB="$2"
