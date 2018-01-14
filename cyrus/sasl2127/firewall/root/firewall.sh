@@ -35,7 +35,7 @@ $IPTABLES -P INPUT ACCEPT
 $IPTABLES -P FORWARD ACCEPT
 $IPTABLES -P OUTPUT ACCEPT
 
-#$IPTABLES -t nat -A POSTROUTING -o $EXTERNAL_INT -j MASQUERADE
+$IPTABLES -t nat -A POSTROUTING -o $EXTERNAL_INT -j MASQUERADE
 
 # Configure Static NAT rules to allow traffic into internal hosts by way of the
 # firewall's 192.168.27.x IPs.
@@ -79,6 +79,7 @@ $IPTABLES -A OUTPUT -o lo -j ACCEPT
 $IPTABLES -A OUTPUT -o ${EXTERNAL_INT} -j ACCEPT
 # Allow established, related packets back in
 $IPTABLES -A INPUT  -i ${EXTERNAL_INT} -m state --state ESTABLISHED,RELATED -j ACCEPT
+#$IPTABLES -A INPUT  -i ${EXTERNAL_INT} -j ACCEPT
 
 # Allow the localnet access to us:
 $IPTABLES -A INPUT    -i ${EXAMPLE_COM_INT}  -j ACCEPT
