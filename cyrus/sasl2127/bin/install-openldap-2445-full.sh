@@ -11,8 +11,7 @@ fi
 
 export HOST="$1"
 
-# make and gcc are needed on the host
-ssh -F conf/ssh_config root@$HOST 'bash -s' << EOF
+ssh -F conf/ssh_config $HOST 'bash -l -s' << EOF
 cd /usr/src/
 rm -rf openldap-2.4.45/
 wget ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.45.tgz

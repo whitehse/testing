@@ -12,8 +12,8 @@ fi
 export HOST="$1"
 
 # make and gcc are needed on the host
-ssh -F conf/ssh_config root@$HOST 'bash -s' << EOF
-apt-get -y install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
+ssh -F conf/ssh_config $HOST 'bash -l -s' << EOF
+apt-get -y install chrpath default-libmysqlclient-dev diffstat libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libpam0g-dev libsqlite3-dev mysql-common quilt
 cd /usr/src
 wget ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.23.tar.gz
 cd cyrus-sasl-2.1.23

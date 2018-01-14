@@ -18,7 +18,7 @@ EOF
   exit 1
 fi
 
-if [ -z "$2" ]; them
+if [ -z "$2" ]; then
   cat - << EOF
 A hostname must be specified.
 EOF

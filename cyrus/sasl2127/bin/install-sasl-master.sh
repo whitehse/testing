@@ -9,14 +9,23 @@ EOF
   exit 1
 fi
 
-export HOST="$1"
+if [ -z "$2" ]; then
+  cat - << EOF
+Must specificy a kerberos library: mit,heimdal
+  exit 1
+EOF
 
-# make and gcc are needed on the host
-ssh -F conf/ssh_config root@$HOST 'bash -s' << EOF
-apt-get -y install chrpath default-libmysqlclient-dev diffstat docbook docbook-to-man libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libosp5 libpam0g-dev libsqlite3-dev mysql-common opensp quilt sgml-data
+export HOST="$1"
+export LIB="$2"
+
+ssh -F conf/ssh_config $HOST 'bash -l -s' << EOF
+apt-get -y install unzip
+apt-get -y install chrpath default-libmysqlclient-dev diffstat libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libpam0g-dev libsqlite3-dev mysql-common quilt
 cd /usr/src
-git clone https://github.com/cyrusimap/cyrus-sasl.git
-cd cyrus-sasl
+#git clone https://github.com/cyrusimap/cyrus-sasl.git
+wget --no-check-certificate https://github.com/cyrusimap/cyrus-sasl/archive/master.zip
+unzip master.zip
+cd cyrus-sasl-master
 CFLAGS="-O0 -g" ./autogen.sh \
 --prefix=/usr \
 --mandir=/usr/share/man \
@@ -34,7 +43,8 @@ CFLAGS="-O0 -g" ./autogen.sh \
 --enable-httpform \
 --with-devrandom=/dev/urandom \
 --enable-gssapi \
---enable-gss_mutexes
+--enable-gss_mutexes \
+--with-gss_impl=$LIB
 make && make install
 ldconfig
 EOF
