@@ -355,7 +355,7 @@ install_debian()
     rootfs=$1
     release=$2
     arch=$3
-    cache="$4/debian-mit-saslmaster"
+    cache="$4/debian-heimdal-saslmaster"
     mkdir -p $LOCALSTATEDIR/lock/subsys/
     (
         flock -x 9
@@ -479,6 +479,7 @@ EOF
 
     chroot "$rootfs" /usr/bin/apt-get update
     chroot "$rootfs" /bin/busybox --install -s
+    wget -O "$rootfs/usr/src/" https://github.com/heimdal/heimdal/releases/download/heimdal-7.5.0/heimdal-7.5.0.tar.gz
     wget -O "$rootfs/usr/src/cyrus-sasl-master.zip" https://github.com/cyrusimap/cyrus-sasl/archive/master.zip
     chroot "$rootfs" /bin/bash -l -s << EOF
 apt-get update
@@ -535,21 +536,25 @@ CFLAGS="-O0 -g" ./autogen.sh \
 	--disable-gssapi
 make && make install
 ldconfig
-apt-get -y build-dep krb5-kdc
+apt-get -y build-dep heimdal-dev
 cd /usr/src
-wget http://web.mit.edu/KERBEROS/dist/krb5/1.16/krb5-1.16.tar.gz
-tar -xvzf krb5-1.16.tar.gz
-cd krb5-1.16/src
-./configure \
+tar -xvzf heimdal-7.5.0.tar.gz
+cd heimdal-7.5.0
+CFLAGS=-O0 ./configure \
 	--prefix=/usr \
-	--localstatedir=/etc \
-	--mandir=/usr/share/man \
-	--with-system-et --with-system-ss --disable-rpath \
-	--enable-shared --with-ldap --without-tcl \
-	--with-system-verto \
+	--libexecdir=/usr/sbin \
+	--enable-shared \
+	--includedir=/usr/include \
+	--with-openldap=/usr \
+	--with-sqlite3=/usr \
+	--with-libedit=/usr \
+	--enable-kcm \
+	--with-hdbdir=/var/lib/heimdal-kdc \
+	--with-openssl=/usr \
+	--infodir=/usr/share/info \
+	--datarootdir=/usr/share \
 	--libdir=/usr/lib \
-	--with-ldap \
-	--sysconfdir=/etc
+	--without-krb4
 make && make install
 ldconfig
 cd /usr/src
@@ -574,7 +579,7 @@ CFLAGS="-O0 -g" ./autogen.sh \
 	--with-devrandom=/dev/urandom \
 	--enable-gssapi \
 	--enable-gss_mutexes \
-	--with-gss_impl=mit
+	--with-gss_impl=heimdal
 make && make install
 ldconfig
 cd /usr/src/
@@ -642,7 +647,7 @@ apt-get -y build-dep cyrus-imapd
 --with-lock=fcntl \
 --with-ldap \
 --with-krb \
---with-krbimpl=mit \
+--with-krbimpl=heimdal \
 --without-krbdes \
 --with-openssl \
 --with-zlib \
@@ -650,7 +655,7 @@ apt-get -y build-dep cyrus-imapd
 --with-pidfile=/run/cyrus-master.pid \
 --with-com_err \
 --with-syslogfacility=MAIL \
---with-gss_impl=mit \
+--with-gss_impl=heimdal \
 --with-sasl \
 --with-perl=/usr/bin/perl \
 --with-snmp
