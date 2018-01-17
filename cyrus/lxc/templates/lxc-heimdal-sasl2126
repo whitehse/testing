@@ -514,7 +514,7 @@ ldconfig
 #apt-get -y install chrpath default-libmysqlclient-dev diffstat libdb-dev libmariadbclient-dev libmariadbclient-dev-compat libmariadbclient18 libpam0g-dev libsqlite3-dev mysql-common quilt
 apt-get -y build-dep libsasl2-modules
 cd /usr/src
-wget ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-2.1.26.tar.gz
+wget ftp://ftp.cyrusimap.org/cyrus-sasl/cyrus-sasl-2.1.26.tar.gz
 tar -xvzf cyrus-sasl-2.1.26.tar.gz
 cd cyrus-sasl-2.1.26
 CFLAGS="-O0 -g" ./configure \
