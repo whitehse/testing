@@ -479,7 +479,7 @@ EOF
 
     chroot "$rootfs" /usr/bin/apt-get update
     chroot "$rootfs" /bin/busybox --install -s
-    wget -O "$rootfs/usr/src/" https://github.com/heimdal/heimdal/releases/download/heimdal-7.5.0/heimdal-7.5.0.tar.gz
+    wget -O "$rootfs/usr/src/heimdal-7.5.0.tar.gz" https://github.com/heimdal/heimdal/releases/download/heimdal-7.5.0/heimdal-7.5.0.tar.gz
     wget -O "$rootfs/usr/src/cyrus-sasl-master.zip" https://github.com/cyrusimap/cyrus-sasl/archive/master.zip
     chroot "$rootfs" /bin/bash -l -s << EOF
 apt-get update
