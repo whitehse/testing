@@ -1,0 +1,2183 @@
+Package: cyrus-sasl2-doc
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: all
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./cyrus-sasl2-doc_2.1.27~101-g0780600+dfsg-3_all.deb
+Size: 2456
+MD5sum: 81ed9b2b4fc18b317ecfafb41c7bcc45
+SHA1: 9af60dd77f61561a247bcd9a593b505b3e626912
+SHA256: 3e1312d96d677493f7695567056c21140da0f2136f5024d1a4d857f962a63337
+Section: doc
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: gnutls-bin
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./gnutls-bin_3.5.8-5+deb9u1_amd64.deb
+Size: 2418
+MD5sum: 13bf32245f989534e80686d068183c14
+SHA1: e00c00ca31e5ea9d67f98df09ed8a1f8d83177b2
+SHA256: 94d90804a36beba72cf53e33c46f61fe8ad0764603fad3740091b3a42742f333
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: gnutls-doc
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: all
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./gnutls-doc_3.5.8-5+deb9u1_all.deb
+Size: 2412
+MD5sum: bf42995ec369688c0d74bb71fc0bd8e3
+SHA1: 808b2d688b0a3fd305f5294df971c491081784df
+SHA256: 46d1caa9d1a346ceb9427e4d16b4c4d6dbe957c813c4dc45645c1ab588d237d9
+Section: doc
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-clients
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Suggests: heimdal-docs, heimdal-kcm
+Conflicts: otp
+Filename: ./heimdal-clients_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2434
+MD5sum: 8fff927345494ca5250ec242fb59d24c
+SHA1: dcbcb46c66f822bc76d0ceea4e9706c8a7b49991
+SHA256: 08c90c9e9f071d3e758c745b8897a8ec5fd1a3207364f7fcee19975a327d9ab9
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-dbg
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./heimdal-dbg_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2374
+MD5sum: e92b1016482dd8cef186462224185122
+SHA1: 5fc014ae3ab66ee44bac655d829e63ae86cd0c71
+SHA256: 9785dd82d0eed8612776ff42b2177a2c5dc9c8064e3db2b6ee4865458a516b07
+Section: debug
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-dev
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Conflicts: libkrb5-dev
+Filename: ./heimdal-dev_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2404
+MD5sum: 9aad397e3ddfb0c6779d965b4130f581
+SHA1: ef96846f35f286662df8a946a187f879be5eb768
+SHA256: cc9c3404a383b007ef192024ca15826aea4b0f634ad61b07f11edd1c185b007a
+Section: devel
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-docs
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: all
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Suggests: heimdal-clients, heimdal-servers
+Filename: ./heimdal-docs_7.1.0+dfsg-13+deb9u1_all.deb
+Size: 2416
+MD5sum: e434c8b8801e8d4498689b22f8e72185
+SHA1: 33a6a212901462f075900c6c92959a3dd29fd806
+SHA256: b328bfb39b5df7358e59b573048af24ce122e1db7bdf322773a78dd9ec98ac4f
+Section: doc
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-kcm
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./heimdal-kcm_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2374
+MD5sum: d2669f1834094df123bd08030278cc80
+SHA1: 58ffe3d1b41f2cf881602e93500b6160222af599
+SHA256: 75aa18d66c730ae9e8b794e732dfceec0142319c56e0592ca1755ed9b7988bc7
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-kdc
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Recommends: logrotate
+Suggests: heimdal-docs
+Conflicts: heimdal-clients (<< 0.4e-3), heimdal-servers (<< 0.6.3-3), kerberos4kth-kdc, krb5-admin-server, krb5-kdc
+Filename: ./heimdal-kdc_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2540
+MD5sum: d4b0b2327a6b8fe3087939bda904f2dd
+SHA1: 2e8f69b753abc73b6ac5b9acad8f60fc537fd5e0
+SHA256: de527f5a297ce248a137a5196c149fa20f57f347201f8a25f0959ca1c9112c9a
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-multidev
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Suggests: heimdal-docs
+Conflicts: heimdal-clients (<< 0.4e-7), kerberos4kth-dev
+Replaces: heimdal-dev (<< 1.6~git20131117+dfsg-2)
+Filename: ./heimdal-multidev_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2534
+MD5sum: 2bf61408cd78834ad3b6c6007b2e5206
+SHA1: a44991a28edf51de5499708d5c2da1b614893dbf
+SHA256: 7efb45ef822d72c0a93d57599ac86f3098508261ceb0fb20fc3f407a757d0ef5
+Section: devel
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: heimdal-servers
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Suggests: heimdal-docs
+Filename: ./heimdal-servers_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2408
+MD5sum: c2ae893b7b47adc3fbad020378d4d531
+SHA1: 6117ea8f068587ce628110dd1652416fabc03bfe
+SHA256: 9b3c00ee24a766fcbeb5bda7b31273c09142fc01c589c72392dbd952ffc542a5
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-admin-server
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-admin-server_1.15-1+deb9u1_amd64.deb
+Size: 2382
+MD5sum: 0fc6b8a5ae4d530b0480e2de7468889e
+SHA1: fcbd2ad64f22e2f0c3a52e2e59d16badbaef9c58
+SHA256: 485cecb6cabceab33295396e8aa25299268b76a29c89030718a32be611677156
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-doc
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: all
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Conflicts: heimdal-docs
+Filename: ./krb5-doc_1.15-1+deb9u1_all.deb
+Size: 2396
+MD5sum: b80d46ca081fa5850c858d03b0bfd6d1
+SHA1: 8b9da5951306f1f8d1e28f594910f88268845b76
+SHA256: 9815fe9fc3933be8cdd883898fdf36e7e68bb59f5c7494d8f664f0f2d79e16d7
+Section: doc
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-gss-samples
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-gss-samples_1.15-1+deb9u1_amd64.deb
+Size: 2386
+MD5sum: a36e35d5db0987e5ad6da351439c50f1
+SHA1: be750dff3c444e4710d187bde3bc19536f608c4e
+SHA256: 5744f58d9df403a01db8a92c25a1134172642fb107900d8facca7e8f14a0d43e
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-k5tls
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-k5tls_1.15-1+deb9u1_amd64.deb
+Size: 2368
+MD5sum: aeb85bfe5e698f43b5f9d99c56cd58f6
+SHA1: efcbef859d4a945735c77e00da38e64ca00fa0fc
+SHA256: 005ea9a62069feb6f28b5c3929a920e2c0f77a5ae182301d0953b32685e687d2
+Section: net
+Priority: extra
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-kdc
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-kpropd, krb5-admin-server, krb5-kdc-ldap (= 1.15-1+deb9u1)
+Filename: ./krb5-kdc_1.15-1+deb9u1_amd64.deb
+Size: 2448
+MD5sum: 12558a91a1126b87ac3e18703fb03806
+SHA1: 1b3d512b3d866e3e6fff3662fd1d10b2058d9ae8
+SHA256: 6fba9e3ab4a7a968526bcdc30dfda1f40b94966fa07437af2f5f059dc6eec20a
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-kdc-ldap
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-kdc-ldap_1.15-1+deb9u1_amd64.deb
+Size: 2376
+MD5sum: c42cbbe13180784d6f8168e01cc7a6cf
+SHA1: 0d9fe506d62450077aa6260048029fdc85017346
+SHA256: 9ce5146b1f3aaa50d1b04f01c85f5f17031928143575f0831079022cc9c640bf
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-kpropd
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: openbsd-inetd | inet-superserver
+Filename: ./krb5-kpropd_1.15-1+deb9u1_amd64.deb
+Size: 2428
+MD5sum: 60bd6e7847e82ab6a1a36855788c6549
+SHA1: 6f726b246cd625ca4083436efc9a2eeeddca2b14
+SHA256: e8f5546b7c7b56f6cf490eddc4ec3a8537211547b2bde3094e98a32f458a6ccf
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-locales
+Source: krb5
+Version: 1.15-1
+Architecture: all
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-locales_1.15-1_all.deb
+Size: 2368
+MD5sum: e36cddef8c02645c315021509a045240
+SHA1: c9f186168c0ea0ef9836100eeed2756c8cf67d78
+SHA256: cf45e3c842e396061da935e2dd8b72bc2c74e306982b8f951ed8b3b8c75a57d2
+Section: localization
+Priority: standard
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-multidev
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc
+Filename: ./krb5-multidev_1.15-1+deb9u1_amd64.deb
+Size: 2400
+MD5sum: 2dad578155a6fc4d8d62e0e37a23fec3
+SHA1: c0629cf723505362df608fbd9b7002ad5c4b6046
+SHA256: 1e1bafefe70775bb9ab3423999c96814762450fb11cf7a460c876de2b347fed7
+Section: libdevel
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-otp
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./krb5-otp_1.15-1+deb9u1_amd64.deb
+Size: 2366
+MD5sum: 3d797463bc78be6c599b2563cebf3660
+SHA1: d8035a09eb65fb3fa1a12aaf17f37e8eb20634e6
+SHA256: 165fa3dbcd7a839cc4bad78e70139533a040df9d4b1e8f57b024b3129e3b3f44
+Section: net
+Priority: extra
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-pkinit
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: opensc
+Breaks: krb5-kdc (<< 1.14+dfsg)
+Filename: ./krb5-pkinit_1.15-1+deb9u1_amd64.deb
+Size: 2438
+MD5sum: b848cbc9a9ac48192735b72487df3c7c
+SHA1: c05725a5890aacdd870e102a3aa01dbd23722cd3
+SHA256: 4cc8825767b0692bffcd66630e33b4d3175bd69b7c692e8aae5596f65037c290
+Section: net
+Priority: extra
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: krb5-user
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Conflicts: heimdal-clients
+Filename: ./krb5-user_1.15-1+deb9u1_amd64.deb
+Size: 2404
+MD5sum: 3c0673c6c1ce9cfd5ee9a1079478de30
+SHA1: a9c1e7241887486786ae0ca40350dfd876590ffb
+SHA256: 37fea1fd01345c0be718b2b431f796bce1e50aa00260c6a23a050b5f77ac0cfc
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: ldap-utils
+Source: openldap
+Version: 2.4.44+dfsg-5+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Recommends: libsasl2-modules
+Suggests: libsasl2-modules-gssapi-mit | libsasl2-modules-gssapi-heimdal
+Conflicts: ldap-client, openldap-utils, umich-ldap-utils
+Replaces: openldap-utils, openldapd, slapd (<< 2.2.23-0.pre6)
+Provides: ldap-client, openldap-utils
+Filename: ./ldap-utils_2.4.44+dfsg-5+deb9u1_amd64.deb
+Size: 2652
+MD5sum: 0423fc76ec47c9ef6177f65bf2f0ca4b
+SHA1: 5f4923b1d44af5ab1a3ddab8f7b44333cd4ebcc4
+SHA256: 13d7875ffabb0319b3df3d285669ef686bf6526b05b8008b3e281bc43f1f0a72
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libasn1-8-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libasn1-8-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2380
+MD5sum: f0f018d9eff674b0e9c3fe36059a325b
+SHA1: 3a331b043d048854b8fb30181c24344f2cb6dee4
+SHA256: 88d5d6b2a76089cb84a3d2779587cc2dc6df3ee7088292a66b5b719986fadf91
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgnutls-dane0
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Suggests: dns-root-data
+Filename: ./libgnutls-dane0_3.5.8-5+deb9u1_amd64.deb
+Size: 2448
+MD5sum: da06f1b11918717a8a1ca83e9f14d3e3
+SHA1: 283e2fc41f062fd2b8c5ae01d42d11be99737b33
+SHA256: 8abb09f67528c11966870b497f28eeeee2793dcce48f57f1af2eef4205e6384e
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgnutls-openssl27
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libgnutls-openssl27_3.5.8-5+deb9u1_amd64.deb
+Size: 2436
+MD5sum: 2d6b720aafbfed32380b3f235a280a91
+SHA1: 3ef4cf656c4f83366a4a6879624f790bbdcaab2c
+SHA256: ee202ded612270bb996fa18a452bda92db8cf7ef1401ccaf4ecfb9d1c19d2131
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgnutls28-dev
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Suggests: gnutls-doc, gnutls-bin
+Conflicts: gnutls-dev
+Replaces: gnutls-dev
+Provides: gnutls-dev, libgnutls-openssl-dev
+Filename: ./libgnutls28-dev_3.5.8-5+deb9u1_amd64.deb
+Size: 2530
+MD5sum: f5a627362a37e7bc56e3f59ad39665f6
+SHA1: 91185d762830d605405531d7fec5c786ec58c1d2
+SHA256: 62b181bc26e330c62a2374cb3f88cf0226648e2f788cb7f86333a15c1adb5932
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgnutls30
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Suggests: gnutls-bin
+Filename: ./libgnutls30_3.5.8-5+deb9u1_amd64.deb
+Size: 2442
+MD5sum: 226dc5ab0490e4c33325b246fdba11ee
+SHA1: c5a2a264b2b7ab34b6ebc9417e3e6c130c0df9e3
+SHA256: 4d1bc45ccae9b0235cd3fec61d6b8ee039a942b996e7e763a728403546f4ce33
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgnutlsxx28
+Source: gnutls28
+Version: 3.5.8-5+deb9u1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libgnutlsxx28_3.5.8-5+deb9u1_amd64.deb
+Size: 2426
+MD5sum: 52846ca8883d3e64848766c239c860d4
+SHA1: 3226f3fdee22739830ed0056446d033b59335637
+SHA256: 40e912974397bab5c119c687eb85f9afc872603024e18e053cc2476439beb80d
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgssapi-krb5-2
+Source: krb5
+Version: 1.15-1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Breaks: libgssglue1 (<< 0.2-2)
+Filename: ./libgssapi-krb5-2_1.15-1_amd64.deb
+Size: 2450
+MD5sum: 73b6615fa02d3a9276336305b083b978
+SHA1: c9abd883a0910d9cc85bcd61490cdcbe97ce0f4c
+SHA256: 300eede6786dbb3efa1f1b12433cb9ec605e46267d45361675a7bfcb1f6a2285
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgssapi3-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Conflicts: libgssapi3
+Filename: ./libgssapi3-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2406
+MD5sum: 9635125f6d9da954785b094923f02d5a
+SHA1: f87afd3a1a78aaa3fa369ec4154b8b152588619a
+SHA256: ed7345219d2a1cba05e1633ad6fafe4da35e46c457e1020aa8864a78e2bdb1f5
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libgssrpc4
+Source: krb5
+Version: 1.15-1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Conflicts: libkadm55
+Filename: ./libgssrpc4_1.15-1_amd64.deb
+Size: 2432
+MD5sum: 3da8b529ae5f2dd92a8a43776c6feb02
+SHA1: f0ed2e378d424dd53b18e17cfb5d4d302e8040fb
+SHA256: 2e4b5b1c05ae81a1ed9ab045129a8e5c1866986a3acfea5c1bf015daa053c39a
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libhcrypto4-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libhcrypto4-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2386
+MD5sum: 9daf58600a7809776b7cf2eb302f72a3
+SHA1: 04d4f4f23ecf797bd4850f10a5c8f9449e44aaaf
+SHA256: d5dadcc54093f2c8d7857a15e9c33efac8622a1bb0f7c5ff8cbbd29bd2775de9
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libhdb9-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Provides: heimdal-hdb-api-8
+Filename: ./libhdb9-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2414
+MD5sum: a36af1e6911e0db499ae41c90c7132be
+SHA1: 464699a66100656a53c5ec727c42d607ea3522cc
+SHA256: a435793c83525cdfa43b0c4fbbd52a09066a4297ddb732ace3f58b262aa53a7b
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libheimbase1-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libheimbase1-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2380
+MD5sum: e6b8d2cdc4f9e0bc47a38fedf52e855a
+SHA1: 3fddb3a919357a4f216b7d4a4ee580248436e695
+SHA256: 4345421f724dfc6dc141300814c9dc7533eb04d26d06246fe55f39308990f590
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libheimntlm0-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libheimntlm0-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2384
+MD5sum: 94b870de8c61b44eadd9b412bc54e158
+SHA1: 9f699735397bd3d35cb8d4de47e30ef889b47c9b
+SHA256: 695e25c9df41b71981935d2c369afb9ce6b98b48aca8ada2a2699914f69aecfe
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libhx509-5-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libhx509-5-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2390
+MD5sum: e54a7b6c799f45142e40aca0e3deb29e
+SHA1: f34c2b55bf8b134fea0aa9f01a8bebedf5f4a4d1
+SHA256: 86f18ea2e4af99d26ba8aefe87fbfbc63a6e79e648e3a150e4facc763b0c6e66
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libk5crypto3
+Source: krb5
+Version: 1.15-1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Breaks: libgssapi-krb5-2 (<= 1.10+dfsg~alpha1), libkrb5-3 (<= 1.8~aa)
+Filename: ./libk5crypto3_1.15-1_amd64.deb
+Size: 2496
+MD5sum: b97fde3218a677021ef89bef2b559a85
+SHA1: 4ed38ab48680c8d33678ac41f6dd0eb416461a8c
+SHA256: 182f0d5fe036f8e6983be1a9a8b747106f11115efb0c9fd397a606ad7b234c76
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkadm5clnt-mit11
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Filename: ./libkadm5clnt-mit11_1.15-1+deb9u1_amd64.deb
+Size: 2428
+MD5sum: e290fc0271de82916e618776f7d46875
+SHA1: e96aa9018e4eea0cfbbadec34f564764fc2dbb6c
+SHA256: 7a80b407af1d5b16caa3f8c6988bbe32e5c0a3ff3b8d7c1428d828c0728a06ce
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkadm5clnt7-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libkadm5clnt7-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2392
+MD5sum: 6bf0a70c7eeab984d9f7210671f8c449
+SHA1: 32708fd618d8365f959292b27946b8dbb8ce9b9b
+SHA256: aa1c0c0d2f8a8e6616ad8ee2cf5bff87c62f84a1021680eafb67793f82b82594
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkadm5srv-mit11
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Filename: ./libkadm5srv-mit11_1.15-1+deb9u1_amd64.deb
+Size: 2422
+MD5sum: 512fb314222fcde921227c60cd71a3ec
+SHA1: 7e64096292a7bfa79f5753398e42194591603b16
+SHA256: ce76d34f98700f76e9a4a7f6f0b3f24b0fc20fc6ab66cc7b668fb6752f2039e5
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkadm5srv8-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libkadm5srv8-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2392
+MD5sum: 8c58b610cf0a092e730b87ad1bdac7da
+SHA1: a2e8a7886d77eadb3646949baf97ef2b4ca19152
+SHA256: 88df5d59347aaa4b9df515828ac555b7048ef758adb8677a29ceb3c20a1049cb
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkafs0-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libkafs0-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2380
+MD5sum: a7381b2b25b2988dc7022e1b26dd0a6a
+SHA1: a6b207baec504a9a7aea678669f92bf33b330172
+SHA256: 724a9b04f22a1d6587c9df7d762588d2807741194692613e5c0f5ff9da98339c
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkdb5-8
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc, krb5-user
+Breaks: krb5-kdc (= 1.13~alpha1+dfsg-1), libkadm5srv-mit8 (<< 1.11+dfsg~)
+Filename: ./libkdb5-8_1.15-1+deb9u1_amd64.deb
+Size: 2508
+MD5sum: 4d3deebcf9f853b6363a895fda1b3b16
+SHA1: 2a16897a78bcc2252796ec7673cf1e3c4ccc71a6
+SHA256: 705c3128f198962b1a2ae0cd3df17a884785335465f25a8dc2626b4faf78531f
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkdc2-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libkdc2-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2380
+MD5sum: 5754a57092993db2baea6e884df73a6b
+SHA1: e201d6dd5b1845b4d6b3f0b15278d0d2b0d44be9
+SHA256: 251ae86900ec1dced0616f2269efa009c7654300c07ec6d7550f8df40a91b5d5
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrad-dev
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: libkrb5-dev
+Breaks: krb5-multidev (<< 1.12+dfsg-2), libkrb5-dev (<< 1.12+dfsg-2)
+Replaces: libkrb5-dev (<< 1.12+dfsg-2)
+Filename: ./libkrad-dev_1.15-1+deb9u1_amd64.deb
+Size: 2488
+MD5sum: 292f4894e6356602fec4fd5235f17241
+SHA1: 2748e657223908e33c03e8fbc632ddcff8f41991
+SHA256: 3aad77b4d63c61bc514008cea7d13d1ea43e73f8fc295d9605104aac46c99e18
+Section: libdevel
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrad0
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./libkrad0_1.15-1+deb9u1_amd64.deb
+Size: 2374
+MD5sum: 79731e86ab67ae9a815477affd354f72
+SHA1: f4ceb00d96e47e94b79722bed64ec933544d5c03
+SHA256: 9cfc98545c0c0c48aa704448c8979b4d2efe792e1c27cdfe9921917b7e9cdf43
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrb5-26-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libkrb5-26-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2382
+MD5sum: 0d17614581c731e90230f1047a5c4738
+SHA1: 121a270337fc242775ebb1f03ed7e94ce8a87f36
+SHA256: 943e80b646908e84435a764b9d4028a3459e5e99b4c7c7b7e04d02605e29988e
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrb5-3
+Source: krb5
+Version: 1.15-1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Recommends: krb5-locales
+Suggests: krb5-doc, krb5-user
+Breaks: libsmbclient (<= 2:3.6.1-2), sssd (<= 1.2.1-4.3)
+Filename: ./libkrb5-3_1.15-1_amd64.deb
+Size: 2498
+MD5sum: d65bd0d51aeb3c3304c4645fae2df5ee
+SHA1: 90ebc1c9e7f0af9213072ad456fa23911ea19cf3
+SHA256: 739a679be3a9385d78a14ef90e5d8d193069517ca591adf22a629caa6be52544
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrb5-dbg
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Filename: ./libkrb5-dbg_1.15-1+deb9u1_amd64.deb
+Size: 2376
+MD5sum: 43545e38e2fed43599cc9a5b27e33eab
+SHA1: 04529667e0c894c72497ce4e9f90a6633121bba2
+SHA256: c22090dff807f7b8162963810881334d5f6bdad568f9346e57016a5eb2da959d
+Section: debug
+Priority: extra
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrb5-dev
+Source: krb5
+Version: 1.15-1+deb9u1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Suggests: krb5-doc
+Conflicts: heimdal-dev
+Replaces: krb5-multidev (<< 1.8+dfsg~alpha1-3)
+Filename: ./libkrb5-dev_1.15-1+deb9u1_amd64.deb
+Size: 2500
+MD5sum: c8b63461e0b3fcc49fe9153eab548de3
+SHA1: e0645a5e6249c0386f17ea9496bbd06ea9be166a
+SHA256: 99b52514eaf1357907d75463b72ee056b58f557fc7bca2fd9e26f61b83cba454
+Section: libdevel
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libkrb5support0
+Source: krb5
+Version: 1.15-1
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 9
+Breaks: libgssapi-krb5-2 (<< 1.13~alpha1-1), libk5crypto3 (<< 1.13~alpha1-1), libkadm5clnt-mit9 (<< 1.13~alpha1-1), libkadm5srv-mit9 (<< 1.13~alpha1-1), libkdb5-7 (<< 1.13~alpha1-1)
+Filename: ./libkrb5support0_1.15-1_amd64.deb
+Size: 2508
+MD5sum: 510dda60bf5fb54e297de03440f988c2
+SHA1: fb4b9780986941df7092761f2b5bfcada7671fc4
+SHA256: 4801046f62c85a86ad167596bbede962a801dc45013803c692614912611479f4
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libldap-2.4-2
+Source: openldap
+Version: 2.4.44+dfsg-5
+Architecture: amd64
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Conflicts: ldap-utils (<= 2.1.23-1)
+Replaces: libldap-2.3-0, libldap2
+Filename: ./libldap-2.4-2_2.4.44+dfsg-5_amd64.deb
+Size: 2508
+MD5sum: 252abd9cdea5930dedac8fef6a7ceeb6
+SHA1: 11499d13daef6c2b877375ccbd93c9be57ee12dd
+SHA256: 61f2ee4a4d206c74005590818e4ed949bed6e106ee4a78d8b6eff1acc6960cba
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libldap-common
+Source: openldap
+Version: 2.4.44+dfsg-5
+Architecture: all
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Replaces: libldap-2.4-2 (<< 2.4.44+dfsg-1)
+Filename: ./libldap-common_2.4.44+dfsg-5_all.deb
+Size: 2470
+MD5sum: 53dd80ba4b5487018db8deeac47d3c1e
+SHA1: 7fa15f062540095bd63a661aba5c16943be55e17
+SHA256: 8a125d6f977c5bff31666707b89d5939a53288cb6ef9356d24fe2938c68198d3
+Section: libs
+Priority: standard
+Multi-Arch: foreign
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libldap2-dev
+Source: openldap
+Version: 2.4.44+dfsg-5+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Conflicts: libldap-dev, libopenldap-dev
+Replaces: libopenldap-dev
+Provides: libldap-dev
+Filename: ./libldap2-dev_2.4.44+dfsg-5+deb9u1_amd64.deb
+Size: 2498
+MD5sum: 2b4ed524110114e7f6ea64ecafb6cfc1
+SHA1: 4115dd15f965490188fce81f76aa6bc34498c938
+SHA256: d6a21949507bdd20a9fa4ed11e8cd1ba7ac6e35cb8e1b8ffdf78922f3f743d79
+Section: libdevel
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libotp0-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Conflicts: libotp0-kerberos4kth
+Filename: ./libotp0-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2412
+MD5sum: cffbb5007150e03b6d6682f3dfa4b188
+SHA1: 65bddc4649fd24805fe5cff2a8f9fbfbc26fa892
+SHA256: 76895414e734caf64eec1ca9c6d9cfc0a0bdbc506c6adbd03e15ae73f34fe9e9
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libroken18-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libroken18-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2380
+MD5sum: 1191f197489b62025b66e48ca5291cb7
+SHA1: 155f06a5e337f686746eec98e7ae9be5252db41b
+SHA256: 367d59d7d9088800c9f534f54b30708d5f3671ecada0c4fc6ef1ff3e5a411163
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-2
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Recommends: libsasl2-modules (>= 2.1.27~101-g0780600+dfsg-3)
+Breaks: postfix (<= 2.8.3-1), slapd (<= 2.4.25-3)
+Replaces: libsasl2
+Filename: ./libsasl2-2_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2594
+MD5sum: cec2bec16d83690b39701ced235d08f3
+SHA1: 795c4f71a18b43d17799a0d2e5d793d196d7a1fa
+SHA256: 394ef6c92045dbd4802b807dc1574fa1d7d9761f4eb9fff12610fc1a567fad89
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-dev
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libsasl2-dev_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2458
+MD5sum: 36861a49e27ee028333bbde7db2d36c7
+SHA1: e608624cd0d21af314338803d8a35306e4d7edfb
+SHA256: c34bd47c9043b1c1aa972dcc4bebb416296c1c0a7102db80d18ee3d5b5db5ca4
+Section: libdevel
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Suggests: libsasl2-modules-gssapi-mit | libsasl2-modules-gssapi-heimdal, libsasl2-modules-ldap, libsasl2-modules-otp, libsasl2-modules-sql
+Breaks: logcheck-database (<= 1.3.16~)
+Filename: ./libsasl2-modules_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2610
+MD5sum: a5e7ae331978ca274f9e0a74013b725a
+SHA1: 107faecb5c31bb0309ad694c13e940c85d7f10b9
+SHA256: c1d2537fd2338e044bee8bdc408eac7be159bb5975f335eedeed0aef0dcacca5
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-db
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libsasl2-modules-db_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2472
+MD5sum: 130730a4c1e473cb579f1a163ed52913
+SHA1: 4ef8de5431b3c72c1c04aff8b6d51d8bfe4e4488
+SHA256: eb3fd1bc65cad118984258f43ee0942bfd86d8be68f13159a5db452a24fc072e
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-gssapi-heimdal
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Conflicts: libsasl2-modules-gssapi-mit
+Filename: ./libsasl2-modules-gssapi-heimdal_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2508
+MD5sum: bd0df7c20558dbeae07dd4ace95c35ab
+SHA1: f8fbd85c37aef472ab001377d99173dbb9ffb835
+SHA256: 33d4c048437922f87917d04638c7942f137be7ea2be5319995657312cadc1ea4
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-gssapi-mit
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Conflicts: libsasl2-modules-gssapi-heimdal
+Filename: ./libsasl2-modules-gssapi-mit_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2504
+MD5sum: 301d6415de3afa8a2a246bc6f14a62e1
+SHA1: 0bfb5613f836c4f306f3e11d2b5844fa3712761a
+SHA256: 605338a49e5196f133d529b31133570300218b723863fdbf3ff1964c082a84d5
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-ldap
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libsasl2-modules-ldap_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2466
+MD5sum: d912889c6a3b8afbd51567ecafed64c8
+SHA1: c3915dbecf60e8ece733c9b326e891afdba90654
+SHA256: 06ee7c7c503d44002b2b493be671fcb5e058f8d73ec667414818b224a54f5f9c
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-otp
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libsasl2-modules-otp_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2474
+MD5sum: 95447af4048794db55729ca2c63ae161
+SHA1: a76289213a9dbc13b5cd277c7e2ce314b48ec2f3
+SHA256: c93a3523aa2a8e6eb151227b0711c5629610702874e516cc7622e9eae79e4f6e
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsasl2-modules-sql
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libsasl2-modules-sql_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2468
+MD5sum: f3447cfa62ee8041e7969adfd1d1e64a
+SHA1: 1db6a61bcff44dc023ae06f7b005286970a39b05
+SHA256: 8b41f8e9aeb1075da4409b7d8e45f6db7fe05a7472923a8be88f18374d0cc99f
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libsl0-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Conflicts: libsl0-kerberos4kth
+Filename: ./libsl0-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2410
+MD5sum: c1be37739098b1eabd8be15ac4734c68
+SHA1: c19d007366a37010bbf28a6e0813f2df50b4ee34
+SHA256: 9fd4ec795d22d2b499e042210c5f3062d549a17f4f43450403d76bfee4581781
+Section: libs
+Priority: extra
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libssl-dev
+Source: openssl
+Version: 1.1.0f-3+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Recommends: libssl-doc
+Conflicts: libssl1.0-dev
+Filename: ./libssl-dev_1.1.0f-3+deb9u1_amd64.deb
+Size: 2460
+MD5sum: 2efe3a8b275492e4167ddb571fecb7b2
+SHA1: a410a5c4d6a060ca241c7d8a7466c7526c7f66f4
+SHA256: 53328e5c4f168258c40fa94f4586070b05a6f1e508b67e097b712ee84b0d696e
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.openssl.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libssl-doc
+Source: openssl
+Version: 1.1.0f-3+deb9u1
+Architecture: all
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Breaks: libssl-dev (<< 1.0.0)
+Replaces: libssl-dev (<< 1.0.0)
+Filename: ./libssl-doc_1.1.0f-3+deb9u1_all.deb
+Size: 2462
+MD5sum: b6526fb1be47293aed683bcccb163fd2
+SHA1: 0976de583114c85d480415af20f3b0fb28ee48e2
+SHA256: 4bed78c6a5f2f871f1213e5a3a3f7c122facff2a3b84564041065415535bc192
+Section: doc
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.openssl.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libssl1.0-dev
+Source: openssl1.0
+Version: 1.0.2l-2+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Conflicts: libssl-dev
+Filename: ./libssl1.0-dev_1.0.2l-2+deb9u1_amd64.deb
+Size: 2444
+MD5sum: 15037e9aa66e817020badef93ffaab65
+SHA1: e7b421356e980bc8c6d80f38e5c24766b536cba0
+SHA256: 3f81186f1603c598d9e301c43ccd29a6a3251943c0628f3df669bfe3ed3524ab
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.openssl.org
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libssl1.0.2
+Source: openssl1.0
+Version: 1.0.2l-2
+Architecture: amd64
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./libssl1.0.2_1.0.2l-2_amd64.deb
+Size: 2406
+MD5sum: 4f04cc5f13e630e1d1a150c00287cb0e
+SHA1: be2a2314272af705b16e4d6af7c24129c9590612
+SHA256: c7a41a6d81233710651d6d862ebbe2c7f45c13a760932cc93953668d90de38a3
+Section: libs
+Priority: important
+Multi-Arch: same
+Homepage: https://www.openssl.org
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libssl1.1
+Source: openssl
+Version: 1.1.0f-3
+Architecture: amd64
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Breaks: salt-common (<= 2016.3.3+ds-3)
+Filename: ./libssl1.1_1.1.0f-3_amd64.deb
+Size: 2460
+MD5sum: 0f34036476420135e78e24c55f5bab89
+SHA1: 170f1e5f233e6849c8b2d3bd2cef0aafb4645322
+SHA256: 841abeb5eb8307c6957e4ba5daf37b1cc3070cc5082e737819973ec723837845
+Section: libs
+Priority: important
+Multi-Arch: same
+Homepage: https://www.openssl.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: libwind0-heimdal
+Source: heimdal
+Version: 7.1.0+dfsg-13+deb9u1
+Architecture: amd64
+Maintainer: Brian May <bam@debian.org>
+Installed-Size: 9
+Filename: ./libwind0-heimdal_7.1.0+dfsg-13+deb9u1_amd64.deb
+Size: 2384
+MD5sum: 02060bf8815fdbc4c284873f2d283001
+SHA1: dfb84195005f6f501f08a521a622c2e75a6e09cc
+SHA256: eacd90a03fadc50f28a5ad492be7569c16465c68c266157d8c1c5b33d7283a72
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.h5l.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: openssl
+Version: 1.1.0f-3
+Architecture: amd64
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Suggests: ca-certificates
+Filename: ./openssl_1.1.0f-3_amd64.deb
+Size: 2428
+MD5sum: 0287fad64a7283d6b2666aa215829c20
+SHA1: 1e83a8318de3f762dccf404d6af5555365a27352
+SHA256: f2ff3f4b99285e9e9442b64734324c990bf5b87d77c3b91c0ebd47b9f206f613
+Section: utils
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.openssl.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: sasl2-bin
+Source: cyrus-sasl2
+Version: 2.1.27~101-g0780600+dfsg-3
+Architecture: amd64
+Maintainer: Debian Cyrus SASL Team <pkg-cyrus-sasl2-debian-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./sasl2-bin_2.1.27~101-g0780600+dfsg-3_amd64.deb
+Size: 2460
+MD5sum: b77b014b9cbc6d6cfc681f9ebf3ea5c9
+SHA1: 141bae4060a85481be2856a7087e5997c5be3eaf
+SHA256: 05967e439dcaaf8370f96c7bf41b23816de039694d0bb56ae7bfe8860309592f
+Section: utils
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.cyrusimap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: slapd
+Source: openldap
+Version: 2.4.44+dfsg-5+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Recommends: libsasl2-modules
+Suggests: ldap-utils, libsasl2-modules-gssapi-mit | libsasl2-modules-gssapi-heimdal
+Conflicts: ldap-server, libltdl3 (= 1.5.4-1), umich-ldapd
+Replaces: ldap-utils (<< 2.2.23-3), libldap2
+Provides: ldap-server, libslapi-2.4-2
+Filename: ./slapd_2.4.44+dfsg-5+deb9u1_amd64.deb
+Size: 2680
+MD5sum: bc816b041372cd79b76b72f01fea0a35
+SHA1: 1d9281a027642e143f981ae3449bb25ea2fe2301
+SHA256: 3685afb54a7cc42656ab2be313270652095dfa7b6235eb81a269782fe9674450
+Section: net
+Priority: optional
+Multi-Arch: foreign
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+
+Package: slapd-smbk5pwd
+Source: openldap
+Version: 2.4.44+dfsg-5+deb9u1
+Architecture: amd64
+Maintainer: Debian OpenLDAP Maintainers <pkg-openldap-devel@lists.alioth.debian.org>
+Installed-Size: 9
+Filename: ./slapd-smbk5pwd_2.4.44+dfsg-5+deb9u1_amd64.deb
+Size: 2440
+MD5sum: b5db1466d0e4c7e8b20a7abd156d00c5
+SHA1: 7e73a4dc1dfa1c808e7bfb3b8787b756b5bbc9a0
+SHA256: 61629b0dfd4b39a825fef23f5d2db30263c9e140cec3cc1167e5b5930a9ae578
+Section: net
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://www.openldap.org/
+Description: Dummy package to fulfill package dependencies
+ This is a dummy package that makes Debian's package management
+ system believe that equivalents to packages on which other
+ packages depend on are actually installed.  Deinstallation of
+ this package is only possible when all pending dependency issues
+ are properly resolved in some other way.
+ .
+ Please note that this is a crude hack and if thoughtlessly used
+ might possibly do damage to your packaging system.  And please
+ note as well that using it is not the recommended way of dealing
+ with broken dependencies.  It is better to file a bug report.
+

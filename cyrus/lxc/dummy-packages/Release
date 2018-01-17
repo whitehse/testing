@@ -1,0 +1,12 @@
+Archive: archive
+Component: component
+Origin: Example
+Label: Example
+Architecture: all
+Date: Tue, 16 Jan 2018 22:19:08 +0000
+MD5Sum:
+ 46594acd74d78f3da4f1cecf219bc7ff            10921 Packages.gz
+ a151f2d48edb4573f52b06a9f89167da            88180 Packages
+SHA256:
+ 955b48d69a52b965841ae0f51c683404404e633262fa5940615869ae75e6d449            10921 Packages.gz
+ e2b4d20e661e27c4a71a2b5d5a44ac30a7b191328491ad9152ea288ec0d4ddd9            88180 Packages
