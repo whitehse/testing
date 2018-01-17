@@ -623,7 +623,7 @@ cd /usr/src
 wget ftp://ftp.cyrusimap.org/cyrus-imapd/cyrus-imapd-3.0.5.tar.gz
 tar -xvzf cyrus-imapd-3.0.5.tar.gz
 cd cyrus-imapd-3.0.5/
-apt-get build-dep cyrus-imapd
+apt-get -y build-dep cyrus-imapd
 ./configure \
 --includedir=/usr/include \
 --datadir=/usr/share/cyrus \
