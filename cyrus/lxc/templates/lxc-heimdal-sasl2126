@@ -533,7 +533,6 @@ CFLAGS="-O0 -g" ./configure \
 make && make install
 ldconfig
 apt-get -y build-dep heimdal-dev
-apt-get -y remove libsnmp-dev
 cd /usr/src
 tar -xvzf heimdal-7.5.0.tar.gz
 cd heimdal-7.5.0
@@ -623,6 +622,7 @@ wget ftp://ftp.cyrusimap.org/cyrus-imapd/cyrus-imapd-3.0.5.tar.gz
 tar -xvzf cyrus-imapd-3.0.5.tar.gz
 cd cyrus-imapd-3.0.5/
 apt-get -y build-dep cyrus-imapd
+apt-get -y remove libsnmp-dev
 ./configure \
 --includedir=/usr/include \
 --datadir=/usr/share/cyrus \
@@ -655,7 +655,7 @@ apt-get -y build-dep cyrus-imapd
 --with-gss_impl=heimdal \
 --with-sasl \
 --with-perl=/usr/bin/perl \
---with-snmp
+--without-snmp
 make && make install
 ldconfig
 EOF

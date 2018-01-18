@@ -743,6 +743,7 @@ wget ftp://ftp.cyrusimap.org/cyrus-imapd/cyrus-imapd-3.0.5.tar.gz
 tar -xvzf cyrus-imapd-3.0.5.tar.gz
 cd cyrus-imapd-3.0.5/
 apt-get -y build-dep cyrus-imapd
+apt-get -y remove libsnmp-dev
 ./configure \
 --includedir=/usr/include \
 --datadir=/usr/share/cyrus \
@@ -775,7 +776,7 @@ apt-get -y build-dep cyrus-imapd
 --with-gss_impl=mit \
 --with-sasl \
 --with-perl=/usr/bin/perl \
---with-snmp
+--without-snmp
 make && make install
 ldconfig
 EOF
