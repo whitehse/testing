@@ -14,7 +14,7 @@ if [ -z "$2" ]; then
 	exit 1
 fi
 
-# Resolve ARP at the remote network
+# Resolve ARP on the remote LAN
 ping -q -c 2 $1 > /dev/null
 
 ping -q -i $2 $1 &
