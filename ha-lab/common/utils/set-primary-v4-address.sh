@@ -15,20 +15,27 @@ cdr2mask ()
 
 CONTAINER="$1"
 INTERFACE="$2"
-IP=`echo "$3" | awk -F'\/' '{print $1}'`
-SUBNET_LEN=`echo "$3" | awk -F'\/' '{print $2}'` 
+IP=`echo "$3" | awk -F'/' '{print $1}'`
+SUBNET_LEN=`echo "$3" | awk -F'/' '{print $2}'` 
 SUBNET_MASK=`cdr2mask "$SUBNET_LEN"`
 GATEWAY="$4"
 
-# Remove the default interface definition if it exists.
-
-sed -i "/$INTERFACE/d" /etc/network/interfaces
-
-# Define the interface underneath /etc/network/interfaces.d
-
 sudo lxc-attach -n $CONTAINER /bin/bash -l -s << EOF
-ifdown $INTERFACE
-ifconfig $INTERFACE 0
+kill `cat /run/network/ifup-$INTERFACE.pid`
+rm /run/network/ifstate.$INTERFACE
+ifconfig eth0 0
+ifconfig eth0 down
+# Add source for directory inclusion
+grep -q source /etc/network/interfaces
+if [ $? -ne 0 ]; then
+	sed -i '1 i\
+source /etc/network/interfaces.d/*
+
+' /etc/network/interfaces
+fi
+# Remove the default interface definition if it exists.
+sed -i "/${INTERFACE}/d" /etc/network/interfaces
+# Define the interface underneath /etc/network/interfaces.d
 cat > /etc/network/interfaces.d/$INTERFACE << FOE
 auto eth0
 iface eth0 inet static
@@ -38,6 +45,5 @@ iface eth0 inet static
 FOE
 ifup $INTERFACE
 apt-get update
-apt-get -y install bird bird-bgp iputils-ping gzip wget less vim
 EOF
 
