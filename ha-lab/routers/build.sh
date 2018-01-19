@@ -82,3 +82,6 @@ sudo ovs-vsctl set port router-b-1 trunks=200,201,202,203,204,205,206,207,208,20
 ../common/utils/set-primary-vlan-v4-address.sh router-b eth0 210 100.64.0.101/30
 ../common/utils/set-primary-vlan-v4-address.sh router-b eth0 211 100.64.0.105/30
 ../common/utils/set-primary-vlan-v4-address.sh router-b eth0 212 100.64.0.109/30
+
+../common/bird/install-config.sh router-a ospf-router-a.conf
+../common/bird/install-config.sh router-b ospf-router-b.conf

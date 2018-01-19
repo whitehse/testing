@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # $1 - Container
-#$ $2 - router-id
+# $2 - router-id
 
 CONTAINER="$1"
 ROUTER_ID="$2"
