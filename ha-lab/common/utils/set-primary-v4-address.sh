@@ -23,8 +23,8 @@ GATEWAY="$4"
 sudo lxc-attach -n $CONTAINER /bin/bash -l -s << EOF
 kill `cat /run/network/ifup-$INTERFACE.pid`
 rm /run/network/ifstate.$INTERFACE
-ifconfig eth0 0
-ifconfig eth0 down
+ifconfig $INTERFACE 0
+ifconfig $INTERFACE down
 # Add source for directory inclusion
 grep -q source /etc/network/interfaces
 if [ $? -ne 0 ]; then
@@ -37,8 +37,8 @@ fi
 sed -i "/${INTERFACE}/d" /etc/network/interfaces
 # Define the interface underneath /etc/network/interfaces.d
 cat > /etc/network/interfaces.d/$INTERFACE << FOE
-auto eth0
-iface eth0 inet static
+auto $INTERFACE
+iface $INTERFACE inet static
     address $IP
     netmask $SUBNET_MASK
     gateway $GATEWAY

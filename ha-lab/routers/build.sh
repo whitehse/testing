@@ -3,8 +3,18 @@
 sudo lxc-create -t /usr/share/lxc/templates/lxc-debian -n router-a
 sudo cp router-a.config /var/lib/lxc/router-a/config
 sudo lxc-start -n router-a
-sudo ifconfig router-a-uplink 100.64.0.1/24
+sudo ifconfig router-a-0 100.64.0.1/24
 
 ../common/utils/set-primary-v4-address.sh router-a eth0 100.64.0.2/24 100.64.0.1
 ../common/utils/install-packages.sh router-a bird,bird-bgp,iputils-ping,gzip,wget,less,vim
 ../common/bird/install-common-config.sh router-a 100.64.0.2
+
+sudo lxc-create -t /usr/share/lxc/templates/lxc-debian -n router-b
+sudo cp router-b.config /var/lib/lxc/router-b/config
+sudo lxc-start -n router-b
+sudo ifconfig router-b-0 100.64.1.1/24
+
+../common/utils/set-primary-v4-address.sh router-b eth0 100.64.1.2/24 100.64.1.1
+../common/utils/install-packages.sh router-b bird,bird-bgp,iputils-ping,gzip,wget,less,vim
+../common/bird/install-common-config.sh router-b 100.64.1.2
+
