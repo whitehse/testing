@@ -16,7 +16,7 @@ sleep 1
 # Temporarily configure gateway to configure the system
 ../common/utils/set-primary-v4-address.sh slapd-1 eth0 100.64.0.10/30 100.64.0.9
 ../common/utils/install-packages.sh slapd-1 bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan,slapd,ldap-utils
-../common/bird/install-common-config.sh slapd-1 100.64.0.10 100.64.1.3
+../common/bird/install-common-config.sh slapd-1 '"eth0"' 100.64.1.3
 
 
 sudo lxc-create -t /usr/share/lxc/templates/lxc-debian -n slapd-2
@@ -35,7 +35,7 @@ sleep 1
 # Temporarily configure gateway to configure the system
 ../common/utils/set-primary-v4-address.sh slapd-2 eth0 100.64.0.62/30 100.64.0.61
 ../common/utils/install-packages.sh slapd-2 bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan,slapd,ldap-utils
-../common/bird/install-common-config.sh slapd-2 100.64.0.62
+../common/bird/install-common-config.sh slapd-2 '"eth0"' 100.64.1.16
 
 ../common/bird/install-config.sh slapd-1 ospf-slapd-1.conf
 ../common/bird/install-config.sh slapd-2 ospf-slapd-2.conf
