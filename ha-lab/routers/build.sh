@@ -10,7 +10,7 @@ sleep 1
 ../common/utils/set-loopback-address.sh router-a lo:0 100.64.1.1/32
 ../common/utils/set-primary-v4-address.sh router-a eth0 100.64.0.2/30 100.64.0.1
 ../common/utils/install-packages.sh router-a bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan
-../common/bird/install-common-config.sh router-a '"eth0", "lo:0"'
+../common/bird/install-common-config.sh router-a '"eth0", "lo:0", "eth1.100", "eth1.101", "eth1.102", "eth1.103", "eth1.104", "eth1.105", "eth1.106", "eth1.107", "eth1.108", "eth1.109", "eth1.110", "eth1.111", "eth1.112"' 100.64.1.1
 
 sudo lxc-create -t /usr/share/lxc/templates/lxc-debian -n router-b
 sudo cp router-b.config /var/lib/lxc/router-b/config
@@ -22,8 +22,7 @@ sleep 1
 ../common/utils/set-loopback-address.sh router-b lo:0 100.64.1.2/32
 ../common/utils/set-primary-v4-address.sh router-b eth0 100.64.0.6/24 100.64.0.5
 ../common/utils/install-packages.sh router-b bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan
-../common/bird/install-common-config.sh router-b '"eth0", "lo:0"'
-
+../common/bird/install-common-config.sh router-b '"eth0", "lo:0", "eth1.200", "eth1.201", "eth1.202", "eth1.203", "eth1.204", "eth1.205", "eth1.206", "eth1.207", "eth1.208", "eth1.209", "eth1.210", "eth1.211", "eth1.212"' 100.64.1.2
 
 #VLANs:
 #100 - slapd-1       - 100.64.0.8/30
