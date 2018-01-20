@@ -9,3 +9,5 @@ sudo iptables -P OUTPUT ACCEPT
 sudo iptables -t nat -A POSTROUTING -o $INTERFACE -j MASQUERADE
 sudo sed -i 's/^#net\.ipv4\.ip_forward.*/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 sudo sysctl -p
+# This is temporary
+sudo route add -net 100.64.0.0/16 gw 100.64.0.2

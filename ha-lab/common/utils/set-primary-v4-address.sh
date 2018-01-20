@@ -43,6 +43,9 @@ iface $INTERFACE inet static
     netmask $SUBNET_MASK
     gateway $GATEWAY
 FOE
+if [ -z "$4" ]; then
+	sed -i '/gateway/d' /etc/network/interfaces.d/$INTERFACE
+fi
 ifup $INTERFACE
 apt-get update
 EOF
