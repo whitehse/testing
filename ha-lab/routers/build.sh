@@ -6,9 +6,11 @@ sudo lxc-start -n router-a
 sudo ifconfig router-a-0 100.64.0.1/30
 
 sleep 1
+# router-a     - 100.64.1.1/32
+../common/utils/set-loopback-address.sh router-a lo:0 100.64.1.1/32
 ../common/utils/set-primary-v4-address.sh router-a eth0 100.64.0.2/30 100.64.0.1
 ../common/utils/install-packages.sh router-a bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan
-../common/bird/install-common-config.sh router-a 100.64.0.2
+../common/bird/install-common-config.sh router-a '"eth0", "lo:0"'
 
 sudo lxc-create -t /usr/share/lxc/templates/lxc-debian -n router-b
 sudo cp router-b.config /var/lib/lxc/router-b/config
@@ -16,9 +18,12 @@ sudo lxc-start -n router-b
 sudo ifconfig router-b-0 100.64.0.5/30
 
 sleep 1
+# router-b     - 100.64.1.2/32
+../common/utils/set-loopback-address.sh router-b lo:0 100.64.1.2/32
 ../common/utils/set-primary-v4-address.sh router-b eth0 100.64.0.6/24 100.64.0.5
 ../common/utils/install-packages.sh router-b bird,bird-bgp,iputils-ping,gzip,wget,less,vim,vlan
-../common/bird/install-common-config.sh router-b 100.64.0.6
+../common/bird/install-common-config.sh router-b '"eth0", "lo:0"'
+
 
 #VLANs:
 #100 - slapd-1       - 100.64.0.8/30

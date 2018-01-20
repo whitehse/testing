@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # $1 - container
-# $2 - container veth interface
-# $3 - ip/subnet declaration - e.g. 100.64.0.2/24
-# $4 - gateway
+# $2 - container lo interface - e.g. lo:0
+# $3 - ip/subnet declaration - e.g. 100.64.1.0/32
 
 cdr2mask ()
 {
@@ -18,25 +17,23 @@ INTERFACE="$2"
 IP=`echo "$3" | awk -F'/' '{print $1}'`
 SUBNET_LEN=`echo "$3" | awk -F'/' '{print $2}'` 
 SUBNET_MASK=`cdr2mask "$SUBNET_LEN"`
-GATEWAY="$4"
 
 sudo lxc-attach -n $CONTAINER /bin/bash -l -s << EOF
-kill `cat /run/network/ifup-$INTERFACE.pid`
-rm /run/network/ifstate.$INTERFACE
-ifconfig $INTERFACE 0
-ifconfig $INTERFACE down
-# Define the interface underneath /etc/network/interfaces.d
+# Add source for directory inclusion
+grep -q lo /etc/network/interfaces
+if [ $? -eq 0 ]; then
+  echo "source /etc/network/interfaces.d/*" > /etc/network/interfaces
+  cat > /etc/network/interfaces.d/lo << FOE
+auto lo
+iface lo inet loopback
+
+FOE
+fi
 cat > /etc/network/interfaces.d/$INTERFACE << FOE
 auto $INTERFACE
 iface $INTERFACE inet static
     address $IP
     netmask $SUBNET_MASK
-    gateway $GATEWAY
 FOE
-if [ -z "$4" ]; then
-	sed -i '/gateway/d' /etc/network/interfaces.d/$INTERFACE
-fi
 ifup $INTERFACE
-apt-get update
 EOF
-
