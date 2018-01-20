@@ -16,8 +16,6 @@ if [ ! -d /etc/bird/bird.d ]; then
 fi
 
 cat > /etc/bird/bird.conf << FOE
-include "/etc/bird/bird.d/*";
-
 router id $ROUTER_ID;
 
 log syslog { debug, trace, info, remote, warning, error, auth, fatal, bug };
@@ -31,7 +29,8 @@ protocol static {
 }
 
 protocol direct {
-        interface $INTERFACES;
+    import all;
+    interface "*";
 }
 
 protocol kernel {
@@ -58,6 +57,7 @@ template bgp ibgp {
 	   export all;
 }
 
+include "/etc/bird/bird.d/*";
 FOE
 /etc/init.d/bird reload
 EOF
