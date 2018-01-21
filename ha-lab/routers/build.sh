@@ -89,21 +89,23 @@ sleep 1
 # bind-2       - 100.64.1.28/32
 #
 # Service Loopbacks
-# ldap.example.com       - 100.64.1.100/32
-# kdc.example.com        - 100.64.1.101/32
-# postgres.example.com   - 100.64.1.102/32
-# auth.example.com       - 100.64.1.103/32
-# smtp.example.com       - 100.64.1.104/32
-# imap.example.com       - 100.64.1.105/32
-# imap-be-1.example.com  - 100.64.1.106/32
-# imap-be-2.example.com  - 100.64.1.107/32
-# nfs.example.com        - 100.64.1.108/32
-# nfs-backup.example.com - 100.64.1.109/32
-# mupdate.example.com    - 100.64.1.110/32
-# www.example.com        - 100.64.1.111/32
-# voice.example.com      - 100.64.1.112/32
-# ns1.example.com        - 100.64.1.113/32
-# ns2.example.com        - 100.64.1.114/32
+# ldap.example.com       - 100.64.2.0/32
+# kdc.example.com        - 100.64.2.1/32
+# postgres.example.com   - 100.64.2.2/32
+# auth.example.com       - 100.64.2.3/32
+# smtp.example.com       - 100.64.2.4/32
+# imap.example.com       - 100.64.2.5/32
+# imap-be-1.example.com  - 100.64.2.6/32
+# imap-be-2.example.com  - 100.64.2.7/32
+# nfs.example.com        - 100.64.2.8/32
+# nfs-backup.example.com - 100.64.2.9/32
+# mupdate.example.com    - 100.64.2.10/32
+# www.example.com        - 100.64.2.11/32
+# voice.example.com      - 100.64.2.12/32
+# ns1.example.com        - 100.64.2.13/32
+# ns2.example.com        - 100.64.2.14/32
+# dhcp1.example.com      - 100.64.2.15/32
+# dhcp2.example.com      - 100.64.2.16/32
 
 sudo ovs-vsctl add-port switch-a router-a-1
 sudo ovs-vsctl add-port switch-b router-b-1
