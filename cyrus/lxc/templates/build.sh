@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copy this script underneath your LXC cache, in a directory called dummy-packages.
+# such as: /var/cache/lxc/dummy-pacakges/build.sh
 
 lxc-create -t /usr/src/git/testing/cyrus/lxc/templates/lxc-mit-sasl2123 -n test-mit-sasl2123 | tee /tmp/output-mit-sasl2123.txt
 lxc-create -t /usr/src/git/testing/cyrus/lxc/templates/lxc-mit-sasl2126 -n test-mit-sasl2126 | tee /tmp/output-mit-sasl2126.txt
