@@ -13,11 +13,8 @@ sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 
 apt-get -y install vagrant
 
-cat > Vagrantfile << EOF
-Vagrant.configure("2") do |config|
-  config.vm.box = "debian/jessie64"
-end
-EOF
-
 vagrant init debian/jessie64
+vagrant up
+
+vagrant init CumulusCommunity/cumulus-vx
 vagrant up

@@ -1,0 +1,92 @@
+# Points of presense
+# sneezy - Data Center
+# grumpy - Another Data Center
+# dopey - Disaster Recovery Site
+# bashful - Office/Campus Network
+# doc - Broadband Access Network
+# happy - Another Broadband Access Network
+# sleepy
+
+[management]
+oob.sneezy.com
+oob.grumpy.com
+oob.dopey.com
+oob.bashful.com
+
+# Spines will also serve as border edge routers facing public internet
+# providers
+[spines]
+spine-a.frabic.sneezy.example.com
+spine-b.frabic.sneezy.example.com
+spine-a.frabic.grumpy.example.com
+spine-b.frabic.grumpy.example.com
+spine-a.frabic.dopey.example.com
+spine-b.frabic.dopey.example.com
+spine-a.frabic.bashful.example.com
+spine-b.frabic.bashful.example.com
+
+[leafs]
+leaf-a.frabic.sneezy.example.com
+leaf-b.frabic.sneezy.example.com
+leaf-a.frabic.grumpy.example.com
+leaf-b.frabic.grumpy.example.com
+leaf-a.frabic.dopey.example.com
+leaf-b.frabic.dopey.example.com
+leaf-a.frabic.bashful.example.com
+leaf-b.frabic.bashful.example.com
+
+[access]
+node-a.access.doc.example.com
+node-a.access.happy.example.com
+
+[bare-metal-servers]
+server-a.baremetal.sneezy.example.com
+server-a.baremetal.grumpy.example.com
+server-a.baremetal.dopey.example.com
+server-a.baremetal.bashful.example.com
+
+[container-servers]
+slapd.container.sneezy.example.com
+slapd.container.grumpy.example.com
+postgres.container.sneezy.example.com
+postgres.container.grumpy.example.com
+kerberos-auth.container.sneezy.example.com
+kerberos-auth.container.grumpy.example.com
+postfix.container.sneezy.example.com
+postfix.container.grumpy.example.com
+cyrus-frontend.container.sneezy.example.com
+cyrus-frontend.container.grumpy.example.com
+cyrus-backend-1.container.sneezy.example.com
+cyrus-backend-1.container.grumpy.example.com
+cyrus-backend-2.container.sneezy.example.com
+cyrus-backend-2.container.grumpy.example.com
+nfs.container.sneezy.example.com
+nfs.container.grumpy.example.com
+nfs-backup.container.sneezy.example.com
+nfs-backup.container.grumpy.example.com
+cyrus-mupdate.container.sneezy.example.com
+cyrus-mupdate.container.grumpy.example.com
+nginx.container.sneezy.example.com
+nginx.container.grumpy.example.com
+freeswitch.container.sneezy.example.com
+freeswitch.container.grumpy.example.com
+
+[desktops]
+neo.desktop.bashful.example.com
+morpheus.desktop.bashful.example.com
+trinity.desktop.bashful.example.com
+eros.desktop.dopey.example.com
+
+[phones]
+alexander.phone.bashful.example.com
+graham.phone.bashful.example.com
+bell.phone.bashful.example.com
+anteros.phone.dopey.example.com
+
+[switches:children]
+leafs
+spines
+
+[servers:children]
+bare-metal-servers
+container-servers
