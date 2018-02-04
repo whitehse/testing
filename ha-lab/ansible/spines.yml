@@ -1,5 +1,4 @@
+---
 - hosts: spines
-  gather_facts: no
-
   roles:
     - containers

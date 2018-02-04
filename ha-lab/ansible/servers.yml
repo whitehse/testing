@@ -1,5 +1,4 @@
+---
 - hosts: servers
-  gather_facts: no
-
   roles:
     - containers
