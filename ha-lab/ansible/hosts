@@ -1,92 +1,88 @@
 # Points of presense
-# sneezy - Data Center
-# grumpy - Another Data Center
-# dopey - Disaster Recovery Site
-# bashful - Office/Campus Network
-# doc - Broadband Access Network
-# happy - Another Broadband Access Network
-# sleepy
+# z - Data Center
+# y - Another Data Center
+# x - Disaster Recovery Site
+# w - Office/Campus Network
+# v - Broadband Access Network
+# u - Another Broadband Access Network
 
-[management]
-oob.sneezy.com
-oob.grumpy.com
-oob.dopey.com
-oob.bashful.com
+# All hosts will be initially configured using lxc_container via
+# localhost, and all hosts will be networked using ebgp ecmp.
+# Once set up, management will move to more traditional management
+# over the network, through the host definitions below.
+#
+# The system this is deployed on will be a bare metal system, or
+# a VM. Vagrant is unused within this project. The host system
+# will run gitlab for ci/cd development and ansible triggers. It
+# will tie into the network somewhere within the ISP cloud, and
+# will provide a default route to the network.
+#[lxc-host]
+#localhost
 
 # Spines will also serve as border edge routers facing public internet
 # providers
 [spines]
-spine-a.frabic.sneezy.example.com
-spine-b.frabic.sneezy.example.com
-spine-a.frabic.grumpy.example.com
-spine-b.frabic.grumpy.example.com
-spine-a.frabic.dopey.example.com
-spine-b.frabic.dopey.example.com
-spine-a.frabic.bashful.example.com
-spine-b.frabic.bashful.example.com
+spine-a.z
+spine-b.z
+spine-a.y
+spine-b.y
+spine-a.x
+spine-b.x
+spine-a.w
+spine-b.w
 
 [leafs]
-leaf-a.frabic.sneezy.example.com
-leaf-b.frabic.sneezy.example.com
-leaf-a.frabic.grumpy.example.com
-leaf-b.frabic.grumpy.example.com
-leaf-a.frabic.dopey.example.com
-leaf-b.frabic.dopey.example.com
-leaf-a.frabic.bashful.example.com
-leaf-b.frabic.bashful.example.com
+leaf-a.z
+leaf-b.z
+leaf-a.y
+leaf-b.y
+leaf-a.x
+leaf-b.x
+leaf-a.w
+leaf-b.w
 
 [access]
-node-a.access.doc.example.com
-node-a.access.happy.example.com
+access-a.v
+access-a.u
 
-[bare-metal-servers]
-server-a.baremetal.sneezy.example.com
-server-a.baremetal.grumpy.example.com
-server-a.baremetal.dopey.example.com
-server-a.baremetal.bashful.example.com
-
-[container-servers]
-slapd.container.sneezy.example.com
-slapd.container.grumpy.example.com
-postgres.container.sneezy.example.com
-postgres.container.grumpy.example.com
-kerberos-auth.container.sneezy.example.com
-kerberos-auth.container.grumpy.example.com
-postfix.container.sneezy.example.com
-postfix.container.grumpy.example.com
-cyrus-frontend.container.sneezy.example.com
-cyrus-frontend.container.grumpy.example.com
-cyrus-backend-1.container.sneezy.example.com
-cyrus-backend-1.container.grumpy.example.com
-cyrus-backend-2.container.sneezy.example.com
-cyrus-backend-2.container.grumpy.example.com
-nfs.container.sneezy.example.com
-nfs.container.grumpy.example.com
-nfs-backup.container.sneezy.example.com
-nfs-backup.container.grumpy.example.com
-cyrus-mupdate.container.sneezy.example.com
-cyrus-mupdate.container.grumpy.example.com
-nginx.container.sneezy.example.com
-nginx.container.grumpy.example.com
-freeswitch.container.sneezy.example.com
-freeswitch.container.grumpy.example.com
+[servers]
+slapd.z
+slapd.y
+postgres.z
+postgres.y
+kerb-auth.z
+kerb-auth.y
+postfix.z
+postfix.y
+cyrus-fe.z
+cyrus-fe.y
+cyrus-be-1.z
+cyrus-be-1.y
+cyrus-be-2.z
+cyrus-be-2.y
+nfs.z
+nfs.y
+nfs-backup.z
+nfs-backup.y
+cyrus-mu.z
+cyrus-mu.y
+nginx.z
+nginx.y
+freeswitch.z
+freeswitch.y
 
 [desktops]
-neo.desktop.bashful.example.com
-morpheus.desktop.bashful.example.com
-trinity.desktop.bashful.example.com
-eros.desktop.dopey.example.com
+neo.w
+morpheus.w
+trinity.w
+eros.x
 
 [phones]
-alexander.phone.bashful.example.com
-graham.phone.bashful.example.com
-bell.phone.bashful.example.com
-anteros.phone.dopey.example.com
+alexander.w
+graham.w
+bell.w
+anteros.x
 
-[switches:children]
-leafs
-spines
-
-[servers:children]
-bare-metal-servers
-container-servers
+#[switches:children]
+#leafs
+#spines

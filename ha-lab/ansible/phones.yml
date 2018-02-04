@@ -1,0 +1,5 @@
+- hosts: phones
+  gather_facts: no
+
+  roles:
+    - containers

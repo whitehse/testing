@@ -1,0 +1,7 @@
+---
+- include: spines.yml
+- include: leafs.yml
+- include: access.yml
+- include: servers.yml
+- include: desktops.yml
+- include: phones.yml

@@ -1,0 +1,5 @@
+- hosts: desktops
+  gather_facts: no
+
+  roles:
+    - containers
