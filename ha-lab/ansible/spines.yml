@@ -1,4 +1,6 @@
 ---
 - hosts: spines
+  become: yes
+  become_user: root
   roles:
     - containers
