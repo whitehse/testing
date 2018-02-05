@@ -1,8 +1,17 @@
 ---
-- name: Create and start containers
+#- name: Create and start containers
+#  lxc_container:
+#    name: "{{ ansible_host }}"
+#    container_log: true
+#    state: absent
+#    backing_store: btrfs
+#    template: debian
+#    template_options: --release jessie
+
+- name: Clone a container using snapshot
   lxc_container:
-    name: "{{ ansible_host }}"
-    container_log: true
-    state: started
-    template: debian
-    template_options: --release jessie
+    name: debian-bgp-ecmp
+    state: absent
+    backing_store: btrfs
+    clone_name: "{{ ansible_host }}"
+    clone_snapshot: true

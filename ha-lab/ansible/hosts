@@ -86,3 +86,6 @@ anteros.x
 #[switches:children]
 #leafs
 #spines
+
+[clonable]
+debian-bgp-ecmp
