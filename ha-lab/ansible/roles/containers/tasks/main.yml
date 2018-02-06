@@ -3,15 +3,15 @@
 #  lxc_container:
 #    name: "{{ ansible_host }}"
 #    container_log: true
-#    state: absent
+#    state: started
 #    backing_store: btrfs
 #    template: debian
-#    template_options: --release jessie
+#    template_options: --release stable
 
 - name: Clone a container using snapshot
   lxc_container:
     name: debian-bgp-ecmp
-    state: absent
+    state: started
     backing_store: btrfs
     clone_name: "{{ ansible_host }}"
     clone_snapshot: true

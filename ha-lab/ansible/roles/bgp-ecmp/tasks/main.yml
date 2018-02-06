@@ -6,7 +6,7 @@
     state: stopped
     backing_store: btrfs
     template: debian
-    template_options: --release jessie
+    template_options: --release stable
     container_config:
       - "lxc.network.type = veth"
       - "lxc.network.name = eth0"
