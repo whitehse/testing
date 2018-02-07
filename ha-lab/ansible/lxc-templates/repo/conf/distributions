@@ -1,0 +1,6 @@
+Origin: deb.cafedemocracy.org
+Label: deb.cafedemocracy.org
+Codename: stretch
+Architectures: amd64
+Components: main
+Description: Apt repository for frrouting and ptmd

@@ -3,7 +3,7 @@
 #  lxc_container:
 #    name: "{{ ansible_host }}"
 #    container_log: true
-#    state: started
+#    state: absent
 #    backing_store: btrfs
 #    template: debian
 #    template_options: --release stable
