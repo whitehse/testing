@@ -35,9 +35,6 @@ done
 export PATH=$PATH:/usr/sbin:/usr/bin:/sbin:/bin
 export GREP_OPTIONS=""
 
-MIRROR=${MIRROR:-http://httpredir.debian.org/debian}
-#LOCAL_REPOSITORY=
-SECURITY_MIRROR=${SECURITY_MIRROR:-http://security.debian.org/}
 LOCALSTATEDIR="/var"
 LXC_TEMPLATE_CONFIG="/usr/share/lxc/config"
 # Allows the lxc-cache directory to be set by environment variable
@@ -312,9 +309,10 @@ openssh-server
 
     # download a mini debian into a cache
     echo "Downloading debian minimal ..."
-    debootstrap --verbose --variant=minbase --arch="$arch" \
-        --include="$packages" --keyring="${releasekeyring}" \
-        "$release" "$cache/partial-$release-$arch" "$MIRROR"
+    #debootstrap --verbose --variant=minbase --arch="$arch" \
+    #    --include="$packages" --keyring="${releasekeyring}" \
+    #    "$release" "$cache/partial-$release-$arch" "$MIRROR"
+    multistrap -d "$cache/partial-$release-$arch" -f multistrap.conf
     if [ $? -ne 0 ]; then
         echo "Failed to download the rootfs, aborting."
         return 1
@@ -349,7 +347,7 @@ install_debian()
     rootfs=$1
     release=$2
     arch=$3
-    cache="$4/debian"
+    cache="$4/debian-bgp-ecmp"
     mkdir -p $LOCALSTATEDIR/lock/subsys/
     (
         flock -x 9
@@ -449,20 +447,20 @@ EOF
     fi
 
     # Write a new sources.list containing both native and multiarch entries
-    > "${rootfs}/etc/apt/sources.list"
-    if [ "${arch}" = "${hostarch}" ]; then
-        write_sourceslist "${rootfs}" "${release}" "${arch}"
-    else
-        write_sourceslist "${rootfs}" "${release}"
-    fi
-
-    # Install Packages in container
-    if [ -n "${packages}" ]; then
-        local pack_list
-        pack_list="${packages//,/ }"
-        echo "Installing packages: ${pack_list}"
-        install_packages "${rootfs}" "${pack_list}"
-    fi
+#    > "${rootfs}/etc/apt/sources.list"
+#    if [ "${arch}" = "${hostarch}" ]; then
+#        write_sourceslist "${rootfs}" "${release}" "${arch}"
+#    else
+#        write_sourceslist "${rootfs}" "${release}"
+#    fi
+#
+#    # Install Packages in container
+#    if [ -n "${packages}" ]; then
+#        local pack_list
+#        pack_list="${packages//,/ }"
+#        echo "Installing packages: ${pack_list}"
+#        install_packages "${rootfs}" "${pack_list}"
+#    fi
 
     # Re-enable service startup
     rm "${rootfs}/usr/sbin/policy-rc.d"
