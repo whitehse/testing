@@ -68,7 +68,6 @@ l6:6:wait:/etc/init.d/rc 6
 # Normally not reached, but fallthrough in case of emergency.
 z6:6:respawn:/sbin/sulogin
 1:2345:respawn:/sbin/getty 38400 console
-$(for tty in $(seq 1 "$num_tty"); do echo "c${tty}:12345:respawn:/sbin/getty 38400 tty${tty} linux" ; done;)
 p6::ctrlaltdel:/sbin/init 6
 p0::powerfail:/sbin/init 0
 EOF
@@ -312,7 +311,7 @@ openssh-server
     #debootstrap --verbose --variant=minbase --arch="$arch" \
     #    --include="$packages" --keyring="${releasekeyring}" \
     #    "$release" "$cache/partial-$release-$arch" "$MIRROR"
-    multistrap -d "$cache/partial-$release-$arch" -f multistrap.conf
+    multistrap -d "$cache/partial-$release-$arch" -f /usr/src/git/whitehse/testing/ha-lab/ansible/lxc-templates/multistrap.conf
     if [ $? -ne 0 ]; then
         echo "Failed to download the rootfs, aborting."
         return 1

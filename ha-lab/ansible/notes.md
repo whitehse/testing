@@ -11,11 +11,24 @@
  neighbor swp29 interface peer-group fabric
  neighbor swp30 interface peer-group fabric
 
-raw.lxc: |-
-  lxc.aa_profile=unconfined
-  lxc.cgroup.devices.allow=a
-  lxc.mount.auto=proc:rw sys:ro cgroup:ro
-  lxc.kmsg=0
-  lxc.autodev=1
+#raw.lxc: |-
+#  lxc.aa_profile=unconfined
+#  lxc.cgroup.devices.allow=a
+#  lxc.mount.auto=proc:rw sys:ro cgroup:ro
+#  lxc.kmsg=0
+#  lxc.autodev=1
 
 adduser frr frrvty
+cp /usr/share/doc/frr/examples/bgpd.conf.sample /etc/frr/bgpd.conf
+cp /usr/share/doc/frr/examples/zebra.conf.sample /etc/frr/zebra.conf
+
+service frr start
+
+vtysh
+sh mem
+sh bpg mem
+
+2001:DB8::/32
+192.0.2.0/24
+198.51.100.0/24
+203.0.113.0/24

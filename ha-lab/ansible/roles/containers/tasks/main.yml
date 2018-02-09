@@ -1,17 +1,17 @@
 ---
-#- name: Create and start containers
-#  lxc_container:
-#    name: "{{ ansible_host }}"
-#    container_log: true
-#    state: absent
-#    backing_store: btrfs
-#    template: debian
-#    template_options: --release stable
-
-- name: Clone a container using snapshot
+- name: Create and start containers
   lxc_container:
-    name: debian-bgp-ecmp
-    state: started
+    name: "{{ ansible_host }}"
+    container_log: true
+    state: absent
     backing_store: btrfs
-    clone_name: "{{ ansible_host }}"
-    clone_snapshot: true
+    template: /usr/src/git/whitehse/testing/ha-lab/ansible/lxc-templates/lxc-bgp-ecmp
+    template_options: --release stable
+
+#- name: Clone a container using snapshot
+#  lxc_container:
+#    name: debian-bgp-ecmp
+#    state: started
+#    backing_store: btrfs
+#    clone_name: "{{ ansible_host }}"
+#    clone_snapshot: true
