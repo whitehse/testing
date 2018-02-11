@@ -1,6 +1,6 @@
 ---
 - name: write the Quagga daemons settings
-  template: src=templates/daemons dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/daemons
+  template: src=templates/debian.conf dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/debian.conf
 
 - name: write the FRR bgpd config file
   template: src=templates/bgpd.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/bgpd.conf
