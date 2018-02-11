@@ -1,9 +1,10 @@
 ---
-- name: write the Quagga config file
-  template: src=templates/quagga.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/zebra.conf
-  #notify: reload quagga
-
 - name: write the Quagga daemons settings
   template: src=templates/daemons dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/daemons
-  #notify: start quagga
+
+- name: write the FRR bgpd config file
+  template: src=templates/bgpd.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/bgpd.conf
+
+- name: write the FRR zebra settings
+  template: src=templates/zebra.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/zebra.conf
 

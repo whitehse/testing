@@ -6,4 +6,7 @@
     - containers
     - interfaces
     - bgpd
+    - slapd-proxy
+    - slapd-nssov
+    - bind-dyndb-ldap
     - nginx

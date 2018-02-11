@@ -1,6 +1,0 @@
----
-- hosts: clonable
-  become: yes
-  become_user: root
-  roles:
-    - bgp-ecmp
