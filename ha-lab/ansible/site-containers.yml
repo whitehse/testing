@@ -13,3 +13,4 @@
 - include: nfs.yml
 - include: nginx.yml
 - include: freeswitch.yml
+- include: bind.yml

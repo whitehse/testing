@@ -1,9 +1,9 @@
 ---
 fabric:
-  asn: 4200000018
-  router_id: 192.0.2.18
-  loopback: 192.0.2.18
-  loopbackv6: 2001:DB8::18
+  asn: 4200000020
+  router_id: 192.0.2.20
+  loopback: 192.0.2.20
+  loopbackv6: 2001:DB8::20
 
 interfaces:
   0:

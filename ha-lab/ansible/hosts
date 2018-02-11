@@ -89,6 +89,10 @@ nginx.y
 freeswitch.z
 freeswitch.y
 
+[bind]
+bind.z
+bind.y
+
 [desktops]
 neo.w
 morpheus.w

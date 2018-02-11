@@ -1,9 +1,9 @@
 ---
 fabric:
-  asn: 4200000023
-  router_id: 192.0.2.23
-  loopback: 192.0.2.23
-  loopbackv6: 2001:DB8::23
+  asn: 4200000025
+  router_id: 192.0.2.25
+  loopback: 192.0.2.25
+  loopbackv6: 2001:DB8::25
 
 interfaces:
   0:
@@ -34,3 +34,5 @@ interfaces:
     link: leaf-b.y_12
   13:
     link: leaf-b.y_13
+  14:
+    link: leaf-b.y_14
