@@ -1,10 +1,12 @@
 ---
 
-- name: Include interfaces.d to the main interface config file
+- name: Set spare interfaces file
   template: src=templates/interfaces.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/network/interfaces owner=root group=root mode=0644
-  #notify: reload networking
 
-- name: configure the interfaces / bonds / brides / SVIs ...
-  template: src=templates/interfaces_config.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/network/interfaces.d/interfaces
-  #notify: reload networking
+- name: Set fabric loopback(s)
+  template: src=templates/lo_config.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/network/interfaces.d/lo owner=root group=root mode=0644
+
+- name: Configure all ethernet intefaces as fabric links
+  template: src=templates/interfaces_config.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/network/interfaces.d/interfaces.d/eth{{ item.value }}
+  with_dict: "{{ interfaces }}"
 
