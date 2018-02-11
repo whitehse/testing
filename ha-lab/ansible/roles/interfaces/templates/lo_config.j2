@@ -4,5 +4,5 @@ iface lo inet loopback
     post-up ip addr add {{ fabric.loopback }}/32 dev lo
 {% endif %}
 {% if fabric.loopbackv6 is defined  %}
-    post-up ipv6 addr add {{ fabric.loopbackv6 }}/128 dev lo
+    post-up ip -6 addr add {{ fabric.loopbackv6 }}/128 dev lo
 {% endif %}

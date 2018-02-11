@@ -1,6 +1,5 @@
 ---
 - include: switches.yml
-- include: access.yml
 - include: desktops.yml
 - include: phones.yml
 - include: slapd.yml
