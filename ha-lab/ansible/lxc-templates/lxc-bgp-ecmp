@@ -67,7 +67,7 @@ l5:5:wait:/etc/init.d/rc 5
 l6:6:wait:/etc/init.d/rc 6
 # Normally not reached, but fallthrough in case of emergency.
 z6:6:respawn:/sbin/sulogin
-1:2345:respawn:/sbin/getty 38400 console
+#1:2345:respawn:/sbin/getty 38400 console
 p6::ctrlaltdel:/sbin/init 6
 p0::powerfail:/sbin/init 0
 EOF

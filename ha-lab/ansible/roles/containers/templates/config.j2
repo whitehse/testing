@@ -1,0 +1,21 @@
+lxc.rootfs = /var/lib/lxc/{{ ansible_host }}/rootfs
+lxc.rootfs.backend = btrfs
+
+# Common configuration
+lxc.include = /usr/share/lxc/config/debian.common.conf
+
+# Container specific configuration
+lxc.tty = 4
+lxc.utsname = {{ ansible_host }}
+lxc.arch = amd64
+
+{% if interfaces is defined %}
+{% for port, interface in interfaces.items() %}
+lxc.network.type = veth
+lxc.network.name = eth{{ port }}
+lxc.network.veth.pair = {{ ansible_host}}_{{ port }}
+lxc.network.link = {{ interface.link }}
+lxc.network.flags = on
+
+{% endfor %}
+{% endif %}

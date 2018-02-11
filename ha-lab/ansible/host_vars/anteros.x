@@ -1,10 +1,12 @@
 ---
-
 fabric:
-  asn: 4200000049
-  uplink_port_start: 1
-  uplink_port_end: 6
-  router_id: "192.0.2.49"
-  loopback: 192.0.2.49
-  loopbackv6: 2001:DB8::49/128
+  asn: 4200000001
+  router_id: 192.0.2.1
+  loopback: 192.0.2.1
+  loopbackv6: 2001:DB8::1
 
+interfaces:
+  0:
+    link: leaf-a.x_3
+  1:
+    link: leaf-b.x_3

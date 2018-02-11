@@ -1,17 +1,25 @@
 ---
-- name: Create and start containers
-  lxc_container:
-    name: "{{ ansible_host }}"
-    container_log: true
-    state: absent
-    backing_store: btrfs
-    template: /usr/src/git/whitehse/testing/ha-lab/ansible/lxc-templates/lxc-bgp-ecmp
-    template_options: --release stable
+#- name: test
+#  command: echo "Interface {{ item.key }} has a bridge link named"
+#  with_dict: "{{ interfaces }}"
 
-#- name: Clone a container using snapshot
+- name: Create bridge interface on the host system for each defined link
+  command: ip link add name "{{ item.value.link }}" type bridge
+  with_dict: "{{ interfaces }}"
+
+- name: Bring bridge interfaces up
+  command: ip link set "{{ item.value.link }}" up
+  with_dict: "{{ interfaces }}"
+
+#- name: Create and start containers
 #  lxc_container:
-#    name: debian-bgp-ecmp
+#    name: "{{ ansible_host }}"
+#    container_log: true
 #    state: started
 #    backing_store: btrfs
-#    clone_name: "{{ ansible_host }}"
-#    clone_snapshot: true
+#    template: /usr/src/git/whitehse/testing/ha-lab/ansible/lxc-templates/lxc-bgp-ecmp
+#    template_options: --release stable
+#
+#- name: generate lxc config to include required veth0 interfaces
+#  template: src=templates/config.j2 dest=/var/lib/lxc/{{ ansible_host }}/config
+

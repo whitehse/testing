@@ -1,7 +1,15 @@
 ---
-- include: spines.yml
-- include: leafs.yml
+- include: switches.yml
 - include: access.yml
-- include: servers.yml
 - include: desktops.yml
 - include: phones.yml
+- include: slapd.yml
+- include: postgres.yml
+- include: kerberos.yml
+- include: postfix.yml
+- include: cyrus-fe.yml
+- include: cyrus-be.yml
+- include: cyrus-mu.yml
+- include: nfs.yml
+- include: nginx.yml
+- include: freeswitch.yml

@@ -1,10 +1,14 @@
 ---
-
 fabric:
-  asn: 4200000001
-  uplink_port_start: 1
-  uplink_port_end: 6
-  router_id: "192.0.2.1"
-  loopback: 192.0.2.1
-  loopbackv6: 2001:DB8::1/128
+  asn: 4200000046
+  router_id: 192.0.2.46
+  loopback: 192.0.2.46
+  loopbackv6: 2001:DB8::46
 
+interfaces:
+  23:
+    link: isp-pe-2_
+  0:
+    link: spine-b.z_0
+  1:
+    link: spine-b.z_1

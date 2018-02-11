@@ -1,6 +1,9 @@
 ---
-- hosts: spines
+- hosts: postfix
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
+    - postfix

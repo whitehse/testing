@@ -1,6 +1,8 @@
 ---
-- hosts: servers
+- hosts: switches
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd

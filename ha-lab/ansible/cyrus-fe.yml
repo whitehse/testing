@@ -1,0 +1,10 @@
+---
+- hosts: cyrus-fe
+  become: yes
+  become_user: root
+  roles:
+    - containers
+    - interfaces
+    - bgpd
+    - cyrus
+    - cyrus-fe

@@ -1,0 +1,10 @@
+---
+- hosts: cyrus-mu
+  become: yes
+  become_user: root
+  roles:
+    - containers
+    - interfaces
+    - bgpd
+    - cyrus
+    - cyrus-mu
