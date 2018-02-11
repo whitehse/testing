@@ -7,8 +7,8 @@ fabric:
 
 interfaces:
   24:
-    link: isp-pe-1_
+    link: brisp-pe-1_
   0:
-    link: spine-a.z_0
+    link: brspine-a.z_0
   1:
-    link: spine-a.z_1
+    link: brspine-a.z_1

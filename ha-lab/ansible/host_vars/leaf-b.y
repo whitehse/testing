@@ -7,32 +7,32 @@ fabric:
 
 interfaces:
   0:
-    link: spine-a.y_1
+    link: brspine-a.y_1
   1:
-    link: spine-b.y_1
+    link: brspine-b.y_1
   2:
-    link: leaf-b.y_2
+    link: brleaf-b.y_2
   3:
-    link: leaf-b.y_3
+    link: brleaf-b.y_3
   4:
-    link: leaf-b.y_4
+    link: brleaf-b.y_4
   5:
-    link: leaf-b.y_5
+    link: brleaf-b.y_5
   6:
-    link: leaf-b.y_6
+    link: brleaf-b.y_6
   7:
-    link: leaf-b.y_7
+    link: brleaf-b.y_7
   8:
-    link: leaf-b.y_8
+    link: brleaf-b.y_8
   9:
-    link: leaf-b.y_9
+    link: brleaf-b.y_9
   10:
-    link: leaf-b.y_10
+    link: brleaf-b.y_10
   11:
-    link: leaf-b.y_11
+    link: brleaf-b.y_11
   12:
-    link: leaf-b.y_12
+    link: brleaf-b.y_12
   13:
-    link: leaf-b.y_13
+    link: brleaf-b.y_13
   14:
-    link: leaf-b.y_14
+    link: brleaf-b.y_14

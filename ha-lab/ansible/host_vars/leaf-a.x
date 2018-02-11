@@ -7,10 +7,10 @@ fabric:
 
 interfaces:
   0:
-    link: spine-a.x_0
+    link: brspine-a.x_0
   1:
-    link: spine-b.x_0
+    link: brspine-b.x_0
   2:
-    link: leaf-a.x_2
+    link: brleaf-a.x_2
   3:
-    link: leaf-a.x_3
+    link: brleaf-a.x_3

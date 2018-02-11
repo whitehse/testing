@@ -7,6 +7,6 @@ fabric:
 
 interfaces:
   0:
-    link: leaf-a.y_3
+    link: brleaf-a.y_3
   1:
-    link: leaf-b.y_3
+    link: brleaf-b.y_3
