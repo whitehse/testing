@@ -29,3 +29,5 @@
 - name: Generate lxc config to include required veth0 interfaces
   template: src=templates/config.j2 dest=/var/lib/lxc/{{ ansible_host }}/config
 
+- name: Set root password
+  command: lxc-attach -n "{{ ansible_host }}" -- echo "root:passw0rd" | chpasswd
