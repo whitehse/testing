@@ -1,6 +1,12 @@
 ---
-- name: write the Quagga daemons settings
-  template: src=templates/debian.conf dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/debian.conf
+- name: write the frr daemons settings
+  template: src=templates/daemons dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/daemons
+
+- name: write the frr daemons.conf settings
+  template: src=templates/daemons.conf dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/daemons.conf
+
+- name: write the frr init.d script
+  template: src=templates/init.d dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/init.d/frr owner=root group=root mode=0755
 
 - name: write the FRR bgpd config file
   template: src=templates/bgpd.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/bgpd.conf
@@ -8,3 +14,11 @@
 - name: write the FRR zebra settings
   template: src=templates/zebra.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/zebra.conf
 
+- name: update-rc.d
+  command: lxc-attach -n "{{ ansible_host }}" -- update-rc.d -f frr defaults
+
+- name: Add frr to the frrvty group
+  command: lxc-attach -n "{{ ansible_host }}" -- adduser frr frrvty
+
+- name: Start frr
+  command: lxc-attach -n "{{ ansible_host }}" -- /etc/init.d/frr restart
