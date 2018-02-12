@@ -14,6 +14,9 @@
 - name: write the FRR zebra settings
   template: src=templates/zebra.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/zebra.conf
 
+- name: copy topology.dot file into container
+  template: src=../topology.dot dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/ptm.d/topology.dot
+
 - name: update-rc.d
   command: lxc-attach -n "{{ ansible_host }}" -- update-rc.d -f frr defaults
 
