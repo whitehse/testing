@@ -9,7 +9,7 @@
   ignore_errors: yes
 
 - name: Enable LLDP forwarding
-  command: echo 16384 > /sys/class/net/"{{ item.value.link }}"/bridge/group_fwd_mask
+  command: echo 16384 > /sys/class/net/{{ item.value.link }}/bridge/group_fwd_mask
   with_dict: "{{ interfaces }}"
 
 - name: Bring bridge interfaces up
