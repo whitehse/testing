@@ -15,12 +15,12 @@ router bgp {{ fabric.asn }}
 {% endfor %}
 !
  address-family ipv4 unicast
-  network {{ fabric.loopback }}/32
+  redistrubute connected
   maximum-paths 64
  exit-address-family
 !
  address-family ipv6 unicast
-  network {{ fabric.loopbackv6 }}/128
+  redistribute connected
   maximum-paths 64
  exit-address-family
 !

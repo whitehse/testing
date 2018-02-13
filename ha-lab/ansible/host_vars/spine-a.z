@@ -7,7 +7,7 @@ fabric:
 
 interfaces:
   24:
-    link: brisp-pe-1_
+    link: bruplink_42
   0:
     link: brspine-a.z_0
   1:

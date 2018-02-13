@@ -9,8 +9,8 @@ INDEX="0"
 
 HOSTS=`mktemp`
 
-cat "$TOPOLOGY" | awk '{print $1}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq > $HOSTS
-cat "$TOPOLOGY" | awk '{print $3}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq >> $HOSTS
+cat "$TOPOLOGY" | sed 's/#.*//' | awk '{print $1}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq > $HOSTS
+cat "$TOPOLOGY" | sed 's/*.*//' | awk '{print $3}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq >> $HOSTS
 
 for HOST in `cat $HOSTS | sort | uniq`
 do
@@ -28,7 +28,7 @@ EOF
     IFS_BACK="$IFS"
     IFS='
 '
-    for CONNECTION in `grep "\"$HOST\"" "$TOPOLOGY"`
+    for CONNECTION in `grep "\"$HOST\"" "$TOPOLOGY" | grep -v '#'`
     do
         SRC_HOST=`echo "$CONNECTION" | awk '{print $1}' | awk -F':' '{print $1}' | sed 's/\"//g'`
         SRC_INT=`echo "$CONNECTION" | awk '{print $1}' | awk -F':' '{print $2}' | sed 's/\"//g' | sed 's/eth//'`

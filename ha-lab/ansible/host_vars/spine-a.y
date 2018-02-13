@@ -6,8 +6,6 @@ fabric:
   loopbackv6: 2001:DB8::43
 
 interfaces:
-  24:
-    link: brisp-pe-2_
   0:
     link: brspine-a.y_0
   1:
