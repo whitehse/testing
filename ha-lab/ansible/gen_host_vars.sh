@@ -21,7 +21,7 @@ fabric:
   asn: $ASN
   router_id: ${V4_SUB}${INDEX}
   loopback: ${V4_SUB}${INDEX}
-  loopbackv6: ${V6_SUB}${INDEX}
+  #loopbackv6: ${V6_SUB}${INDEX}
 
 interfaces:
 EOF
