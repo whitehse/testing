@@ -15,7 +15,6 @@ router bgp {{ fabric.asn }}
 {% endfor %}
 !
  address-family ipv4 unicast
-  network 0.0.0.0/0
   redistribute connected
   maximum-paths 64
  exit-address-family
