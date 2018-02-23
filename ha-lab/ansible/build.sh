@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#ansible-playbook --connection=local -i hosts clonable-containers.yml
 ansible-playbook --connection=local -i hosts site-containers.yml
 
 for foo in host_vars/*
@@ -29,26 +28,6 @@ service ssh reload
 EOF
 done
 
+ansible-playbook -i hosts site.yml
+
 exit 0
-
-cat > /tmp/slapd.preseed << FOE
-#_preseed_V1
-slapd   slapd/password1 password        passw0rd
-slapd   slapd/internal/generated_adminpw        password
-slapd   slapd/internal/adminpw  password
-slapd   slapd/password2 password        passw0rd
-slapd   slapd/domain    string  example.org
-slapd   slapd/dump_database     select  when needed
-slapd   shared/organization     string  example.org
-slapd   slapd/unsafe_selfwrite_acl      note
-slapd   slapd/no_configuration  boolean false
-slapd   slapd/backend   select  MDB
-slapd   slapd/move_old_database boolean true
-slapd   slapd/invalid_config    boolean true
-slapd   slapd/ppolicy_schema_needs_update       select  abort installation
-slapd   slapd/dump_database_destdir     string  /var/backups/slapd-VERSION
-slapd   slapd/password_mismatch note
-slapd   slapd/purge_database    boolean false
-FOE
-debconf-set-selections /tmp/slapd.preseed
-

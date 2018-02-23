@@ -1,15 +1,85 @@
 ---
-- include: switches.yml
-- include: desktops.yml
-- include: phones.yml
-- include: slapd.yml
-- include: postgres.yml
-- include: kerberos.yml
-- include: postfix.yml
-- include: cyrus-fe.yml
-- include: cyrus-be.yml
-- include: cyrus-mu.yml
-- include: nfs.yml
-- include: nginx.yml
-- include: freeswitch.yml
-- include: bind.yml
+- hosts: switches
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: desktops
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: phones
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: slapd
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: postgres
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: kerberos
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: postfix
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: cyrus-fe
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: cyrus-be
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: cyrus-mu
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: nfs
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: nginx
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: freeswitch
+  become: yes
+  become_user: root
+  roles:
+    - containers
+
+- hosts: bind
+  become: yes
+  become_user: root
+  roles:
+    - containers
+

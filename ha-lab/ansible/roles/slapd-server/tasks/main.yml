@@ -1,2 +1,11 @@
 ---
+- name: Update repositories cache and install "slapd" package
+  apt:
+    name: slapd
+    update_cache: yes
+
+- name: Install nssov package
+  apt:
+    name: slapd-nssov
+    update_cache: no
 
