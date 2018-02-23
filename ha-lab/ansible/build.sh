@@ -10,6 +10,8 @@ done
 
 sudo lxc-attach -n spine-a.z -- ifconfig eth24 192.168.100.2
 sudo lxc-attach -n spine-a.z -- route add default gw 192.168.100.1
+#sudo lxc-attach -n spine-a.z -- ifconfig eth24 192.168.100.2
+#sudo lxc-attach -n spine-a.z -- route add default gw 192.168.100.1
 sudo lxc-attach -n spine-a.z -- vtysh -c 'config t
 router bgp
 address-family ipv4 unicast
@@ -28,6 +30,7 @@ service ssh reload
 EOF
 done
 
-ansible-playbook -i hosts site.yml
+#ansible-playbook -i hosts -e "ansible_user=root ansible_ssh_pass=passw0rd ansible_sudo_pass:passw0rd" site.yml
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts -e "ansible_user=root ansible_ssh_pass=passw0rd" site.yml
 
 exit 0

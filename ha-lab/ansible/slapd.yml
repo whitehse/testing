@@ -3,8 +3,6 @@
   become: yes
   become_user: root
   roles:
-    - interfaces
-    - bgpd
     - slapd-server
     - slapd-nssov
     - bind-dyndb-ldap

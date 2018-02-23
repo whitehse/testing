@@ -4,82 +4,110 @@
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: desktops
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: phones
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: slapd
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: postgres
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: kerberos
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: postfix
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: cyrus-fe
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: cyrus-be
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: cyrus-mu
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: nfs
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: nginx
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: freeswitch
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
 - hosts: bind
   become: yes
   become_user: root
   roles:
     - containers
+    - interfaces
+    - bgpd
 
