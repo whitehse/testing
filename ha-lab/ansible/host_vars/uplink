@@ -6,5 +6,11 @@ fabric:
   #loopbackv6: 2001:DB8::50
 
 interfaces:
-  42:
-    link: bruplink_42
+  25:
+    link: bruplink_25
+  26:
+    link: bruplink_26
+  27:
+    link: bruplink_27
+  28:
+    link: bruplink_28

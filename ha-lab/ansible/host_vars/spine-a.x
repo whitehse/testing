@@ -6,6 +6,8 @@ fabric:
   #loopbackv6: 2001:DB8::42
 
 interfaces:
+  24:
+    link: bruplink_27
   0:
     link: brspine-a.x_0
   1:
