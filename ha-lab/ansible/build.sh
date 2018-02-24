@@ -8,15 +8,13 @@ do
   sudo lxc-start -n `basename $foo`
 done
 
-sudo lxc-attach -n spine-a.z -- ifconfig eth24 192.168.100.2
-sudo lxc-attach -n spine-a.z -- route add default gw 192.168.100.1
-#sudo lxc-attach -n spine-a.z -- ifconfig eth24 192.168.100.2
-#sudo lxc-attach -n spine-a.z -- route add default gw 192.168.100.1
-sudo lxc-attach -n spine-a.z -- vtysh -c 'config t
+sudo lxc-attach -n isp -- ifconfig eth24 192.168.100.2/30
+sudo lxc-attach -n isp -- route add default gw 192.168.100.1
+sudo lxc-attach -n isp -- vtysh -c 'config t
 router bgp
 address-family ipv4 unicast
 network 0.0.0.0/0'
-sudo ifconfig bruplink_42 192.168.100.1/24
+sudo ifconfig bruplink_24 192.168.100.1/30
 sudo route add -net 192.0.2.0/24 gw 192.168.100.2
 
 for foo in host_vars/*
@@ -31,6 +29,7 @@ EOF
 done
 
 #ansible-playbook -i hosts -e "ansible_user=root ansible_ssh_pass=passw0rd ansible_sudo_pass:passw0rd" site.yml
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts -e "ansible_user=root ansible_ssh_pass=passw0rd" site.yml
+export ANSIBLE_HOST_KEY_CHECKING=False
+ansible-playbook -i hosts -e "ansible_user=root ansible_ssh_pass=passw0rd host_key_checking=False" site.yml
 
 exit 0

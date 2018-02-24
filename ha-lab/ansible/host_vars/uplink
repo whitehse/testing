@@ -1,16 +1,10 @@
 ---
 fabric:
-  asn: 4200000050
-  router_id: 192.0.2.50
-  loopback: 192.0.2.50
-  #loopbackv6: 2001:DB8::50
+  asn: 4200000051
+  router_id: 192.0.2.51
+  loopback: 192.0.2.51
+  #loopbackv6: 2001:DB8::51
 
 interfaces:
-  25:
-    link: bruplink_25
-  26:
-    link: bruplink_26
-  27:
-    link: bruplink_27
-  28:
-    link: bruplink_28
+  24:
+    link: bruplink_24

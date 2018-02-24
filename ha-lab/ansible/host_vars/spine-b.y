@@ -1,11 +1,13 @@
 ---
 fabric:
-  asn: 4200000047
-  router_id: 192.0.2.47
-  loopback: 192.0.2.47
-  #loopbackv6: 2001:DB8::47
+  asn: 4200000048
+  router_id: 192.0.2.48
+  loopback: 192.0.2.48
+  #loopbackv6: 2001:DB8::48
 
 interfaces:
+  24:
+    link: brisp_4
   0:
     link: brspine-b.y_0
   1:

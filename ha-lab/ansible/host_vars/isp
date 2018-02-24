@@ -1,0 +1,26 @@
+---
+fabric:
+  asn: 4200000017
+  router_id: 192.0.2.17
+  loopback: 192.0.2.17
+  #loopbackv6: 2001:DB8::17
+
+interfaces:
+  24:
+    link: bruplink_24
+  1:
+    link: brisp_1
+  2:
+    link: brisp_2
+  3:
+    link: brisp_3
+  4:
+    link: brisp_4
+  5:
+    link: brisp_5
+  6:
+    link: brisp_6
+  7:
+    link: brisp_7
+  8:
+    link: brisp_8
