@@ -312,6 +312,7 @@ openssh-server
     #    --include="$packages" --keyring="${releasekeyring}" \
     #    "$release" "$cache/partial-$release-$arch" "$MIRROR"
     multistrap -d "$cache/partial-$release-$arch" -f /usr/src/git/whitehse/testing/ha-lab/ansible/lxc-templates/multistrap.conf
+    chroot "$cache/partial-$release-$arch" /configscript.sh
     if [ $? -ne 0 ]; then
         echo "Failed to download the rootfs, aborting."
         return 1

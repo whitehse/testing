@@ -22,6 +22,7 @@
 # Spines will also serve as border edge routers facing public internet
 # providers
 [spines]
+isp
 spine-a.z
 spine-b.z
 spine-a.y

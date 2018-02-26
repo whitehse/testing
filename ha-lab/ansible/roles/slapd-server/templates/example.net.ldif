@@ -1,0 +1,78 @@
+dn: dc=example,dc=net
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+dc: example
+o: Example Network
+
+dn: ou=people,dc=example,dc=net
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+description: Users
+
+dn: ou=hosts,dc=example,dc=net
+objectclass: top
+objectclass: organizationalUnit
+ou: hosts
+description: Hosts
+
+dn: ou=dns,dc=example,dc=net
+objectClass: top
+objectClass: organizationalUnit
+ou: dns
+description: DNS
+
+dn: uid=dwhite,dc=example,dc=net
+objectclass: top
+objectclass: account
+objectclass: posixAccount
+uid: dwhite
+cn: Dan White
+uidNumber: 2000
+gidNumber: 2000
+homeDirectory: /home/dwhite
+
+dn: cn=trinity.w+ipHostNumber=192.0.2.50,ou=hosts,dc=example,dc=net
+objectclass: top
+objectclass: device
+objectclass: ipHost
+cn: trinity.w
+ipHostNumber: 192.0.2.50
+
+# Zone example.com
+dn: idnsName=example.net,ou=dns,dc=example,dc=net
+objectClass: top
+objectClass: idnsZone
+objectClass: idnsRecord
+idnsName: example.net
+idnsUpdatePolicy: grant EXAMPLE.NET krb5-self * A;
+idnsZoneActive: TRUE
+idnsSOAmName: server.example.net.
+idnsSOArName: root.server.example.net.
+idnsSOAserial: 1
+idnsSOArefresh: 10800
+idnsSOAretry: 900
+idnsSOAexpire: 604800
+idnsSOAminimum: 86400
+NSRecord: example.net.
+ARecord: 192.168.1.1
+
+# DNS records for zone example.org
+dn: idnsName=server, idnsName=example.net,ou=dns,dc=example,dc=net
+objectClass: top
+objectClass: idnsRecord
+idnsName: server
+CNAMERecord: example.com.
+
+dn: idnsName=trinity.w,idnsName=example.net,ou=dns,dc=example,dc=net
+objectClass: top
+objectClass: idnsRecord
+idnsName: trinity.w
+ARecord: 192.0.2.50
+
+dn: idnsName=bar,idnsName=example.net,ou=dns,dc=example,dc=net
+objectClass: idnsRecord
+objectClass: top
+idnsName: bar
+CNAMERecord: foo

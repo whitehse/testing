@@ -1,0 +1,118 @@
+# This is the main slapd configuration file. See slapd.conf(5) for more
+# info on the configuration options.
+
+#######################################################################
+# Global Directives:
+
+# Schema and objectClass definitions
+include         /etc/ldap/schema/core.schema
+include         /etc/ldap/schema/cosine.schema
+include         /etc/ldap/schema/nis.schema
+include         /etc/ldap/schema/inetorgperson.schema
+
+# Where the pid file is put. The init.d script
+# will not stop the server if you change this.
+pidfile         /var/run/slapd/slapd.pid
+
+# List of arguments that were passed to the server
+argsfile        /var/run/slapd/slapd.args
+
+# Read slapd.conf(5) for possible values
+loglevel        none
+
+# Where the dynamically loaded modules are stored
+modulepath	/usr/lib/ldap
+moduleload	back_mdb
+moduleload	syncprov
+#moduleload	nssov
+
+# The maximum number of entries that is returned for a search operation
+sizelimit 500
+
+# The tool-threads parameter sets the actual amount of cpu's that is used
+# for indexing.
+tool-threads 1
+
+
+# gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+#authz-regexp
+#        uid=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+#        uid=root
+authz-regexp "gidNumber=0\\+uidNumber=0,cn=peercred,cn=external,cn=auth"
+	uid=root
+authz-regexp "gidNumber=109\\+uidNumber=106,cn=peercred,cn=external,cn=auth"
+	uid=root
+#authz-regexp "gidNumber=108\\+uidNumber=105,cn=peercred,cn=external,cn=auth"
+#	uid=nslcd
+
+#######################################################################
+# Specific Backend Directives for @BACKEND@:
+# Backend specific directives apply to this backend until another
+# 'backend' directive occurs
+backend		mdb
+
+#######################################################################
+# Specific Backend Directives for 'other':
+# Backend specific directives apply to this backend until another
+# 'backend' directive occurs
+#backend		<other>
+
+database	config
+rootdn          uid=root
+
+#######################################################################
+# Specific Directives for database #1, of type @BACKEND@:
+# Database specific directives apply to this databasse until another
+# 'database' directive occurs
+database        mdb
+
+# The base of your directory in database #1
+suffix          dc=example,dc=net
+
+# rootdn directive for specifying a superuser on the database. This is needed
+# for syncrepl.
+rootdn          uid=root
+
+# Where the database file are physically stored for database #1
+directory       "/var/lib/ldap"
+
+#overlay		nssov
+#nssov-ssd	passwd ldap:///ou=people,dc=example,dc=net
+
+# Indexing options for database #1
+index		objectclass,entryCSN,entryUUID eq
+
+overlay syncprov
+#        syncprov-checkpoint 100 10
+#        syncprov-sessionlog 100
+
+# Save the time that the entry gets modified, for database #1
+lastmod         on
+
+# The userPassword by default can be changed
+# by the entry owning it if they are authenticated.
+# Others should not be able to see it, except the
+# admin entry below
+# These access lines apply to database #1 only
+access to attrs=userPassword,shadowLastChange
+        by anonymous auth
+        by self write
+        by * none
+
+# Ensure read access to the base for things like
+# supportedSASLMechanisms.  Without this you may
+# have problems with SASL not knowing what
+# mechanisms are available and the like.
+# Note that this is covered by the 'access to *'
+# ACL below too but if you change that as people
+# are wont to do you'll still need this if you
+# want SASL (and possible other things) to work 
+# happily.
+access to dn.base=""
+        by * read
+
+# The admin dn has full write access, everyone else
+# can read everything.
+access to *
+        by * read
+
