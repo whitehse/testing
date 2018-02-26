@@ -33,13 +33,6 @@ uidNumber: 2000
 gidNumber: 2000
 homeDirectory: /home/dwhite
 
-dn: cn=trinity.w+ipHostNumber=192.0.2.50,ou=hosts,dc=example,dc=net
-objectclass: top
-objectclass: device
-objectclass: ipHost
-cn: trinity.w
-ipHostNumber: 192.0.2.50
-
 # Zone example.com
 dn: idnsName=example.net,ou=dns,dc=example,dc=net
 objectClass: top
@@ -76,3 +69,24 @@ objectClass: idnsRecord
 objectClass: top
 idnsName: bar
 CNAMERecord: foo
+
+dn: idnsName=2.0.192.IN-ADDR.ARPA.,ou=dns,dc=example,dc=net
+objectClass: top
+objectClass: idnsZone
+idnsName: 2.0.192.IN-ADDR.ARPA.
+idnsZoneActive: TRUE
+idnsSOAmName: server.example.net.
+idnsSOArName: root.server.example.net.
+idnsSOAserial: 1
+idnsSOArefresh: 10800
+idnsSOAretry: 900
+idnsSOAexpire: 604800
+idnsSOAminimum: 86400
+NSRecord: example.net.
+
+dn: idnsName=50,idnsName=2.0.192.IN-ADDR.ARPA.,ou=dns,dc=example,dc=net
+objectClass: idnsRecord
+objectClass: top
+idnsName: 50
+PTRRecord: trinity.w.example.net.
+
