@@ -1,11 +1,9 @@
 ---
-- name: Update repositories cache and install "slapd" package
-  apt:
-    name: slapd
-    update_cache: yes
+#- name: Update repositories cache and install "slapd" package
+#  apt:
+#    name: slapd
+#    update_cache: yes
 
-- name: Install nssov package
-  apt:
-    name: slapd-nssov
-    update_cache: no
+- name: Generate ldap content
+  template: src=templates/example.net.j2 dest=/var/lib/lxc/{{ ansible_host }}/rootfs/etc/frr/bgpd.conf
 

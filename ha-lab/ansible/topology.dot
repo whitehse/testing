@@ -9,7 +9,7 @@ graph G {
     hostnametype="fqdn"
     LLDP=""
     BFD="upMinTx=150,requiredMinRx=150,detectMult=3,afi=v6"
-    "uplink":"eth24" -- "isp":"eth24"
+    "host":"eth24" -- "isp":"eth24"
     "isp":"eth1" -- "spine-a.z":"eth24"
     "isp":"eth2" -- "spine-b.z":"eth24"
     "isp":"eth3" -- "spine-a.y":"eth24"
