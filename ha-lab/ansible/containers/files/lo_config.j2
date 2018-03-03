@@ -1,0 +1,8 @@
+auto lo
+iface lo inet loopback
+{% if fabric.loopback is defined  %}
+    post-up ip addr add {{ fabric.loopback }}/32 dev lo
+{% endif %}
+{% if fabric.loopbackv6 is defined  %}
+    post-up ip -6 addr add {{ fabric.loopbackv6 }}/128 dev lo
+{% endif %}
