@@ -30,7 +30,7 @@ for line in file:
 file.close()
 file = open(filename, "r")
 
-allowed_devices = ["c 5:1" "c 1:3" "c 1:5" "c 1:8" "c 1:9"]
+allowed_devices = ["c 5:1", "c 1:3", "c 1:5", "c 1:8", "c 1:9"]
 
 # Create cgroups
 for line in file:
@@ -46,31 +46,22 @@ for line in file:
                 call("sudo cgset -r memory.limit_in_bytes=500M " + src_host, shell=True)
                 call("sudo cgset -r devices.deny=a " + src_host, shell=True)
                 for device in allowed_devices:
-                    call("sudo cgset -r devices.allow=\"$d rw\" " + src_host, shell=True)
+                    call("sudo cgset -r devices.allow=\"" + device + " rw\" " + src_host, shell=True)
 
         if not os.path.isdir("/sys/fs/cgroup/memory/" + dst_host):
             call("sudo cgcreate -g cpu,memory,blkio,devices,freezer:/" + dst_host, shell=True)
             call("sudo cgset -r memory.limit_in_bytes=500M " + dst_host, shell=True)
             call("sudo cgset -r devices.deny=a " + dst_host, shell=True)
             for device in allowed_devices:
-                call("sudo cgset -r devices.allow=\"$d rw\" " + dst_host, shell=True)
-
-#for foo in `sudo ip netns list`; do   sudo ip netns delete $foo; done
-#HOSTS=`mktemp`
-#cat "$TOPOLOGY" | sed 's/#.*//' | awk '{print $1}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq > $HOSTS
-#cat "$TOPOLOGY" | sed 's/*.*//' | awk '{print $3}' | grep eth | awk -F':' '{print $1}' | sed 's/\"//g' | sort | uniq >> $HOSTS
-#for HOST in `cat $HOSTS | sort | uniq`
-#do
-#  sudo cgdelete -g cpu,memory,blkio,devices,freezer:/${HOST}
-#done
+                call("sudo cgset -r devices.allow=\"" + device + " rw\" " + dst_host, shell=True)
 
 file.close()
+
+filename = "hosts"
 file = open(filename, "r")
 
-#sudo cgdelete -g cpu,memory,blkio,devices,freezer:/isp
-
-#sudo cgexec -g cpu,memory,blkio,devices,freezer:/isp       \
-#  prlimit --nofile=256 --nproc=512 --locks=32         \
-#    ip netns exec isp                                 \
-#      unshare -i -m -u -C -p -f --mount-proc=/proc    \
-#        chroot /var/cache/lxc/debian-bgp-ecmp/rootfs-stable-amd64/ /bin/dash
+for line in file:
+    host = line.rstrip()
+    call("sudo btrfs subvolume snapshot build build." + host, shell=True)
+    call("sudo cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " unshare -i -m -u -C -p -f --mount-proc=/proc --fork chroot build." + host + " /usr/local/bin/init&", shell=True)
+    #call("sudo ip netns exec " + host + " unshare -i -m -u -C -p -f --mount-proc=/proc --fork chroot build." + host + " /usr/local/bin/init&", shell=True)

@@ -9,12 +9,13 @@ if [ -d /tmp/preseeds/ ]; then
         done
 fi
 mount proc -t proc /proc
-mknod ./dev/random c 1 8
-chmod 640 ./dev/random
-chown 0:0 ./dev/random
-mknod ./dev/urandom c 1 9
-chmod 640 ./dev/urandom
-chown 0:0 ./dev/urandom
+rm /dev/null
+mknod -m 666 /dev/null c 1 3
+#chown 0:0 ./dev/null
+mknod -m 666 /dev/random c 1 8
+#chown 0:0 ./dev/random
+mknod -m 666 /dev/urandom c 1 9
+#chown 0:0 ./dev/urandom
 /etc/init.d/nslcd stop
 update-rc.d nslcd disable
 dpkg --configure -a
