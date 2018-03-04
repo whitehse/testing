@@ -14,4 +14,5 @@ do
   echo "$HOST" >> hosts
 done
 rm $HOSTS
-killall sleep
+#killall sleep
+for foo in `ps auwx | grep init..2 | awk '{print $2}'`; do   sudo kill -9 $foo; done

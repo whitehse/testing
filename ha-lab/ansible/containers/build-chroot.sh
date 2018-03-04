@@ -25,54 +25,21 @@ cp files/daemons* "$BUILD_DIR/etc/frr/"
 cp files/interfaces "$BUILD_DIR/etc/network/"
 cp files/zebra.conf "$BUILD_DIR/etc/frr/zebra.conf"
 chroot build adduser frr frrvty
-cat > "$BUILD_DIR/usr/local/bin/init" << FOE
+
+cat > "$BUILD_DIR/usr/local/bin/init" << EOF
 #!/bin/sh
 
-ASN=$RANDOM
-cat > /etc/frr/bgpd.conf << EOF
-log syslog
-!
-router bgp $ASN
- bgp router-id 192.0.2.234
- bgp bestpath as-path multipath-relax
- bgp bestpath compare-routerid
- neighbor fabric peer-group
- neighbor fabric remote-as external
- neighbor fabric description Internal Fabric Network
- neighbor fabric capability extended-nexthop
-
-FOE
-
-
 mount proc /proc -t proc
+mount -t devpts -o gid=4,mode=620 none /dev/pts
 #mount --make-rprivate /
 #service networking start
-ifconfig lo up
-for foo in `ifconfig -a | grep '^e' | awk '{print $1}' | sed 's/://g'`
-do
-  ifconfig $foo up
-  echo " neighbor $foo interface peer-group fabric" >> /etc/frr/bgpd.conf
-done
-service ssh start
-service slapd start
-service bind9 start
-service lldpd start
-cat >> /etc/frr/bgpd.conf << FOE
-!
- address-family ipv4 unicast
-  redistribute connected
-  maximum-paths 64
- exit-address-family
-!
- address-family ipv6 unicast
-  redistribute connected
-  maximum-paths 64
- exit-address-family
-!
-line vty
-FOE
-service frr start
-sleep 1000
+#service ssh start
+#service slapd start
+#service bind9 start
+#service lldpd start
+#service frr start
+#sleep 1000
+/sbin/init 2
 EOF
 chmod 755 "$BUILD_DIR/usr/local/bin/init"
 #sudo cp -a build build.orig
