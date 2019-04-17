@@ -1,0 +1,45 @@
+# This is a fake protocol, to be used by nc to generate dissectible traffic, to
+# be then displayed within Wireshark or Tshark using fakeprot.lua.
+#
+# This is all on port 19999
+
+To test, run:
+
+nc -l -p 19999
+
+to start the server, and then:
+
+nc localhost 19999
+
+Initial State:
+
+Client: Howdy fine neighbor. I am Kim 1.0.
+Server: Howdy fine neighbor. I am Psy 1.0.
+
+If a successful Handshake:
+
+Client: It's nice to see you again.
+Server: It's nice to see you again.
+
+On failure, the client or server replies with:
+
+Client/Server: I just realized I have an important place to be. I bid you a fair adieu.
+<end connection>
+
+Joke State:
+
+Client: Knock Knock
+Server: Who's there?
+Client: Opportunity. 
+Server: Don't be silly - opportunity doesn't knock twice!
+
+Laughing State:
+
+Client: Haha.
+Server: Ha.
+
+Farewell State:
+
+Client: See ya later alligator.
+Server: after 'while crocodile.
+<end connection>
