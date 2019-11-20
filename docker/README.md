@@ -8,7 +8,7 @@ docker image list
 docker run -i -t debian /bin/bash
 
 apt-get update
-apt-get install procps git sudo
+apt-get install procps git sudo vim
 mkdir -p /usr/src/git
 cd /usr/src/git
 git clone https://github.com/whitehse/lab-oss.git
@@ -23,3 +23,5 @@ cd ..
 cd freeradius
 apt-get install freeradius freeradius-ldap
 ./build-freeradius.sh
+cd
+apt-get install libpyside2-py3-5.11 pyside2-tools python3-pyside2.qtwidgets python3-pyside2.qtgui python3-pyside2.qtcore
