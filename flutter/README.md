@@ -31,3 +31,8 @@ vs code
 
 ctrl-s to save an reformat (setting editor.formatOnSave must be true)
 ctrl-space get a list of named arguments
+ctrl-k-c comment block
+ctrl-k-u uncomment block
+ctrl-hover-over-link, then click. View source code
+ctrl-shift-r Refactor (after clicking on the function/word)
+
