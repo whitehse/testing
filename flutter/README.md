@@ -24,3 +24,10 @@ flutter doctor --android-licenses
 flutter doctor
 flutter create first_app 
 
+
+----
+
+vs code
+
+ctrl-s to save an reformat (setting editor.formatOnSave must be true)
+ctrl-space get a list of named arguments
