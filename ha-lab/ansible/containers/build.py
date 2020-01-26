@@ -53,6 +53,7 @@ for line in file:
 file.close()
 
 allowed_devices = ["c 5:1", "c 1:3", "c 1:5", "c 1:8", "c 1:9"]
+#allowed_devices = ["c 5:1", "c 5:2", "c 1:3", "c 1:5", "c 1:8", "c 1:9"]
 
 asn_counter=4200000000
 loopback_counter=0
@@ -60,9 +61,9 @@ loopback_counter=0
 for host in hosts:
     call("cgcreate -g cpu,memory,blkio,devices,freezer:/" + host, shell=True)
     call("cgset -r memory.limit_in_bytes=500M " + host, shell=True)
-    call("cgset -r devices.deny=a " + host, shell=True)
-    for device in allowed_devices:
-        call("cgset -r devices.allow=\"" + device + " rw\" " + host, shell=True)
+    #call("cgset -r devices.deny=a " + host, shell=True)
+    #for device in allowed_devices:
+    #    call("cgset -r devices.allow=\"" + device + " rw\" " + host, shell=True)
 
     call("ip netns exec " + host + " ip link set dev lo up", shell=True)
     call("ip netns exec " + host + " ip addr add 192.0.2." + str(loopback_counter) + "/32 dev lo", shell=True)
@@ -77,7 +78,10 @@ for host in hosts:
     f.write(template.render(asn=asn_counter, router_id="192.168.0." + str(loopback_counter), interfaces=hosts[host]))
     f.close()
 
-    Popen("cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " unshare -i -u -C -p -f --mount-proc=/proc --fork ./switch-root.sh build." + host, shell=True)
+    #Popen("cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " unshare -i -m -u -C -p -f --mount-proc=/proc --fork ./switch-root.sh build." + host, shell=True)
+    #Popen("cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " unshare -m -i -u -p -f --mount-proc=/proc --fork ./switch-root.sh build." + host, shell=True)
+    #Popen("cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " ./switch-root2.sh build." + host, shell=True)
+    Popen("cgexec -g cpu,memory,blkio,devices,freezer:/" + host + " prlimit --nofile=256 --nproc=512 --locks=32 ip netns exec " + host + " unshare -m --propagation private -i -u -p --fork --mount-proc=/proc ./switch-root.sh build." + host, shell=True)
 
     asn_counter+=1
     loopback_counter+=1
