@@ -20,6 +20,8 @@ btrfs subvolume create "$BUILD_DIR"
 multistrap -d "$BUILD_DIR" -f "$MULTISTRAP_CONF"
 chroot "$BUILD_DIR" /configscript.sh
 cp files/init.d-frr "$BUILD_DIR/etc/init.d/frr"
+( cd "$BUILD_DIR/etc/rc2.d" ; ln -s ../init.d/frr S99frr )
+ln -s "$BUILD_DIR/etc/init.d/frr" "$BUILD_DIR/etc/rc2.d/S99frr"
 chmod 755 "$BUILD_DIR/etc/init.d/frr"
 cp files/daemons* "$BUILD_DIR/etc/frr/"
 cp files/interfaces "$BUILD_DIR/etc/network/"

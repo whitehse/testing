@@ -1,0 +1,13 @@
+# To create a network diagram:
+# cat topology.dot | sed 's/:\"eth[0-9]\+\"//g' | dot -Tsvg > topology.svg
+#
+
+# To generate host_vars, run:
+#   gen_host_vars.sh topology.dot
+
+graph G {
+    hostnametype="fqdn"
+    LLDP=""
+    BFD="upMinTx=150,requiredMinRx=150,detectMult=3,afi=v6"
+    "host":"eth24" -- "isp":"eth24"
+}
