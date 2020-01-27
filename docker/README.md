@@ -33,4 +33,4 @@ cd ..
 cd bind-dyndb-ldap
 ./build-bind-ldap.sh
 cd
-apt-get install libpyside2-py3-5.11 pyside2-tools python3-pyside2.qtwidgets python3-pyside2.qtgui python3-pyside2.qtcore
+#apt-get install libpyside2-py3-5.11 pyside2-tools python3-pyside2.qtwidgets python3-pyside2.qtgui python3-pyside2.qtcore
