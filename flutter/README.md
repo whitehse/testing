@@ -29,6 +29,10 @@ flutter create first_app
 
 vs code
 
+extensions to install (file->preferences->extensions):
+ flutter
+ material icon theme
+
 ctrl-s to save an reformat (setting editor.formatOnSave must be true)
 ctrl-space get a list of named arguments
 ctrl-k-c comment block
