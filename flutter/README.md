@@ -35,4 +35,5 @@ ctrl-k-c comment block
 ctrl-k-u uncomment block
 ctrl-hover-over-link, then click. View source code
 ctrl-shift-r Refactor (after clicking on the function/word)
+ctrl-shift-p, type 'dart devtools' to open dev tools
 
