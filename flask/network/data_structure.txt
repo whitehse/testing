@@ -1,7 +1,18 @@
-# object type vlan (1)
-# vlan id (2)
-# index
-0001 0002 00000001
+Value Types
+
+
+Key/Types
+
+0001 0001                      MPLS Domain
+  Default Domain                 Name of domain in string form
+0001 0001 00000001             vc id
+  01 0002 00000001 00000002      Type (eline/elan), Number of PEs, PE #1 VPLS/VLL index, PE #2 VPLS/VLL index
+
+0002 00000001 00000000         MPLS VC instance
+  
+
+0002 00000001 00000001 0000
+
 
 # object type mpls vc (2)
 # mpls vc/vpls id
@@ -52,3 +63,27 @@
 0003 0002 0005
 ### 10-gig
 0003 0002 0006
+# Calix E7s (Object type 000a)
+000a 0001
+
+# Calix E7 Slot (Object type 000b)
+000b 0001
+
+# PON Type (Object type 000c)
+## A-PON
+000c 0001
+## B-PON
+000c 0002
+## E-PON
+000c 0003
+## G-PON
+000c 0004
+## NG-PON2
+000c 0005
+## 10G-PON (XG-PON)
+000c 0006
+
+# Calix E7 PON OLT (Object type 000d)
+000c 0001:
+
+# PON Splitter
