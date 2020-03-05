@@ -27,6 +27,7 @@ proto: proto-go-server proto-sdk-dart
 
 proto-go-server:
 	@bash -c "protoc -Iproto/ --go-grpc_out=sdk/go service.proto"
+	#@bash -c "protoc -Iproto/ --go_out=plugins=grpc:sdk/go service.proto"
 
 proto-sdk-dart:
 	@bash -c "protoc --plugin=/usr/src/git/dart-lang/protobuf/protoc_plugin/bin/protoc-gen-dart -I=proto --dart_out=sdk/dart service.proto"

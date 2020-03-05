@@ -13,6 +13,8 @@ import (
     "../sdk/go"
 
     "github.com/bmatsuo/lmdb-go/lmdb"
+    //proto "github.com/golang/protobuf/proto"
+    proto "google.golang.org/protobuf/proto"
 //    "google.golang.org/grpc"
 //    "google.golang.org/grpc/reflection"
 )
@@ -74,26 +76,28 @@ func main() {
         if puterr != nil {
             return puterr
         }
-        for i:= 0; i< 4500000; i++ {
-            //v, err := txn.Get(dbi, []byte("hello"))
-            _, err := txn.Get(dbi, []byte("hello"))
-            if err != nil {
-                return err
-            }
-            //fmt.Println(string(v))
-        }
-        key := proto.Response {
+//        for i:= 0; i< 4500000; i++ {
+//            //v, err := txn.Get(dbi, []byte("hello"))
+//            _, err := txn.Get(dbi, []byte("hello"))
+//            if err != nil {
+//                return err
+//            }
+//            //fmt.Println(string(v))
+//        }
+        key := &service.Response {
             Result: 5,
         }
-        value := proto.Request {
-            A: 34,
-            B: 42,
-        }
+        //value := &service.Request {
+        //    A: 34,
+        //    B: 42,
+        //}
 
-        proto.Marshal(b, key, true)
-        proto.Marshal(c, value, true)
-        //puterr = txn.Put(dbi, []byte(proto.Marshal(key)), []byte(proto.Marshal(value)), 0)
-        //puterr = txn.Put(dbi, []byte(key.Marshal()), []byte(value.Marshal()), 0)
+        //var b proto.Buffer
+        //b, _ := proto.Marshal(key)
+        //key.marshal(&b)
+        marshalled_value, _ := proto.Marshal(key)
+        //proto.Marshal(c, value, true)
+        puterr = txn.Put(dbi, []byte("hi"), marshalled_value, 0)
         if puterr != nil {
             return puterr
         }

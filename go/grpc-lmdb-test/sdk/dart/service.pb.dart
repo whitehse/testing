@@ -12,7 +12,7 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Request extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Request', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Request', createEmptyInstance: create)
     ..aInt64(1, 'a')
     ..aInt64(2, 'b')
     ..hasRequiredFields = false
@@ -53,7 +53,7 @@ class Request extends $pb.GeneratedMessage {
 }
 
 class Response extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Response', package: const $pb.PackageName('proto'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('Response', createEmptyInstance: create)
     ..aInt64(1, 'result')
     ..hasRequiredFields = false
   ;

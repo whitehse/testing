@@ -23,13 +23,13 @@ const Response$json = const {
 const MathServiceBase$json = const {
   '1': 'MathService',
   '2': const [
-    const {'1': 'Add', '2': '.proto.Request', '3': '.proto.Response'},
-    const {'1': 'Multiply', '2': '.proto.Request', '3': '.proto.Response'},
+    const {'1': 'Add', '2': '.Request', '3': '.Response'},
+    const {'1': 'Multiply', '2': '.Request', '3': '.Response'},
   ],
 };
 
 const MathServiceBase$messageJson = const {
-  '.proto.Request': Request$json,
-  '.proto.Response': Response$json,
+  '.Request': Request$json,
+  '.Response': Response$json,
 };
 
