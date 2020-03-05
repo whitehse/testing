@@ -30,6 +30,8 @@ proto-go-server:
 
 proto-sdk-dart:
 	@bash -c "protoc --plugin=/usr/src/git/dart-lang/protobuf/protoc_plugin/bin/protoc-gen-dart -I=proto --dart_out=sdk/dart service.proto"
+	@bash -c "sed -i '/github.*proto/d' sdk/go/service.pb.go"
+	@bash -c "sed -i '/ProtoPackageIsVersion4/d' sdk/go/service.pb.go"
 
 servers: make-go-server
 
