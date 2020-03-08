@@ -3,6 +3,10 @@ sudo apt-get install docker.io
 sudo usermod -aG docker $USER
 newgrp docker
 docker pull debian
+sudo chmod 666 /dev/kvm
+# This is obviously insecure, but is an easy way
+# to allow the docker user to have the ability to
+# run Android instances
 
 docker image list
 
@@ -185,10 +189,120 @@ docker ps
 # Note the container ID and use it in this command:
 docker commit -p -a "Dan White" -m "Add go and dart tools" 5956637f12ee zero_cool_v2
 
-----
-flutter create first_app 
+Exit and then restart the docker instance:
 
-#apt-get install vim-pathogen
-#vim-addons install pathogen
+docker run \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  --privileged -v /dev/bus/usb:/dev/bus/usb \
+  --device=/dev/kvm \
+  -i -t zero_cool_v2 /bin/bash
+
+# More
+
+sudo bash -c 'cat >> /etc/vim/vimrc.local << EOF
+set paste
+set tabstop=4 shiftwidth=4 expandtab
+EOF'
+sed -i 's/^#force_color.*/force_color_prompt=yes/' ~/.bashrc
+
+sudo apt-get install gcc
+cd /tmp/
+git clone https://github.com/golang/protobuf.git && (cd protobuf && git checkout v1.2.0 && go build -o /tmp/protoc-gen-go ./protoc-gen-go) && rm -r protobuf
+mv /tmp/protoc-gen-go ~/go/bin/
+
+----
+
+exit
+chmod 666 /dev/kvm
+apt-get install qemu-kvm
+su - zero_cool
+bash
+sed -i 's/: Big enough.*/ \*\//' ~/go/src/github.com/bmatsuo/lmdb-go/lmdb/mdb.c
+
+
+studio.io
+# Select Configurage -> AVD Manager
+# Download the top recommended system image by clicking the download link
+flutter create flutter_client
+cd flutter_client
+
+studio.sh
+# Select "Configure" and then "AVD Manager"
+# Click "Create Virtual Device"
+# Select "Pixel 2". Clicke Next
+# 
+
+Outside of the docker instance:
+
+docker ps
+# Note the container ID and use it in this command:
+docker commit -p -a "Dan White" -m "Add go and dart tools" 5956637f12ee zero_cool_v2
+
+Exit and then restart the docker instance:
+
+docker run \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  --privileged -v /dev/bus/usb:/dev/bus/usb \
+  --device=/dev/kvm \
+  -i -t zero_cool_v3 /bin/bash
+
+su - zero_cool
+bash
+
+cat >> ~/.bash_profile << EOF
+export PATH="$PATH:`pwd`/Android/Sdk/emulator/"
+EOF
+source ~/.bash_profile
+
+emulator -list-avds
+# e.g.: Pixel_2_API_R
+# This may be necessary
+rm .android/avd/Pixel_2_API_R.avd/*lock
+emulator -avd Pixel_2_API_R 2>&1 > /dev/null &
+
+# I experience a seg fault here after a couple of minutes.
+# I'd recommend letting the instance boot up for a few
+# minutes and monitor load. Proceed when load has dropped.
 #
-#echo "execute pathogen#infect()" >> ~/.vimrc
+# btrfs workers seem to be busy here. I'm not sure if btrfs
+# is a poor choice for the host system or not. Perhaps there's
+# just a lot of disk activity. I haven't had issues with
+# btrfs otherwise.
+
+# To shut down, press the power button on the side
+# panel. A shutdown button will then be displayed on screen.
+# Click it to cleanly shut down. 
+#
+# Sometimes when pressing the power button the side panel,
+# the android screen goes black and it's not clear how to
+# proceed. Then clicking the Close 'X' on the side panel
+# may be necessary to close. This doesn't appear to leave
+# any hanging locks around. When closing this way, you'll
+# probably need to press the side panel power button to
+# turn the device back on. Perhaps the poer button in the
+# side panel is more like a sleep button, and to actually
+# turn the device off, you need to do it within the
+# emulator.
+
+# verify the flutter system can see the emulator, when
+# it's running:
+flutter doctor
+
+# Run a project to test:
+cd /tmp/
+flutter create example_test
+cd example_test
+flutter run
+
+# This takes several minutes to build and load, on my
+# development system. The "Taking a long time" messages
+# can be ignored.
+
+# Press "Q", in the console, to end the demo app in the
+# emulator.
+
+# I can't figure out the proper way to shutdown the
+# emulator.
+
