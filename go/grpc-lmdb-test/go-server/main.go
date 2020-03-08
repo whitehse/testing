@@ -8,16 +8,17 @@ import (
 //    "os"
 //    "runtime"
 //    "time"
-//    "context"
-//    "net"
+    "context"
+    "net"
     "../sdk/go"
 
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/reflection"
     "github.com/bmatsuo/lmdb-go/lmdb"
-    //proto "github.com/golang/protobuf/proto"
-    proto "google.golang.org/protobuf/proto"
-//    "google.golang.org/grpc"
-//    "google.golang.org/grpc/reflection"
+    proto "github.com/golang/protobuf/proto"
 )
+
+type server struct{}
 
 func main() {
     env, err := lmdb.NewEnv()
@@ -87,14 +88,7 @@ func main() {
         key := &service.Response {
             Result: 5,
         }
-        //value := &service.Request {
-        //    A: 34,
-        //    B: 42,
-        //}
 
-        //var b proto.Buffer
-        //b, _ := proto.Marshal(key)
-        //key.marshal(&b)
         marshalled_value, _ := proto.Marshal(key)
         //proto.Marshal(c, value, true)
         puterr = txn.Put(dbi, []byte("hi"), marshalled_value, 0)
@@ -107,4 +101,33 @@ func main() {
     if err != nil {
         // ...
     }
+
+    listener, err := net.Listen("tcp", ":4040")
+    if err != nil {
+        panic(err)
+    }
+
+    srv := grpc.NewServer()
+    service.RegisterMathServiceServer(srv, &server{})
+    reflection.Register(srv)
+
+    if e := srv.Serve(listener); e != nil {
+        panic(err)
+    }
+}
+
+func (s *server) Add(ctx context.Context, request *service.Request) (*service.Response, error) {
+    a, b := request.GetA(), request.GetB()
+
+    result := a + b
+
+    return &service.Response{Result: result}, nil
+}
+
+func (s *server) Multiply(ctx context.Context, request *service.Request) (*service.Response, error) {
+    a, b := request.GetA(), request.GetB()
+
+    result := a * b
+
+    return &service.Response{Result: result}, nil
 }
