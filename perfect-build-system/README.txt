@@ -306,3 +306,10 @@ flutter run
 # I can't figure out the proper way to shutdown the
 # emulator.
 
+pub global activate stagehand
+cat >> ~/.bash_profile << EOF
+export PATH="$PATH:$HOME/.pub-cache/bin/"
+EOF
+source ~/.bash_profile
+
+sudo apt-get install file
