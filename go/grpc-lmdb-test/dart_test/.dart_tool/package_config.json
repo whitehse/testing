@@ -1,0 +1,32 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "asn1lib",
+      "rootUri": "file:///home/zero_cool/.pub-cache/hosted/pub.dartlang.org/asn1lib-0.5.15",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
+      "name": "pointycastle",
+      "rootUri": "file:///home/zero_cool/.pub-cache/hosted/pub.dartlang.org/pointycastle-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "0.8"
+    },
+    {
+      "name": "x509csr",
+      "rootUri": "file:///home/zero_cool/.pub-cache/hosted/pub.dartlang.org/x509csr-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
+    },
+    {
+      "name": "x509_test",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
+    }
+  ],
+  "generated": "2020-03-08T18:38:46.668232Z",
+  "generator": "pub",
+  "generatorVersion": "2.7.1"
+}
