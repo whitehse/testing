@@ -24,25 +24,22 @@ if [ -d "$DIR/certs" ]; then
   exit 3
 fi
 
-root_cnf=`mktemp`
-cat root-config.txt | sed "s/DIR/${DIR}/" > $root_cnf
-echo "finished sed command"
-
 mkdir -p "$DIR"/certs
 mkdir -p "$DIR"/crl
 mkdir -p "$DIR"/newcerts
 mkdir -p "$DIR"/private
 
-chmod 700 "$DIR"/private
-touch "$DIR"/index.txt
-echo 1000 > "$DIR"/serial
-openssl genrsa -out "$DIR"/private/ca.key.pem 4096
-chmod 400 "$DIR"/private/ca.key.pem
-openssl req -config $root_cnf \
-      -key "$DIR"/private/ca.key.pem \
-      -new -x509 -days 7300 -sha256 -extensions v3_ca \
-      -out "$DIR"/certs/ca.cert.pem \
-	  -subj "$SUBJECT"
-chmod 444 "$DIR"/certs/ca.cert.pem
+CUR_DIR=`pwd`
+cd "$DIR"
 
-rm $root_cnf
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+openssl genrsa -out private/ca.key.pem 4096
+chmod 400 private/ca.key.pem
+openssl req -config "$CUR_DIR"/root-config.txt \
+      -key private/ca.key.pem \
+      -new -x509 -days 7300 -sha256 -extensions v3_ca \
+      -out certs/ca.cert.pem \
+	  -subj "$SUBJECT"
+chmod 444 certs/ca.cert.pem
