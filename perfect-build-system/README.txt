@@ -262,7 +262,7 @@ emulator -list-avds
 rm .android/avd/Pixel_2_API_R.avd/*lock
 emulator -avd Pixel_2_API_R 2>&1 > /dev/null &
 
-# I experience a seg fault here after a couple of minutes.
+# I experienced a segfault here after a couple of minutes.
 # I'd recommend letting the instance boot up for a few
 # minutes and monitor load. Proceed when load has dropped.
 #
