@@ -55,7 +55,7 @@ cd "$DIR"
 
 chmod 700 private
 touch ./index.txt
-#echo 1000 > serial
+echo 1000 > serial
 #openssl genrsa -out private/ca.key.pem 4096
 openssl ecparam -name prime256v1 -out ./prime256v1.pem
 openssl ecparam -in ./prime256v1.pem -genkey -noout -out private/ca.key.pem

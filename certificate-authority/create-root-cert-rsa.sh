@@ -31,7 +31,7 @@ cd "$DIR"
 
 chmod 700 private
 touch index.txt
-#echo 1000 > serial
+echo 1000 > serial
 openssl genrsa -out private/ca.key.pem 4096
 chmod 400 private/ca.key.pem
 openssl req -config "$CUR_DIR"/root-config.txt \
