@@ -28,6 +28,7 @@ mkdir -p "$DIR"/certs
 mkdir -p "$DIR"/crl
 mkdir -p "$DIR"/newcerts
 mkdir -p "$DIR"/private
+mkdir -p "$DIR"/{certs,crl,newcerts,private}
 
 CUR_DIR=`pwd`
 cd "$DIR"
