@@ -69,3 +69,10 @@ echo "EC List Curves"
 echo "=============="
 openssl ecparam -list_curves
 echo ""
+
+echo "=============="
+echo "help"
+echo "=============="
+openssl help 2>&1
+echo ""
+
