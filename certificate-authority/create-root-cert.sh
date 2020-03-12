@@ -24,10 +24,6 @@ if [ -d "$DIR/certs" ]; then
   exit 3
 fi
 
-mkdir -p "$DIR"/certs
-mkdir -p "$DIR"/crl
-mkdir -p "$DIR"/newcerts
-mkdir -p "$DIR"/private
 mkdir -p "$DIR"/{certs,crl,newcerts,private}
 
 CUR_DIR=`pwd`
@@ -35,7 +31,7 @@ cd "$DIR"
 
 chmod 700 private
 touch index.txt
-echo 1000 > serial
+#echo 1000 > serial
 openssl genrsa -out private/ca.key.pem 4096
 chmod 400 private/ca.key.pem
 openssl req -config "$CUR_DIR"/root-config.txt \
