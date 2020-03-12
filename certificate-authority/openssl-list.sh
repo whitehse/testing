@@ -64,3 +64,8 @@ echo "================="
 openssl list -disabled
 echo ""
 
+echo "=============="
+echo "EC List Curves"
+echo "=============="
+openssl ecparam -list_curves
+echo ""
