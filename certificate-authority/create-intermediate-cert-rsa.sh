@@ -40,8 +40,8 @@ CUR_DIR=`pwd`
 cd "$DIR"
 chmod 700 intermediate/private
 touch intermediate/index.txt
-echo 1000 > intermediate/serial
-echo 1000 > intermediate/crlnumber
+openssl rand -hex 16 > intermediate/serial
+openssl rand -hex 16 > intermediate/crlnumber
 openssl genrsa \
       -out intermediate/private/intermediate.key.pem 4096
 chmod 400 intermediate/private/intermediate.key.pem
