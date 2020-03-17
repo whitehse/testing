@@ -29,22 +29,20 @@ if [ -d "$DIR/intermediate/certs" ]; then
   exit 4
 fi
 
-mkdir -p "$DIR"/intermediate/certs
-mkdir -p "$DIR"/intermediate/crl
-mkdir -p "$DIR"/intermediate/newcerts
-mkdir -p "$DIR"/intermediate/private
-mkdir -p "$DIR"/intermediate/csr
+mkdir -p "$DIR"/intermediate/{certs,crl,newcerts,private,csr}
 
 CUR_DIR=`pwd`
 
 cd "$DIR"
 chmod 700 intermediate/private
 touch intermediate/index.txt
-echo 1000 > intermediate/serial
-echo 1000 > intermediate/crlnumber
+openssl rand -hex 16 > intermediate/serial
+openssl rand -hex 16 > intermediate/crlnumber
 
 #openssl genrsa \
 #      -out intermediate/private/intermediate.key.pem 4096
+#openssl genpkey -algorithm x25519 \
+#      -out intermediate/private/intermediate.key.pem
 openssl ecparam -name prime256v1 -out ./prime256v1.pem
 openssl ecparam -in ./prime256v1.pem \
       -genkey -noout -out intermediate/private/intermediate.key.pem
