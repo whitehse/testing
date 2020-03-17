@@ -237,7 +237,7 @@ Outside of the docker instance:
 
 docker ps
 # Note the container ID and use it in this command:
-docker commit -p -a "Dan White" -m "Add go and dart tools" 5956637f12ee zero_cool_v2
+docker commit -p -a "Dan White" -m "Add go and dart tools" 5956637f12ee zero_cool_v3
 
 Exit and then restart the docker instance:
 
@@ -313,3 +313,22 @@ EOF
 source ~/.bash_profile
 
 sudo apt-get install file
+
+Outside of the docker instance:
+
+docker ps
+# Note the container ID and use it in this command:
+docker commit -p -a "Dan White" -m "Add go and dart tools" 5956637f12ee zero_cool_v4
+
+Exit and then restart the docker instance:
+
+docker run \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  --privileged -v /dev/bus/usb:/dev/bus/usb \
+  --device=/dev/kvm \
+  -i -t zero_cool_v4 /bin/bash
+
+su - zero_cool
+bash
+
