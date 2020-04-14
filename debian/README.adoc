@@ -1,0 +1,140 @@
+== Install KVM
+
+// https://www.youtube.com/watch?v=Dl4tpStOKyg
+apt install ifupdown bridge-utils
+apt install qemu-kvm libvirt-daemon-system virtinst libvirt-clients qemu-utils ovmf
+apt install virt-viewer spice-client-gtk virt-manager remmina remmina-plugin-spice
+adduser $USER libvirt
+
+== Mastering Debian ISO with preseed file
+
+apt install udevil
+apt install genisoimage
+
+genisoimage -r -J -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o preseed-debian-10.3.0-amd64-netinst.iso isofiles/
+
+apt install simple-cdd
+mkdir ~/my-simple-cdd
+cd ~/my-simple-cdd
+mkdir profiles
+NAME=dans_test
+cat > profiles/${NAME}.packages << EOF
+apt
+base-files
+base-passwd
+bash
+bsdutils
+coreutils
+dash
+debconf
+debianutils
+diffutils
+dpkg
+e2fslibs
+e2fsprogs
+findutils
+gcc-10-base
+gcc-6-base
+gcc-7-base
+gcc-8-base
+gcc-9-base
+grep
+gzip
+hostname
+init-system-helpers
+libacl1
+libc-bin
+libc6
+libcomerr2
+libgcc1
+libpam-modules
+libpam-modules-bin
+libpam-runtime
+libss2
+libtinfo5
+login
+mawk
+mount
+multiarch-support
+ncurses-base
+ncurses-bin
+passwd
+perl-base
+sed
+sensible-utils
+sysvinit-utils
+tar
+tzdata
+util-linux
+zlib1g
+adduser
+apt
+apt-utils
+bsdmainutils
+cpio
+cron
+debconf-i18n
+debian-archive-keyring
+dmidecode
+fdisk
+gnupg
+gpgv
+groff-base
+ifupdown
+init
+iproute2
+iptables
+iputils-ping
+isc-dhcp-client
+isc-dhcp-common
+kmod
+less
+libapt-inst2.0
+libapt-pkg5.0
+libcap2-bin
+libgdbm3
+libkmod2
+liblogging-stdlog0
+libncursesw5
+libnewt0.52
+libpipeline1
+libpopt0
+libprocps6
+libreadline7
+libreadline8
+libssl1.0.2
+libssl1.1
+libstdc++6
+libudev1
+logrotate
+man-db
+nano
+netbase
+nftables
+procps
+readline-common
+rsyslog
+sensible-utils
+systemd
+systemd-sysv
+tasksel
+tasksel-data
+udev
+vim-common
+vim-tiny
+wget
+whiptail
+EOF
+
+cat > profiles/${NAME}.conf << EOF
+debian_mirror="http://ftp.us.debian.org/debian/"
+dist="buster"
+mirror_components="main"
+simple_cdd_dir=$(pwd)
+profiles="dans-test"
+auto_profiles="dans-test"
+local_packages="$simple_cdd_dir/tmp/"
+EOF
+
+build-simple-cdd --conf profiles/${NAME}.conf --dist buster
+build-simple-cdd --profiles ${NAME} --dist buster
