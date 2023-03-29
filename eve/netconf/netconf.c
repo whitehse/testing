@@ -167,7 +167,8 @@ int main(int argc, char **argv) {
 
   const char *hostname = argv[1];
   const char *command = argv[2];
-  const char *port = "22";
+  //const char *port = "22";
+  const char *port = "830";
 
   struct ev_loop *loop = EV_DEFAULT;
   ssh_t ssh;
@@ -224,7 +225,11 @@ int main(int argc, char **argv) {
     ASSH_USERAUTH_METHOD_KEYBOARD;
 
   struct asshh_client_inter_session_s inter;
-  asshh_client_init_inter_session(&inter, command, NULL);
+  //asshh_client_init_inter_session(&inter, command, NULL);
+  asshh_client_init_inter_session(&inter, NULL, NULL);
+
+  //struct asshh_inter_subsystem_s sub;
+  //asshh_inter_init_subsystem(&sub, "netconf");
 
   struct assh_event_s event;
 
@@ -253,3 +258,183 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<capabilities>
+<capability>urn:ietf:params:netconf:base:1.0</capability>
+<capability>urn:ietf:params:netconf:base:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:writable-running:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:rollback-on-error:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:url:1.0?scheme=ftp,sftp,file</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:validate:1.1</capability>
+<capability>urn:ietf:params:netconf:capability:xpath:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:notification:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:interleave:1.0</capability>
+<capability>urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=trim&amp;also-supported=report-all-tagged,report-all</capability>
+<capability>urn:ietf:params:netconf:capability:with-operational-defaults:1.0?basic-mode=trim&amp;also-supported=report-all-tagged,report-all</capability>
+<capability>urn:ietf:params:netconf:capability:yang-library:1.0?revision=2019-01-04&amp;module-set-id=1732182466ce607796e3546a93b03eba</capability>
+<capability>urn:ietf:params:netconf:capability:yang-library:1.1?revision=2019-01-04&amp;content-id=1732182466ce607796e3546a93b03eba</capability>
+<capability>http://tail-f.com/ns/aaa/1.1?module=tailf-aaa&amp;revision=2013-03-07</capability>
+<capability>http://tail-f.com/ns/common/query?module=tailf-common-query&amp;revision=2017-04-27</capability>
+<capability>http://tail-f.com/ns/webui?module=tailf-webui&amp;revision=2013-03-07</capability>
+<capability>http://tail-f.com/yang/acm?module=tailf-acm&amp;revision=2013-03-07</capability>
+<capability>http://tail-f.com/yang/common?module=tailf-common&amp;revision=2021-09-21</capability>
+<capability>http://tail-f.com/yang/common-monitoring?module=tailf-common-monitoring&amp;revision=2019-04-09</capability>
+<capability>http://tail-f.com/yang/confd-monitoring?module=tailf-confd-monitoring&amp;revision=2019-10-30</capability>
+<capability>http://tail-f.com/yang/netconf-monitoring?module=tailf-netconf-monitoring&amp;revision=2012-06-14</capability>
+<capability>http://www.calix.com/ns/arc?module=arc&amp;revision=2022-06-29</capability>
+<capability>http://www.calix.com/ns/erps-g8032-qos?module=erps-g8032-qos&amp;revision=2020-08-18</capability>
+<capability>http://www.calix.com/ns/ethernet-std?module=ethernet-std&amp;revision=2022-05-30</capability>
+<capability>http://www.calix.com/ns/exa/access-security?module=access-security&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/access-security-std?module=access-security-std&amp;revision=2022-03-31</capability>
+<capability>http://www.calix.com/ns/exa/acl?module=acl&amp;revision=2022-03-30</capability>
+<capability>http://www.calix.com/ns/exa/acl-router-igmp?module=acl-router-igmp&amp;revision=2021-01-08</capability>
+<capability>http://www.calix.com/ns/exa/acl-std?module=acl-std&amp;revision=2022-05-10</capability>
+<capability>http://www.calix.com/ns/exa/ae-management?module=ae-management&amp;revision=2022-02-17</capability>
+<capability>http://www.calix.com/ns/exa/ae-management-std?module=ae-management-std&amp;revision=2019-04-18</capability>
+<capability>http://www.calix.com/ns/exa/axos-netconf-server-base?module=axos-netconf-server-base&amp;revision=2020-09-10</capability>
+<capability>http://www.calix.com/ns/exa/axos-netconf-server-std?module=axos-netconf-server-std&amp;revision=2021-01-12</capability>
+<capability>http://www.calix.com/ns/exa/base?module=exa-base&amp;revision=2020-03-16&amp;features=shelf-config,ont-simulation,dos-protection,chassis-craft-port,backplane-mode</capability>
+<capability>http://www.calix.com/ns/exa/bridge?module=bridge&amp;revision=2022-03-18</capability>
+<capability>http://www.calix.com/ns/exa/bridge-std-eth?module=bridge-std-eth&amp;revision=2021-04-21</capability>
+<capability>http://www.calix.com/ns/exa/bridge-std-lag?module=bridge-std-lag&amp;revision=2021-04-21</capability>
+<capability>http://www.calix.com/ns/exa/bridge-std-ont?module=bridge-std-ont&amp;revision=2022-03-18</capability>
+<capability>http://www.calix.com/ns/exa/card-profiles?module=card-profiles&amp;revision=2022-05-30</capability>
+<capability>http://www.calix.com/ns/exa/copp?module=copp&amp;revision=2022-05-30</capability>
+<capability>http://www.calix.com/ns/exa/copp-std?module=copp-std&amp;revision=2022-05-30</capability>
+<capability>http://www.calix.com/ns/exa/crypto-types?module=crypto-types&amp;revision=2018-03-07</capability>
+<capability>http://www.calix.com/ns/exa/diagnostics?module=diagnostics&amp;revision=2022-03-02</capability>
+<capability>http://www.calix.com/ns/exa/diagnostics-std?module=diagnostics-std&amp;revision=2018-08-17</capability>
+<capability>http://www.calix.com/ns/exa/discovery?module=discovery&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/dot1x-base?module=dot1x-base&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/exa/dot1x-std-ethernet?module=dot1x-std-ethernet&amp;revision=2021-04-20</capability>
+<capability>http://www.calix.com/ns/exa/dscp?module=dscp&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/dscp-copp?module=dscp-copp&amp;revision=2020-10-22</capability>
+<capability>http://www.calix.com/ns/exa/dscp-lag-std?module=dscp-lag-std&amp;revision=2022-05-16</capability>
+<capability>http://www.calix.com/ns/exa/dscp-std?module=dscp-std&amp;revision=2022-05-10</capability>
+<capability>http://www.calix.com/ns/exa/equipment-ua?module=equipment-ua&amp;revision=2020-12-14</capability>
+<capability>http://www.calix.com/ns/exa/erps?module=erps&amp;revision=2022-03-25</capability>
+<capability>http://www.calix.com/ns/exa/erps-rstp?module=erps-rstp&amp;revision=2020-10-22</capability>
+<capability>http://www.calix.com/ns/exa/erps-std-eth?module=erps-std-eth&amp;revision=2020-02-25</capability>
+<capability>http://www.calix.com/ns/exa/erps-std-lag?module=erps-std-lag&amp;revision=2020-02-25</capability>
+<capability>http://www.calix.com/ns/exa/ethernet-service-oam?module=ethernet-service-oam&amp;revision=2022-05-31</capability>
+<capability>http://www.calix.com/ns/exa/ethernet-soam-std?module=ethernet-soam-std&amp;revision=2021-09-16</capability>
+<capability>http://www.calix.com/ns/exa/exa-entity-base?module=exa-entity-base&amp;revision=2021-08-17</capability>
+<capability>http://www.calix.com/ns/exa/ffp-base?module=ffp-base&amp;revision=2021-11-22</capability>
+<capability>http://www.calix.com/ns/exa/ffp-std?module=ffp-std&amp;revision=2021-08-18</capability>
+<capability>http://www.calix.com/ns/exa/g8032?module=g8032&amp;revision=2022-05-03</capability>
+<capability>http://www.calix.com/ns/exa/g8032-std-eth?module=g8032-std-eth&amp;revision=2021-09-16</capability>
+<capability>http://www.calix.com/ns/exa/g8032-std-lag?module=g8032-std-lag&amp;revision=2020-02-25</capability>
+<capability>http://www.calix.com/ns/exa/gpon-dscp-std?module=gpon-dscp-std&amp;revision=2019-12-24</capability>
+<capability>http://www.calix.com/ns/exa/gpon-interface-base?module=gpon-interface-base&amp;revision=2022-04-26</capability>
+<capability>http://www.calix.com/ns/exa/gpon-interface-soam?module=gpon-interface-soam&amp;revision=2021-12-19</capability>
+<capability>http://www.calix.com/ns/exa/gpon-interface-soam-std?module=gpon-interface-soam-std&amp;revision=2022-02-14</capability>
+<capability>http://www.calix.com/ns/exa/gpon-interface-std?module=gpon-interface-std&amp;revision=2022-07-27</capability>
+<capability>http://www.calix.com/ns/exa/gpon-ont-simulation-base?module=gpon-ont-simulation-base&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/host-management-std?module=host-management-std&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/exa/igmp?module=igmp&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/igmp-ont?module=igmp-ont&amp;revision=2022-03-31</capability>
+<capability>http://www.calix.com/ns/exa/igmp-std-eth?module=igmp-std-eth&amp;revision=2022-03-31</capability>
+<capability>http://www.calix.com/ns/exa/igmp-std-lag?module=igmp-std-lag&amp;revision=2020-11-17</capability>
+<capability>http://www.calix.com/ns/exa/igmp-std-ont?module=igmp-std-ont&amp;revision=2021-03-05</capability>
+<capability>http://www.calix.com/ns/exa/ip-management?module=ip-management&amp;revision=2022-05-10</capability>
+<capability>http://www.calix.com/ns/exa/ip-management-eth-std?module=ip-management-eth-std&amp;revision=2022-06-28</capability>
+<capability>http://www.calix.com/ns/exa/ip-management-lag-std?module=ip-management-lag-std&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/exa/ip-management-vlan-std?module=ip-management-vlan-std&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/exa/ipdr?module=ipdr&amp;revision=2022-03-24</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-base?module=ipfix-base&amp;revision=2022-04-14</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-bgp-std?module=ipfix-bgp-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-eth-std?module=ipfix-eth-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-gpon-std?module=ipfix-gpon-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-igmp-std?module=ipfix-igmp-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-lag-std?module=ipfix-lag-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-routing-std?module=ipfix-routing-std&amp;revision=2021-09-01</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-std?module=ipfix-std&amp;revision=2021-06-09</capability>
+<capability>http://www.calix.com/ns/exa/ipfix-vlan-std?module=ipfix-vlan-std&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/exa/lacp?module=lacp&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/exa/lacp-lag-base?module=lacp-lag-base&amp;revision=2019-12-10</capability>
+<capability>http://www.calix.com/ns/exa/lacp-std-eth?module=lacp-std-eth&amp;revision=2017-08-02</capability>
+<capability>http://www.calix.com/ns/exa/lacp-std-lag?module=lacp-std-lag&amp;revision=2020-11-17</capability>
+<capability>http://www.calix.com/ns/exa/layer2-control-protocol?module=layer2-control-protocol&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/exa/layer2-control-protocol-std?module=layer2-control-protocol-std&amp;revision=2020-11-17</capability>
+<capability>http://www.calix.com/ns/exa/layer2-service-protocols?module=layer2-service-protocols&amp;revision=2022-04-08</capability>
+<capability>http://www.calix.com/ns/exa/layer2-service-protocols-std?module=layer2-service-protocols-std&amp;revision=2022-03-31</capability>
+<capability>http://www.calix.com/ns/exa/lldp?module=lldp&amp;revision=2022-03-24</capability>
+<capability>http://www.calix.com/ns/exa/logging-std?module=logging-std&amp;revision=2021-07-20</capability>
+<capability>http://www.calix.com/ns/exa/mka-base?module=mka-base&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/exa/mka-std?module=mka-std&amp;revision=2020-11-17</capability>
+<capability>http://www.calix.com/ns/exa/ont-upgrade?module=ont-upgrade&amp;revision=2022-05-16</capability>
+<capability>http://www.calix.com/ns/exa/pcp-map?module=pcp-map&amp;revision=2022-02-26</capability>
+<capability>http://www.calix.com/ns/exa/pcp-map-std?module=pcp-map-std&amp;revision=2022-02-26</capability>
+<capability>http://www.calix.com/ns/exa/platform-std?module=platform-std&amp;revision=2021-02-24</capability>
+<capability>http://www.calix.com/ns/exa/pppoe?module=pppoe&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/exa/pppoeia?module=pppoeia&amp;revision=2022-07-04</capability>
+<capability>http://www.calix.com/ns/exa/pppoeia-std?module=pppoeia-std&amp;revision=2022-03-31</capability>
+<capability>http://www.calix.com/ns/exa/pwe-services?module=pwe-services&amp;revision=2021-06-28</capability>
+<capability>http://www.calix.com/ns/exa/rbac?module=rbac&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/exa/router-bfd?module=router-bfd&amp;revision=2022-07-24</capability>
+<capability>http://www.calix.com/ns/exa/shelf-slot-ua?module=shelf-slot-ua&amp;revision=2021-11-17</capability>
+<capability>http://www.calix.com/ns/exa/vca?module=vca&amp;revision=2021-06-27</capability>
+<capability>http://www.calix.com/ns/exa/voip-services?module=voip-services&amp;revision=2022-07-22</capability>
+<capability>http://www.calix.com/ns/exa/voip-services-std?module=voip-services-std&amp;revision=2022-04-18</capability>
+<capability>http://www.calix.com/ns/iana-timezones?module=iana-timezones&amp;revision=2019-10-11</capability>
+<capability>http://www.calix.com/ns/interface?module=interface&amp;revision=2021-12-06</capability>
+<capability>http://www.calix.com/ns/ipfix-vrf?module=ipfix-vrf&amp;revision=2021-10-07</capability>
+<capability>http://www.calix.com/ns/lag?module=lag&amp;revision=2020-09-08</capability>
+<capability>http://www.calix.com/ns/lag-soam-std?module=lag-soam-std&amp;revision=2021-09-16</capability>
+<capability>http://www.calix.com/ns/lag-std?module=lag-std&amp;revision=2022-05-30</capability>
+<capability>http://www.calix.com/ns/lldp-std?module=lldp-std&amp;revision=2022-02-17</capability>
+<capability>http://www.calix.com/ns/qos-std?module=qos-std&amp;revision=2020-09-08</capability>
+<capability>http://www.calix.com/ns/remote-mirror?module=remote-mirror&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/remote-mirror-std?module=remote-mirror-std&amp;revision=2021-07-08</capability>
+<capability>http://www.calix.com/ns/router-bgp?module=router-bgp&amp;revision=2022-05-18</capability>
+<capability>http://www.calix.com/ns/router-igmp?module=router-igmp&amp;revision=2021-12-06</capability>
+<capability>http://www.calix.com/ns/router-isis?module=router-isis&amp;revision=2022-07-29</capability>
+<capability>http://www.calix.com/ns/router-ospf?module=router-ospf&amp;revision=2022-07-20</capability>
+<capability>http://www.calix.com/ns/router-ospf-lag-std?module=router-ospf-lag-std&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/router-ospf-std?module=router-ospf-std&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/router-ospf-vrf?module=router-ospf-vrf&amp;revision=2022-07-06</capability>
+<capability>http://www.calix.com/ns/router-pim?module=router-pim&amp;revision=2022-07-27</capability>
+<capability>http://www.calix.com/ns/router-plcy?module=router-plcy&amp;revision=2021-09-02</capability>
+<capability>http://www.calix.com/ns/router-rip?module=router-rip&amp;revision=2021-08-20</capability>
+<capability>http://www.calix.com/ns/rstp?module=rstp&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/rstp-std-eth?module=rstp-std-eth&amp;revision=2020-11-17</capability>
+<capability>http://www.calix.com/ns/rstp-std-lag?module=rstp-std-lag&amp;revision=2020-07-08</capability>
+<capability>http://www.calix.com/ns/sensor-bcm-switch?module=sensor-bcm-switch&amp;revision=2021-08-06</capability>
+<capability>http://www.calix.com/ns/system-settings?module=system-settings&amp;revision=2022-04-28</capability>
+<capability>http://www.calix.com/ns/vlan-interface-std?module=vlan-interface-std&amp;revision=2022-05-13</capability>
+<capability>http://www.calix.com/ns/vrf-routing?module=vrf-routing&amp;revision=2022-06-16</capability>
+<capability>http://www.calix.com/ns/wifi-interface?module=wifi-interface&amp;revision=2022-02-25</capability>
+<capability>http://www.calix.com/ns/wifi-interface-std?module=wifi-interface-std&amp;revision=2019-12-09</capability>
+<capability>http://www.verizon.com/ns/verizon-ipfix?module=verizon-ipfix&amp;revision=2021-06-09</capability>
+<capability>urn:dummy-common?module=tailf-common-monitoring-ann</capability>
+<capability>urn:dummy-ietf-interfaces-ann?module=ietf-interfaces-ann</capability>
+<capability>urn:dummy-monitoring?module=ietf-netconf-monitoring-ann</capability>
+<capability>urn:dummy-verizon-ipfix-ann?module=verizon-ipfix-ann</capability>
+<capability>urn:dummy2?module=tailf-confd-monitoring-ann</capability>
+<capability>urn:dummy4?module=ietf-netconf-acm-ann</capability>
+<capability>urn:dummy5?module=ietf-netconf-notifications-ann</capability>
+<capability>urn:dummy6?module=ietf-restconf-ann</capability>
+<capability>urn:dummy7?module=ietf-restconf-monitoring-ann</capability>
+<capability>urn:dummy8?module=ietf-yang-library-ann</capability>
+<capability>urn:ietf:params:xml:ns:netconf:base:1.0?module=ietf-netconf&amp;revision=2011-06-01&amp;features=writable-running,rollback-on-error,validate,xpath,url</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-inet-types?module=ietf-inet-types&amp;revision=2013-07-15</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-interfaces?module=ietf-interfaces&amp;revision=2018-02-20&amp;features=if-mib</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-ipfix-psamp?module=ietf-ipfix-psamp&amp;revision=2022-03-01&amp;features=udpTransport,timeoutCache,sctpTransport,psampSampUniProb,psampSampTimeBased,psampSampRandOutOfN,psampSampCountBased,psampFilterMatch,psampFilterHash,permanentCache,naturalCache,meter,immediateCache,fileWriter,fileReader</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-acm?module=ietf-netconf-acm&amp;revision=2012-02-22</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-notifications?module=ietf-netconf-notifications&amp;revision=2012-02-06</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-server-2015-11-12?module=ietf-netconf-server&amp;revision=2015-11-12&amp;features=ssh-call-home</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults?module=ietf-netconf-with-defaults&amp;revision=2011-06-01</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-network-instance?module=ietf-network-instance&amp;revision=2022-03-21</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-restconf-monitoring?module=ietf-restconf-monitoring&amp;revision=2016-08-15</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-yang-smiv2?module=ietf-yang-smiv2&amp;revision=2011-11-25</capability>
+<capability>urn:ietf:params:xml:ns:yang:ietf-yang-types?module=ietf-yang-types&amp;revision=2013-07-15</capability>
+<capability>urn:ietf:params:xml:ns:netconf:notification:1.0?module=notifications&amp;revision=2008-07-14</capability>
+</capabilities>
+<session-id>2523</session-id></hello>]]>]]>
+*/

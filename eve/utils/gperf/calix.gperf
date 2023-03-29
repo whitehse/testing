@@ -1,0 +1,53 @@
+%{
+#include <assert.h>
+//#include <calix_gperf.h>
+int return_calix (struct calix *calix);
+%}
+struct calix { char *name; int number; void* data};
+%%
+ont-missing,              1,NULL
+description,              2,NULL
+probable-cause,           3,NULL
+detail,                   4,NULL
+device-sequence-number,   5,NULL
+instance-id,              6,NULL
+id,                       7,NULL
+name,                     8,NULL
+perceived-severity,       9,NULL
+prev-severity,            10,NULL
+alarm,                    11,NULL
+service-impacting,        12,NULL
+service-affecting,        13,NULL
+alarm-type,               14,NULL
+category,                 15,NULL
+hw-failure-event,         16,NULL
+repair-action,            17,NULL
+address,                  18,NULL
+port,                     19,NULL
+ont-id,                   20,NULL
+phys-pon-shelf,           21,NULL
+phys-pon-slot,            22,NULL
+phys-pon-port,            23,NULL
+serial-number,            24,NULL
+equipment-type,           25,NULL
+vendor-id,                26,NULL
+eventTime,                27,NULL
+ont-ds-sdber,             28,NULL
+ont-us-sdber,             29,NULL
+ont-arrival,              30,NULL
+ont-departure,            31,NULL
+notification,             32,NULL
+user-login,               33,NULL
+user-logout,              34,NULL
+ont-eth-down,             35,NULL
+xmlns,                    36,NULL
+ont-dying-gasp,           37,NULL
+low-rx-opt-pwr-ne,        38,NULL
+ntp-server-reachability,  39,NULL
+dhcp-lease-establishment, 40,NULL
+dhcp-lease-termination,   41,NULL
+loss-of-pon,              42,NULL
+omci-comm-fail,           43,NULL
+ont-sw-mismatch,          44,NULL
+ont-download-start,       45,NULL
+ont-download-fail,        46,NULL
