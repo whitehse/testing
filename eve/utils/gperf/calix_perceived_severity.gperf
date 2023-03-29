@@ -1,0 +1,20 @@
+%{
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <calix_perceived_severity.h>
+//#include <strings.h>
+int return_perceived_severity (struct calix_perceived_severity *severity);
+%}
+//%compare-lengths
+%7bit
+%define hash-function-name hash_perceived_severity
+%define lookup-function-name in_word_set_perceived_severity
+struct calix_perceived_severity;
+%%
+CLEAR,        1,NULL
+CRITICAL,     2,NULL
+INFO,         3,NULL
+MAJOR,        4,NULL
+MINOR,        5,NULL
+WARNING,      6,NULL

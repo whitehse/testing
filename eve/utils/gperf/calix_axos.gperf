@@ -1,9 +1,17 @@
 %{
 #include <assert.h>
-//#include <calix_gperf.h>
-int return_calix (struct calix *calix);
+#include <stdlib.h>
+#include <stdio.h>
+#include <calix_axos.h>
+int return_calix (struct calix_axos *axos);
 %}
-struct calix { char *name; int number; void* data};
+//%compare-lengths
+%7bit
+%define hash-function-name hash_axos
+%define lookup-function-name in_word_set_axos
+struct calix_axos;
+
+struct calix { char *name; int number; void* data; };
 %%
 ont-missing,              1,NULL
 description,              2,NULL
@@ -51,3 +59,18 @@ omci-comm-fail,           43,NULL
 ont-sw-mismatch,          44,NULL
 ont-download-start,       45,NULL
 ont-download-fail,        46,NULL
+rpc-reply,                47,NULL
+data,                     48,NULL
+status,                   49,NULL
+system,                   50,NULL
+ont,                      51,NULL
+vendor,                   52,NULL
+upgrade-class,            53,NULL
+oper-state,               54,NULL
+linked-pon,               55,NULL
+model,                    56,NULL
+clei,                     57,NULL
+curr-version,             58,NULL
+alt-version,              59,NULL
+voip-config-version       60,NULL
+rg-config-version         61,NULL
