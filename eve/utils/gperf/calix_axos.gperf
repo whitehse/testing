@@ -3,74 +3,105 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <calix_axos.h>
-int return_calix (struct calix_axos *axos);
+#include <expat.h>
+#include <states.h>
+int return_calix (struct calix_axos_parse *axos_parser);
 %}
 //%compare-lengths
 %7bit
 %define hash-function-name hash_axos
 %define lookup-function-name in_word_set_axos
-struct calix_axos;
-
-struct calix { char *name; int number; void* data; };
+struct calix_axos_parse;
 %%
-ont-missing,              1,NULL
-description,              2,NULL
-probable-cause,           3,NULL
-detail,                   4,NULL
-device-sequence-number,   5,NULL
-instance-id,              6,NULL
-id,                       7,NULL
-name,                     8,NULL
-perceived-severity,       9,NULL
-prev-severity,            10,NULL
-alarm,                    11,NULL
-service-impacting,        12,NULL
-service-affecting,        13,NULL
-alarm-type,               14,NULL
-category,                 15,NULL
-hw-failure-event,         16,NULL
-repair-action,            17,NULL
-address,                  18,NULL
-port,                     19,NULL
-ont-id,                   20,NULL
-phys-pon-shelf,           21,NULL
-phys-pon-slot,            22,NULL
-phys-pon-port,            23,NULL
-serial-number,            24,NULL
-equipment-type,           25,NULL
-vendor-id,                26,NULL
-eventTime,                27,NULL
-ont-ds-sdber,             28,NULL
-ont-us-sdber,             29,NULL
-ont-arrival,              30,NULL
-ont-departure,            31,NULL
-notification,             32,NULL
-user-login,               33,NULL
-user-logout,              34,NULL
-ont-eth-down,             35,NULL
-xmlns,                    36,NULL
-ont-dying-gasp,           37,NULL
-low-rx-opt-pwr-ne,        38,NULL
-ntp-server-reachability,  39,NULL
-dhcp-lease-establishment, 40,NULL
-dhcp-lease-termination,   41,NULL
-loss-of-pon,              42,NULL
-omci-comm-fail,           43,NULL
-ont-sw-mismatch,          44,NULL
-ont-download-start,       45,NULL
-ont-download-fail,        46,NULL
-rpc-reply,                47,NULL
-data,                     48,NULL
-status,                   49,NULL
-system,                   50,NULL
-ont,                      51,NULL
-vendor,                   52,NULL
-upgrade-class,            53,NULL
-oper-state,               54,NULL
-linked-pon,               55,NULL
-model,                    56,NULL
-clei,                     57,NULL
-curr-version,             58,NULL
-alt-version,              59,NULL
-voip-config-version       60,NULL
-rg-config-version         61,NULL
+ont-missing,              1,NULL,NULL,NULL
+description,              2,NULL,NULL,NULL
+probable-cause,           3,NULL,NULL,NULL
+detail,                   4,NULL,NULL,NULL
+device-sequence-number,   5,NULL,NULL,NULL
+instance-id,              6,NULL,NULL,NULL
+id,                       7,NULL,NULL,NULL
+name,                     8,NULL,NULL,NULL
+perceived-severity,       9,NULL,NULL,NULL
+prev-severity,            10,NULL,NULL,NULL
+alarm,                    11,NULL,NULL,NULL
+service-impacting,        12,NULL,NULL,NULL
+service-affecting,        13,NULL,NULL,NULL
+alarm-type,               14,NULL,NULL,NULL
+category,                 15,NULL,NULL,NULL
+hw-failure-event,         16,NULL,NULL,NULL
+repair-action,            17,NULL,NULL,NULL
+address,                  18,NULL,NULL,NULL
+port,                     19,NULL,NULL,NULL
+ont-id,                   20,NULL,NULL,NULL
+phys-pon-shelf,           21,NULL,NULL,NULL
+phys-pon-slot,            22,NULL,NULL,NULL
+phys-pon-port,            23,NULL,NULL,NULL
+serial-number,            24,NULL,NULL,NULL
+equipment-type,           25,NULL,NULL,NULL
+vendor-id,                26,NULL,NULL,NULL
+eventTime,                27,NULL,NULL,NULL
+ont-ds-sdber,             28,NULL,NULL,NULL
+ont-us-sdber,             29,NULL,NULL,NULL
+ont-arrival,              30,NULL,NULL,NULL
+ont-departure,            31,NULL,NULL,NULL
+notification,             32,NULL,NULL,NULL
+user-login,               33,NULL,NULL,NULL
+user-logout,              34,NULL,NULL,NULL
+ont-eth-down,             35,NULL,NULL,NULL
+xmlns,                    36,NULL,NULL,NULL
+ont-dying-gasp,           37,NULL,NULL,NULL
+low-rx-opt-pwr-ne,        38,NULL,NULL,NULL
+ntp-server-reachability,  39,NULL,NULL,NULL
+dhcp-lease-establishment, 40,NULL,NULL,NULL
+dhcp-lease-termination,   41,NULL,NULL,NULL
+loss-of-pon,              42,NULL,NULL,NULL
+omci-comm-fail,           43,NULL,NULL,NULL
+ont-sw-mismatch,          44,NULL,NULL,NULL
+ont-download-start,       45,NULL,NULL,NULL
+ont-download-fail,        46,NULL,NULL,NULL
+rpc-reply,                47,NULL,NULL,NULL
+data,                     48,NULL,NULL,NULL
+status,                   49,NULL,NULL,NULL
+system,                   50,NULL,NULL,NULL
+ont,                      51,NULL,NULL,NULL
+vendor,                   52,NULL,NULL,NULL
+upgrade-class,            53,NULL,NULL,NULL
+oper-state,               54,NULL,NULL,NULL
+linked-pon,               55,NULL,NULL,NULL
+model,                    56,NULL,NULL,NULL
+clei,                     57,NULL,NULL,NULL
+curr-version,             58,NULL,NULL,NULL
+alt-version,              59,NULL,NULL,NULL
+voip-config-version,      60,NULL,NULL,NULL
+rg-config-version,        61,NULL,NULL,NULL
+curr-committed,           62,NULL,NULL,NULL
+onu-mac-addr,             63,NULL,NULL,NULL
+mta-mac-addr,             64,NULL,NULL,NULL
+mfg-serial-number,        65,NULL,NULL,NULL
+product-code,             66,NULL,NULL,NULL
+linked-by,                67,NULL,NULL,NULL
+range-length,             68,NULL,NULL,NULL
+up-time,                  69,NULL,NULL,NULL
+opt-signal-level,         70,NULL,NULL,NULL
+tx-opt-level,             71,NULL,NULL,NULL
+ne-opt-signal,            72,NULL,NULL,NULL
+us-sdber-rate,            73,NULL,NULL,NULL
+ds-sdber-rate,            74,NULL,NULL,NULL
+counters,                 75,NULL,NULL,NULL
+ont-counters,             76,NULL,NULL,NULL
+message-id,               77,NULL,NULL,NULL
+urn:ietf:params:xml:ns:netconf:base:1.0,         78,calix_doc_tag_start,NULL,NULL
+http://www.calix.com/ns/exa/base,                79,NULL,calix_doc_tag_end,NULL
+http://www.calix.com/ns/exa/gpon-interface-base, 80,NULL,NULL,calix_doc_char_data
+%%
+static void XMLCALL
+calix_doc_tag_start(void *user_data, const XML_Char *name, const XML_Char **atts) {
+}
+
+static void XMLCALL
+calix_doc_tag_end(void *user_data, const XML_Char *name) {
+}
+
+static void
+calix_doc_char_data(void* user_data, const char* val, int len) {
+}

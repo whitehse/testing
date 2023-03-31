@@ -4,6 +4,8 @@
 #include <string.h>
 #include <calix_axos.h>
 #include <calix_perceived_severity.h>
+#include <expat.h>
+#include <states.h>
 
 int main(int argc, char *argv[]) {
 /*
@@ -29,9 +31,9 @@ int main(int argc, char *argv[]) {
     //i = hash_perceived_severity("CLEAR", 5);
     //printf("CEARL = %d\n", i);
 
-    struct calix_axos *axos;
-    axos = in_word_set_axos ("description", 11);
-    printf("Name = %s\n", axos->name);
+    struct calix_axos_parse *axos_parser;
+    axos_parser = in_word_set_axos ("description", 11);
+    printf("Name = %s\n", axos_parser->name);
 
     struct calix_perceived_severity *severity;
     severity = in_word_set_perceived_severity ("CLEAR", 5);
