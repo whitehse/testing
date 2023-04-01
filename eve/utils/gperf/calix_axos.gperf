@@ -5,6 +5,7 @@
 #include <calix_axos.h>
 #include <expat.h>
 #include <states.h>
+#include <string.h>
 int return_calix (struct calix_axos_parse *axos_parser);
 %}
 //%compare-lengths

@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <calix_perceived_severity.h>
 //#include <strings.h>
 int return_perceived_severity (struct calix_perceived_severity *severity);
