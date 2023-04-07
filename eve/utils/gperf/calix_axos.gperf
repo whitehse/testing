@@ -1,17 +1,18 @@
 %{
 #include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <calix_axos.h>
 #include <expat.h>
 #include <states.h>
-#include <string.h>
 int return_calix (struct calix_axos_parse *axos_parser);
 %}
 //%compare-lengths
 %7bit
 %define hash-function-name hash_axos
 %define lookup-function-name in_word_set_axos
+%define constants-prefix AXOS_
+%define word-array-name wordlist_axos
+%includes
+//%enum
 struct calix_axos_parse;
 %%
 ont-missing,              1,NULL,NULL,NULL

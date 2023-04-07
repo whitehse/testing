@@ -1,454 +1,695 @@
-/*
- * Written in 2010-2020 by Andy Green <andy@warmcat.com>
- *
- * This file is made available under the Creative Commons CC0 1.0
- * Universal Public Domain Dedication.
- *
- * This demonstrates the most minimal http server you can make with lws that
- * uses a libuv event loop created outside lws.  It shows how lws can
- * participate in someone else's event loop and clean up after itself.
- *
- * You choose the event loop to work with at runtime, by giving the
- * --uv, --event or --ev switch.  Lws has to have been configured to build the
- * selected event lib support.
- *
- * To keep it simple, it serves stuff from the subdirectory 
- * "./mount-origin" of the directory it was started in.
- * You can change that by changing mount.origin below.
- */
-
-#include <libwebsockets.h>
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <unistd.h>
 #include <signal.h>
-#include "eve.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <sys/unistd.h>
+#include <pwd.h>
+#include <grp.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 #include <ev.h>
+#include <eio.h>
+#include <libwebsockets.h>
 #include <sodium.h>
+#include <confuse.h>
+#include <lmdb.h>
 
-static struct lws_context_creation_info info;
-static const struct ops *ops = NULL;
-struct lws_context *context;
-int lifetime = 5, reported;
+static ev_idle repeat_watcher;
+static ev_async ready_watcher;
+ 
+int sockfd;
+int number_of_sockets = 0;
+int sockets[10];
 
-enum {
-	TEST_STATE_CREATE_LWS_CONTEXT,
-	TEST_STATE_DESTROY_LWS_CONTEXT,
-	TEST_STATE_EXIT
-};
-
-static int sequence = TEST_STATE_CREATE_LWS_CONTEXT;
-
-static struct ev_loop *loop_ev;
-static struct ev_timer timer_outer_ev;
-static struct ev_signal sighandler_ev;
-
-static void
-timer_cb_ev(struct ev_loop *loop, struct ev_timer *watcher, int revents)
-{
-	foreign_timer_service(loop_ev);
+/* idle watcher callback, only used when eio_poll */
+/* didn't handle all results in one call */
+static void repeat (EV_P_ ev_idle *w, int revents) {
+  if (eio_poll () != -1)
+    ev_idle_stop (EV_A_ w);
 }
 
-static void
-signal_cb_ev(struct ev_loop *loop, struct ev_signal *watcher, int revents)
-{
-	signal_cb(watcher->signum);
+/* eio has some results, process them */
+static void ready (EV_P_ ev_async *w, int revents) {
+  if (eio_poll () == -1)
+    ev_idle_start (EV_A_ &repeat_watcher);
 }
-
-static int BUFFER_SIZE = 1024;
-int total_clients = 0;
 
 /* Read client message */
-void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
-    char buffer[BUFFER_SIZE];
-    ssize_t read;
+void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents){
+  char buffer[1024];
+  ssize_t read;
 
-    if(EV_ERROR & revents) {
-        perror("got invalid event");
-        return;
-    }
+  if(EV_ERROR & revents)
+  {
+    perror("got invalid event");
+    return;
+  }
 
-    // Receive message from client socket
-    read = recv(watcher->fd, buffer, BUFFER_SIZE, 0);
+  // Receive message from client socket
+  read = recv(watcher->fd, buffer, 1024, 0);
 
-    if(read < 0) {
-        perror("read error");
-        return;
-    }
+  if(read < 0)
+  {
+    perror("read error");
+    return;
+  }
 
-    if(read == 0) {
-        // Stop and free watchet if client socket is closing
-        ev_io_stop(loop,watcher);
-        free(watcher);
-        perror("peer might closing");
-        total_clients --; // Decrement total_clients count
-        printf("%d client(s) connected.\n", total_clients);
-        return;
-    } else {
-        printf("message:%s\n",buffer);
-    }
+  if(read == 0)
+  {
+    // Stop and free watchet if client socket is closing
+    ev_io_stop(loop,watcher);
+    free(watcher);
+    perror("peer might closing");
+    return;
+  }
+  else
+  {
+    printf("message:%s",buffer);
+  }
 
-    // Send message bach to the client
-    send(watcher->fd, buffer, read, 0);
-    bzero(buffer, read);
+  // Send message bach to the client
+  /* send(watcher->fd, buffer, read, 0); */
+  bzero(buffer, read);
 }
 
-/* Accept client requests */
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
-    struct sockaddr_in client_addr;
-    socklen_t client_len = sizeof(client_addr);
-    int client_sd;
-    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+  struct sockaddr_in client_addr;
+  socklen_t client_len = sizeof(client_addr);
+  int client_sd;
+  struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
 
-    if(EV_ERROR & revents) {
-        perror("got invalid event");
-        return;
+  if(EV_ERROR & revents)
+  {
+    perror("got invalid event");
+    return;
+  }
+
+  // Accept client request
+  client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
+
+  if (client_sd < 0)
+  {
+    perror("accept error");
+    return;
+  }
+
+  sockets[number_of_sockets] = client_sd;
+  number_of_sockets += 1;
+
+  puts("Accepted connection");
+
+  // Initialize and start watcher to read client requests
+  ev_io_init(w_client, read_cb, client_sd, EV_READ);
+  ev_io_start(loop, w_client);
+}
+
+void sig_cb(struct ev_loop *loop, struct ev_signal *watcher, int revents) {
+  puts("SIGINT called");
+  for (int i=0; i<number_of_sockets; i++) {
+    close(sockets[i]);
+  }
+  close(sockfd);
+  abort();
+}
+
+int child_stdin; 
+int child_stdout;
+int child_stderr;
+
+/*
+int rc;
+MDB_env *env;
+MDB_dbi dbi;
+MDB_val key, data;
+MDB_txn *txn;
+MDB_cursor *cursor;
+char sval[32];
+*/
+
+void hexDump(char *desc, void *addr, int len) 
+{
+    int i;
+    unsigned char buff[17];
+    unsigned char *pc = (unsigned char*)addr;
+
+    // Output description if given.
+    if (desc != NULL)
+        printf ("%s:\n", desc);
+
+    // Process every byte in the data.
+    for (i = 0; i < len; i++) {
+        // Multiple of 16 means new line (with line offset).
+
+        if ((i % 16) == 0) {
+            // Just don't print ASCII for the zeroth line.
+            if (i != 0)
+                printf("  %s\n", buff);
+
+            // Output the offset.
+            printf("  %04x ", i);
+        }
+
+        // Now the hex code for the specific character.
+        printf(" %02x", pc[i]);
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+            buff[i % 16] = '.';
+        } else {
+            buff[i % 16] = pc[i];
+        }
+
+        buff[(i % 16) + 1] = '\0';
     }
 
-    // Accept client request
-    client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
-
-    if (client_sd < 0) {
-        perror("accept error");
-        return;
+    // Pad out last line if not exactly 16 characters.
+    while ((i % 16) != 0) {
+        printf("   ");
+        i++;
     }
 
-    total_clients ++; // Increment total_clients count
-    printf("Successfully connected with client.\n");
-    printf("%d client(s) connected.\n", total_clients);
-
-    // Initialize and start watcher to read client requests
-    ev_io_init(w_client, read_cb, client_sd, EV_READ);
-    ev_io_start(loop, w_client);
+    // And print the final ASCII bit.
+    printf("  %s\n", buff);
 }
 
+//int fork_as(int uid, int gid, char **env, char *command) {
+int exec_as(int uid, int gid, int *child_stdin, int *child_stdout, int *child_stderr, char *command) {
+  int in[2];
+  int out[2];
+  int err[2];
+  int rc;
+  int pid;
+  //int status;
+
+  rc = pipe2(in, O_NONBLOCK);
+  //rc = pipe2(in, O_DIRECT);
+  if (rc<0) goto error_in;
+
+  rc = pipe2(out, O_NONBLOCK);
+  //rc = pipe2(out, O_DIRECT);
+  if (rc<0) goto error_out;
+
+  rc = pipe2(err, O_NONBLOCK);
+  //rc = pipe2(err, O_DIRECT);
+  if (rc<0) goto error_err;
+
+  pid = fork();
+
+  if (pid > 0) { /* parent */
+    close(in[0]);
+    close(out[1]);
+    close(err[1]);
+    *child_stdin = in[1];
+    *child_stdout = out[0];
+    *child_stderr = err[0];
+    return pid;
+  } else if (pid == 0) { /* child */
+    close(in[1]);
+    close(out[0]);
+    close(err[0]);
+    close(0);
+    if(!dup(in[0])) {
+      ;
+    }
+    close(1);
+    if(!dup(out[1])) {
+      ;
+    }
+    close(2);
+    if(!dup(err[1])) {
+      ;
+    }
+
+    int flags = fcntl(out[1], F_GETFL, 0);
+    fcntl(out[1], F_SETFL, flags | O_NONBLOCK);
+    flags = fcntl(err[1], F_GETFL, 0);
+    fcntl(err[1], F_SETFL, flags | O_NONBLOCK);
+
+    setuid(uid);
+    setgid(gid);
+    execl("/home/dwhite/eve/netconf.pl", "netconf.pl", NULL);
+    _exit(1);
+  } else
+    goto error_fork;
+
+  return pid;
+
+error_fork:
+  close(err[0]);
+  close(err[1]);
+error_err:
+  close(out[0]);
+  close(out[1]);
+error_out:
+  close(in[0]);
+  close(in[1]);
+error_in:
+  return -1;
+}
+
+// every watcher type has its own typedef'd struct
+// with the name ev_TYPE
+ev_io stdin_watcher;
+ev_timer timeout_watcher;
+
+char temp_buffer[8192];
+
+// all watcher callbacks have a similar signature
+// this callback is called when data is readable on stdin
 static void
-foreign_event_loop_init_and_run_libev(void)
+child_stdout_cb (EV_P_ ev_io *w, int revents)
 {
-	//loop_ev = EV_DEFAULT;
+  int nbytes;
+  ioctl(child_stdout, FIONREAD, &nbytes);
+  printf ("There are %d available bytes on child_stdout\n", nbytes);
 
-	ev_signal_init(&sighandler_ev, signal_cb_ev, SIGINT);
-	ev_signal_start(loop_ev, &sighandler_ev);
+  //int flags = fcntl(child_stdout, F_GETFL, 0);
+  //fcntl(child_stdout, F_SETFL, flags | O_NONBLOCK);
 
-	ev_timer_init(&timer_outer_ev, timer_cb_ev, 0, 1);
-	ev_timer_start(loop_ev, &timer_outer_ev);
+  //ssize_t amount_read = read (child_stdout, temp_buffer, 64*1024);
+  ssize_t amount_read = read (child_stdout, temp_buffer, 8192);
+  //printf("%d read, data:%s\n", amount_read, temp_buffer);
+  //printf("%d read, data:\n%.*s", amount_read, amount_read, temp_buffer);
 
-	ev_run(loop_ev, 0);
-}
+  char *protobuf_ptr = temp_buffer;
+  protobuf_ptr += 8;
 
-static void
-foreign_event_loop_stop_libev(void)
-{
-	ev_break(loop_ev, EVBREAK_ALL);
-}
+  unsigned int type = temp_buffer[0];
+  unsigned int length = temp_buffer[4];
 
-static void
-foreign_event_loop_cleanup_libev(void)
-{
-	/* cleanup the foreign loop assets */
+  //printf ("Type = %u, length = %u\n", type, length);
 
-	ev_timer_stop(loop_ev, &timer_outer_ev);
-	ev_signal_stop(loop_ev, &sighandler_ev);
+  Axos__OntMissing *ont_missing_msg;
+  Axos__OntArrival *ont_arrival_msg;
+  Axos__OntDsSdber *ont_ds_sdber_msg;
+  Axos__OntUsSdber *ont_us_sdber_msg;
+  Axos__OntDeparture *ont_departure_msg;
+  Axos__OntDyingGasp *ont_dying_gasp_msg;
 
-	ev_run(loop_ev, 0);
-	ev_loop_destroy(loop_ev);
-}
-
-const struct ops ops_libev = {
-	foreign_event_loop_init_and_run_libev,
-	foreign_event_loop_stop_libev,
-	foreign_event_loop_cleanup_libev
-};
-
-static const struct lws_http_mount mount = {
-	/* .mount_next */		NULL,		/* linked-list "next" */
-	/* .mountpoint */		"/",		/* mountpoint URL */
-	/* .origin */			"./mount-origin", /* serve from dir */
-	/* .def */			"index.html",	/* default filename */
-	/* .protocol */			NULL,
-	/* .cgienv */			NULL,
-	/* .extra_mimetypes */		NULL,
-	/* .interpret */		NULL,
-	/* .cgi_timeout */		0,
-	/* .cache_max_age */		0,
-	/* .auth_mask */		0,
-	/* .cache_reusable */		0,
-	/* .cache_revalidate */		0,
-	/* .cache_intermediaries */	0,
-	/* .origin_protocol */		LWSMPRO_FILE,	/* files in a dir */
-	/* .mountpoint_len */		1,		/* char count */
-	/* .basic_auth_login_file */	NULL,
-};
-
-void
-signal_cb(int signum)
-{
-	lwsl_notice("Signal %d caught, exiting...\n", signum);
-
-	switch (signum) {
-	case SIGTERM:
-	case SIGINT:
-		break;
-	default:
-		break;
-	}
-
-	lws_context_destroy(context);
-}
-
-static int
-callback_http(struct lws *wsi, enum lws_callback_reasons reason,
-	      void *user, void *in, size_t len)
-{
-	switch (reason) {
-
-	case LWS_CALLBACK_ESTABLISHED_CLIENT_HTTP:
-		lwsl_user("LWS_CALLBACK_ESTABLISHED_CLIENT_HTTP: resp %u\n",
-				lws_http_client_http_response(wsi));
-		break;
-
-	/* because we are protocols[0] ... */
-	case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
-		lwsl_err("CLIENT_CONNECTION_ERROR: %s\n",
-			 in ? (char *)in : "(null)");
-		break;
-
-	/* chunks of chunked content, with header removed */
-	case LWS_CALLBACK_RECEIVE_CLIENT_HTTP_READ:
-		lwsl_user("RECEIVE_CLIENT_HTTP_READ: read %d\n", (int)len);
-		lwsl_hexdump_info(in, len);
-		return 0; /* don't passthru */
-
-	/* uninterpreted http content */
-	case LWS_CALLBACK_RECEIVE_CLIENT_HTTP:
-		{
-			char buffer[1024 + LWS_PRE];
-			char *px = buffer + LWS_PRE;
-			int lenx = sizeof(buffer) - LWS_PRE;
-
-			if (lws_http_client_read(wsi, &px, &lenx) < 0)
-				return -1;
-		}
-		return 0; /* don't passthru */
-
-	case LWS_CALLBACK_COMPLETED_CLIENT_HTTP:
-		lwsl_user("LWS_CALLBACK_COMPLETED_CLIENT_HTTP %s\n",
-			  lws_wsi_tag(wsi));
-		break;
-
-	case LWS_CALLBACK_CLOSED_CLIENT_HTTP:
-		lwsl_info("%s: closed: %s\n", __func__, lws_wsi_tag(wsi));
-		break;
-
-	default:
-		break;
-	}
-
-	return lws_callback_http_dummy(wsi, reason, user, in, len);
-}
-
-static const struct lws_protocols protocols[] = {
-	{ "httptest", callback_http, 0, 0, 0, NULL, 0},
-	LWS_PROTOCOL_LIST_TERM
-};
-
-static int
-do_client_conn(void)
-{
-	struct lws_client_connect_info i;
-
-	memset(&i, 0, sizeof i); /* otherwise uninitialized garbage */
-
-	i.context		= context;
-
-	i.ssl_connection	= LCCSCF_USE_SSL;
-	i.port			= 443;
-	i.address		= "warmcat.com";
-
-	i.ssl_connection	|= LCCSCF_H2_QUIRK_OVERFLOWS_TXCR |
-				   LCCSCF_H2_QUIRK_NGHTTP2_END_STREAM;
-	i.path			= "/";
-	i.host			= i.address;
-	i.origin		= i.address;
-	i.method		= "GET";
-	i.local_protocol_name	= protocols[0].name;
-#if defined(LWS_WITH_SYS_FAULT_INJECTION)
-	i.fi_wsi_name		= "user";
-#endif
-
-	if (!lws_client_connect_via_info(&i)) {
-		lwsl_err("Client creation failed\n");
-
-		return 1;
-	}
-
-	return 0;
-}
-
-
-/* this is called at 1Hz using a foreign loop timer */
-
-void
-foreign_timer_service(void *foreign_loop)
-{
-	void *foreign_loops[1];
-
-	//lwsl_user("Foreign 1Hz timer\n");
-
-	if (sequence == TEST_STATE_EXIT && !context && !reported) {
-		/*
-		 * at this point the lws_context_destroy() we did earlier
-		 * has completed and the entire context is wholly destroyed
-		 */
-		lwsl_user("lws_destroy_context() done, continuing for 5s\n");
-		reported = 1;
-	}
-
-	if (--lifetime)
-		return;
-
-	switch (sequence++) {
-	case TEST_STATE_CREATE_LWS_CONTEXT:
-		/* this only has to exist for the duration of create context */
-		foreign_loops[0] = foreign_loop;
-		info.foreign_loops = foreign_loops;
-
-		context = lws_create_context(&info);
-		if (!context) {
-			lwsl_err("lws init failed\n");
-			return;
-		}
-		lwsl_user("LWS Context created and will be active for 10s\n");
-
-		do_client_conn();
-
-		lifetime = 11;
-		break;
-
-	case TEST_STATE_DESTROY_LWS_CONTEXT:
-		/* cleanup the lws part */
-		lwsl_user("Destroying lws context and continuing loop for 5s\n");
-		lws_context_destroy(context);
-		lifetime = 6;
-		break;
-
-	case TEST_STATE_EXIT:
-		lwsl_user("Deciding to exit foreign loop too\n");
-		ops->stop();
-		break;
-	default:
-		break;
-	}
-}
-
-static void
-mytimer_cb_ev(struct ev_loop *loop, struct ev_timer *watcher, int revents)
-{
-        lwsl_user("mytimer_cb_ev was called");
-}
-
-int main(int argc, const char **argv)
-{
-	const char *p;
-	int logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
-			/* for LLL_ verbosity above NOTICE to be built into lws,
-			 * lws must have been configured and built with
-			 * -DCMAKE_BUILD_TYPE=DEBUG instead of =RELEASE */
-			/* | LLL_INFO */ /* | LLL_PARSER */ /* | LLL_HEADER */
-			/* | LLL_EXT */ /* | LLL_CLIENT */ /* | LLL_LATENCY */
-			/* | LLL_DEBUG */;
-
-	if ((p = lws_cmdline_option(argc, argv, "-d")))
-		logs = atoi(p);
-
-	lws_set_log_level(logs, NULL);
-	lwsl_user("LWS minimal http server eventlib + foreign loop |"
-		  " visit http://localhost:7681\n");
-
+  switch (type) {
+    case OBJECTS__ont_missing:
+      ont_missing_msg = axos__ont_missing__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_missing_msg > 0) {
+        int ont = ont_missing_msg->ont_id;
+        int eventTime = ont_missing_msg->event_time;
+        printf("ONT %d went missing at %d\n", ont, eventTime);
 	/*
-	 * We prepare the info here, but don't use it until later in the
-	 * timer callback, to demonstrate the independence of the foreign loop
-	 * and lws.
-	 */
+        rc = mdb_txn_begin(env, NULL, 0, &txn);
+        rc = mdb_open(txn, NULL, 0, &dbi);
 
-	memset(&info, 0, sizeof info); /* otherwise uninitialized garbage */
-	info.port = 7681;
-	if ((p = lws_cmdline_option(argc, argv, "-p")))
-		info.port = atoi(p);
-	info.mounts = &mount;
-	info.error_document_404 = "/404.html";
-	info.pcontext = &context;
-	info.protocols = protocols;
-	info.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT |
-		LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
-
-	if (lws_cmdline_option(argc, argv, "-s")) {
-		info.ssl_cert_filepath = "localhost-100y.cert";
-		info.ssl_private_key_filepath = "localhost-100y.key";
-	}
-
-	/*
-	 * We configure lws to use the chosen event loop, and select the
-	 * matching event-lib specific code for our demo operations
-	 */
-
-	info.options |= LWS_SERVER_OPTION_LIBEV;
-	ops = &ops_libev;
-	lwsl_notice("%s: using libev loop\n", __func__);
-
-        static struct ev_timer mytimer_ev;
-
-        loop_ev = EV_DEFAULT;
-
-        ev_timer_init (&mytimer_ev, mytimer_cb_ev, 1.5, .7);
-        ev_timer_start (loop_ev, &mytimer_ev);
-
-        int PORT_NO = 2000;
-
-        int sd;
-        struct sockaddr_in addr;
-        int addr_len = sizeof(addr);
-        struct ev_io w_accept;
-
-        // Create server socket
-        if( (sd = socket(PF_INET, SOCK_STREAM, 0)) < 0 ) {
-            perror("socket error");
-	    exit(EXIT_FAILURE);
+        key.mv_size = sizeof(int);
+        key.mv_data = &eventTime;
+        data.mv_size = nbytes - 8;
+        data.mv_data = protobuf_ptr;
+        rc = mdb_put(txn, dbi, &key, &data, 0);
+        rc = mdb_txn_commit(txn);
+        if (rc) {
+            fprintf(stderr, "mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
         }
-
-        bzero(&addr, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(PORT_NO);
-        addr.sin_addr.s_addr = INADDR_ANY;
-
-        if (bind(sd, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
-            perror("bind error");
-	    exit(EXIT_FAILURE);
-        }
-
-        if (listen(sd, 2) < 0) {
-            perror("listen error");
-	    exit(EXIT_FAILURE);
-        }
-
-        // Initialize and start a watcher to accepts client requests
-        ev_io_init(&w_accept, accept_cb, sd, EV_READ);
-        ev_io_start(loop_ev, &w_accept);
-
-        if (sodium_init() < 0) {
-            puts("The sodium library did not initialize. Bailing");
-	    abort();
-        }
-
-	/* foreign loop specific startup and run */
-	ops->init_and_run();
-
-	lws_context_destroy(context);
-
-	/* foreign loop specific cleanup and exit */
-
-	ops->cleanup();
-
-	lwsl_user("%s: exiting...\n", __func__);
-
-	return 0;
+	*/
+      }
+      break;
+    case OBJECTS__ont_arrival:
+      ont_arrival_msg = axos__ont_arrival__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_arrival_msg > 0) {
+        int ont = ont_arrival_msg->ont_id;
+        int eventTime = ont_arrival_msg->event_time;
+        printf("ONT %d arrival at %d\n", ont, eventTime);
+      }
+      break;
+    case OBJECTS__ont_ds_sdber:
+      ont_ds_sdber_msg = axos__ont_ds_sdber__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_ds_sdber_msg > 0) {
+        int ont = ont_ds_sdber_msg->ont_id;
+        int eventTime = ont_ds_sdber_msg->event_time;
+        printf("ONT Ds Sdber for %d, arrival at %d\n", ont, eventTime);
+      }
+      break;
+    case OBJECTS__ont_us_sdber:
+      ont_us_sdber_msg = axos__ont_us_sdber__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_us_sdber_msg > 0) {
+        int ont = ont_us_sdber_msg->ont_id;
+        int eventTime = ont_us_sdber_msg->event_time;
+        printf("ONT Us Sdber for %d, arrival at %d\n", ont, eventTime);
+      }
+      break;
+    case OBJECTS__ont_departure:
+      ont_departure_msg = axos__ont_departure__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_departure_msg > 0) {
+        int ont = ont_departure_msg->ont_id;
+        int eventTime = ont_departure_msg->event_time;
+        printf("ONT departure for %d, arrival at %d\n", ont, eventTime);
+      }
+      break;
+    case OBJECTS__ont_dying_gasp:
+      ont_dying_gasp_msg = axos__ont_dying_gasp__unpack(NULL, nbytes - 8, protobuf_ptr);
+      //printf("msg has a value of %d\n", msg);
+      if (ont_dying_gasp_msg > 0) {
+        int ont = ont_dying_gasp_msg->ont_id;
+        int eventTime = ont_dying_gasp_msg->event_time;
+        printf("ONT dying_gasp for %d, arrival at %d\n", ont, eventTime);
+      }
+      break;
+    default:
+      printf("Unknown message object: %d\n", type);
+      break;
+  }
+  hexDump ("ont-missing", temp_buffer, nbytes);
 }
 
+// another callback, this time for a time-out
+static void
+timeout_cb (EV_P_ ev_timer *w, int revents)
+{
+  puts("Timer triggered");
+  //// this causes the innermost ev_run to stop iterating
+  //ev_break (EV_A_ EVBREAK_ONE);
+}
+
+int
+main (void) {
+
+    struct passwd *p;
+
+    if ((p = getpwnam("dwhite")) == NULL) {
+        perror("user dwhite not found");
+        return EXIT_FAILURE;
+    }
+    printf("User dwhite has a uid of %d\n", (int) p->pw_uid);
+
+    struct group *g;
+
+    if ((g = getgrnam("dwhite")) == NULL) {
+        perror("group dwhite not found");
+        return EXIT_FAILURE;
+    }
+    printf("Group dwhite has a gid of %d\n", (int) g->gr_gid);
+
+    //exec_as(p->pw_uid, g->gr_gid, &child_stdin, &child_stdout, &child_stderr, "/usr/bin/perl --version");
+    //exec_as(p->pw_uid, g->gr_gid, &child_stdin, &child_stdout, &child_stderr, "/home/dwhite/eve/netconf.pl");
+    //exec_as(0, 0, &child_stdin, &child_stdout, &child_stderr, "/home/dwhite/eve/netconf.pl");
+
+    //int flags = fcntl(child_stdout, F_GETFL, 0);
+    //fcntl(child_stdout, F_SETFL, flags | O_NONBLOCK);
+
+    //char temp_buffer[10];
+    //read (child_stdout, temp_buffer, 10);
+    //printf ("Buffer = %s", temp_buffer);
+
+    cfg_opt_t system_opts[] = {
+        CFG_STR("daemon_uid", "eve", CFGF_NONE), 
+        CFG_STR("daemon_gid", "eve", CFGF_NONE), 
+        CFG_STR("perl_bin", "/usr/bin/perl", CFGF_NONE), 
+        CFG_STR("perldoc_bin", "/usr/bin/perldoc", CFGF_NONE), 
+        CFG_STR("perlscript_location", "", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t e7_opts[] = {
+        CFG_STR("host", "", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t e7_daemon_opts[] = {
+        CFG_STR("daemon_uid", "e7", CFGF_NONE), 
+        CFG_STR("daemon_gid", "e7", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/e7/", CFGF_NONE), 
+        CFG_STR("connection_type", "ssh", CFGF_NONE), 
+        CFG_INT("connection_port", 830, CFGF_NONE), 
+        CFG_STR("connection_user", "ro", CFGF_NONE), 
+        CFG_STR("connection_pass", "secret", CFGF_NONE), 
+        CFG_SEC("e7", e7_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_END()
+    };
+
+    cfg_opt_t mx_opts[] = {
+        CFG_STR("host", "", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t mx_daemon_opts[] = {
+        CFG_STR("daemon_uid", "mx", CFGF_NONE), 
+        CFG_STR("daemon_gid", "mx", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/mx/", CFGF_NONE), 
+        CFG_STR("connection_type", "ssh", CFGF_NONE), 
+        CFG_INT("connection_port", 830, CFGF_NONE), 
+        CFG_STR("connection_user", "ro", CFGF_NONE), 
+        CFG_STR("connection_pass", "secret", CFGF_NONE), 
+        CFG_SEC("mx", mx_opts, CFGF_TITLE | CFGF_MULTI),
+        CFG_END()
+    };
+
+    cfg_opt_t slackbot_daemon_opts[] = {
+        CFG_STR("daemon_uid", "slackbot", CFGF_NONE), 
+        CFG_STR("daemon_gid", "slackbot", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/mx/", CFGF_NONE), 
+        CFG_STR("bot_token", "", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t webserver_daemon_opts[] = {
+        CFG_STR("daemon_uid", "www-data", CFGF_NONE), 
+        CFG_STR("daemon_gid", "www-data", CFGF_NONE), 
+        CFG_STR("listen_address", "localhost", CFGF_NONE), 
+        CFG_INT("listen_port", 443, CFGF_NONE), 
+        CFG_STR("tls_cert", "", CFGF_NONE), 
+        CFG_STR("tls_key", "", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/mx/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t tui_daemon_opts[] = {
+        CFG_STR("daemon_uid", "tui", CFGF_NONE), 
+        CFG_STR("daemon_gid", "tui", CFGF_NONE), 
+        CFG_STR("listen_socket", "/var/run/eve/eve_client", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/tui/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t ipfix_daemon_opts[] = {
+        CFG_STR("daemon_uid", "ipfix", CFGF_NONE), 
+        CFG_STR("daemon_gid", "ipfix", CFGF_NONE), 
+        CFG_STR("listen_address", "0.0.0.0", CFGF_NONE), 
+        CFG_INT("listen_port", 4739, CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/ipfix/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t syslog_daemon_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("listen_address", "0.0.0.0", CFGF_NONE), 
+        CFG_INT("listen_port", 514, CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/syslog/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t snmptrap_daemon_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("listen_address", "0.0.0.0", CFGF_NONE), 
+        CFG_INT("listen_port", 162, CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/snmptrap/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t flowspec_daemon_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/flowspec/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t analysisbot_daemon_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/analysisbot/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t smx_api_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/smx/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t calixcloud_api_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/csc/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t alianza_api_opts[] = {
+        CFG_STR("daemon_uid", "syslog", CFGF_NONE), 
+        CFG_STR("daemon_gid", "syslog", CFGF_NONE), 
+        CFG_STR("socket", "/var/run/eve/alianza/", CFGF_NONE), 
+        CFG_END()
+    };
+
+    cfg_opt_t opts[] = {
+        CFG_SEC("system", system_opts, CFGF_NONE),
+        CFG_SEC("e7_daemon", e7_daemon_opts, CFGF_NONE),
+        CFG_SEC("mx_daemon", mx_daemon_opts, CFGF_NONE),
+        CFG_SEC("slackbot_daemon", slackbot_daemon_opts, CFGF_NONE),
+        CFG_SEC("webserver_daemon", webserver_daemon_opts, CFGF_NONE),
+        CFG_SEC("tui_daemon", tui_daemon_opts, CFGF_NONE),
+        CFG_SEC("ipfix_daemon", ipfix_daemon_opts, CFGF_NONE),
+        CFG_SEC("syslog_daemon", syslog_daemon_opts, CFGF_NONE),
+        CFG_SEC("snmptrap_daemon", snmptrap_daemon_opts, CFGF_NONE),
+        CFG_SEC("flowspec_daemon", flowspec_daemon_opts, CFGF_NONE),
+        CFG_SEC("analysisbot_daemon", analysisbot_daemon_opts, CFGF_NONE),
+        CFG_SEC("smx_api", smx_api_opts, CFGF_NONE),
+        CFG_SEC("calixcloud_api", calixcloud_api_opts, CFGF_NONE),
+        CFG_SEC("alianza_api", alianza_api_opts, CFGF_NONE),
+        CFG_END()
+    };
+
+/*
+  int repeat;
+*/
+
+  cfg_t *cfg;
+  cfg = cfg_init(opts, CFGF_NONE);
+  if(cfg_parse(cfg, "../eve.conf") == CFG_PARSE_ERROR)
+    return 1;   
+
+/*
+  printf("Hello");
+  for(int i = 0; i < cfg_size(cfg, "targets"); i++) {
+    printf(", %s", cfg_getnstr(cfg, "targets", i));
+  }
+  printf("!\n");
+*/
+
+  cfg_free(cfg);
+
+/*
+  rc = mdb_env_create(&env);
+  rc = mdb_env_open(env, "./testdb", 0, 0664);
+  rc = mdb_txn_begin(env, NULL, 0, &txn);
+  rc = mdb_open(txn, NULL, 0, &dbi);
+
+  key.mv_size = sizeof(int);
+  key.mv_data = sval;
+  data.mv_size = sizeof(sval);
+  data.mv_data = sval;
+
+  sprintf(sval, "%03x %d foo bar", 32, 3141592);
+  rc = mdb_put(txn, dbi, &key, &data, 0);
+  rc = mdb_txn_commit(txn);
+  if (rc) {
+    fprintf(stderr, "mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+    goto leave;
+  }
+  rc = mdb_txn_begin(env, NULL, MDB_RDONLY, &txn);
+  rc = mdb_cursor_open(txn, dbi, &cursor);
+  while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
+    printf("key: %p %.*s, data: %p %.*s\n",
+    key.mv_data,  (int) key.mv_size,  (char *) key.mv_data,
+    data.mv_data, (int) data.mv_size, (char *) data.mv_data);
+  }
+  mdb_cursor_close(cursor);
+  mdb_txn_abort(txn);
+*/
+
+leave:
+  printf("");
+//  mdb_close(env, dbi);
+//  mdb_env_close(env);
+  int uid = getuid();
+  printf("The uid = %d\n", uid);
+  if (getuid() == 0) {
+      /* process is running as root, drop privileges */
+      puts("Process is running as root. Dropping privileges\n");
+      if (setgid(1000) != 0) {
+          printf("setgid: Unable to drop group privileges: %s", strerror(errno));
+          abort();
+      }
+      if (setuid(1000) != 0) {
+          printf("setuid: Unable to drop user privileges: %S", strerror(errno));
+          abort();
+      }
+  }
+
+  ev_default_loop (EVBACKEND_POLL | EVBACKEND_SELECT | EVFLAG_NOENV);
+
+  // use the default event loop unless you have special needs
+  struct ev_loop *loop = EV_DEFAULT;
+
+  // initialise an io watcher, then start it
+  // this one will watch for stdin to become readable
+  ev_io_init (&stdin_watcher, child_stdout_cb, child_stdout, EV_READ);
+  ev_io_start (loop, &stdin_watcher);
+
+  // initialise a timer watcher, then start it
+  // simple non-repeating 5.5 second timeout
+  //ev_timer_init (&timeout_watcher, timeout_cb, 1, 1);
+  //ev_timer_start (loop, &timeout_watcher);
+
+
+
+  int len;
+  struct sockaddr_in servaddr, cli;
+  struct ev_io w_accept;
+ 
+  // socket create and verification
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd == -1) {
+    printf("socket creation failed...\n");
+    exit(0);
+  }
+  else
+    printf("Socket successfully created..\n");
+  bzero(&servaddr, sizeof(servaddr));
+
+  // assign IP, PORT 
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(1234);
+ 
+  // Binding newly created socket to given IP and verification
+  if ((bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr))) != 0) {
+    printf("socket bind failed...\n");
+    perror("Bind socket");
+    exit(0);
+  }
+  else
+    printf("Socket successfully binded..\n");
+
+  // Now server is ready to listen and verification
+  if ((listen(sockfd, 5)) != 0) {
+    printf("Listen failed...\n");
+    exit(0);
+  }
+  else
+    printf("Server listening..\n");
+  len = sizeof(cli);
+
+  ev_io_init(&w_accept, accept_cb, sockfd, EV_READ);
+  ev_io_start(loop, &w_accept);
+
+  ev_signal exitsig;
+  ev_signal_init (&exitsig, sig_cb, SIGINT);
+  ev_signal_start (loop, &exitsig);
+
+  // now wait for events to arrive
+  ev_run (loop, 0);
+
+  // break was called, so exit
+  return 0;
+}
