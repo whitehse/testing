@@ -18,18 +18,18 @@ include_directories(
   "${CMAKE_BINARY_DIR}/configured_files/include")
 
 
-add_library(firetools STATIC
+add_library(${LIBRARY_NAME} STATIC
   "${LIBRARY_SOURCES}"
 )
   #"${LIBRARY_HEADERS"
 
-add_executable(test 
+add_executable(exe
   "${EXE_SOURCES}"
 )
 
 if (WASM)
 else()
-  target_link_libraries(test m)
+  target_link_libraries(exe m)
 endif()
 
-#target_link_options(test PRIVATE "LINKER:--no-check-features")
+#target_link_options(main PRIVATE "LINKER:--no-check-features")

@@ -40,6 +40,9 @@ prepare:
 
 graphviz:
 	cd build && cmake .. --graphviz=graph.dot && dot -Tpng graph.dot -o graph.png
+
 docs:
 	cd build && cmake --build . --target=docs
 
+test:
+	cd build && ctest
