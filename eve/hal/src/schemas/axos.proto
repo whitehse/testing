@@ -1,0 +1,1484 @@
+syntax = "proto3";
+
+enum vendor {
+  CXNK = 0;
+}
+
+enum eth_port {
+  g1 = 0;
+  g2 = 1;
+  g3 = 2;
+  g4 = 3;
+}
+
+enum pon_port {
+  gp1 = 0;
+  gp2 = 1;
+  gp3 = 2;
+  gp4 = 3;
+  gp5 = 4;
+  gp6 = 5;
+  gp7 = 6;
+  gp8 = 7;
+  gp9 = 8;
+  gp10 = 9;
+  gp11 = 10;
+  gp12 = 11;
+  gp13 = 12;
+  gp14 = 13;
+  gp15 = 14;
+  gp16 = 15;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:38-06:00</eventTime>
+<ont-missing xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>Provisioned ONT is missing</description>
+  <probable-cause>Provisioned ONT is not accessible on the PON.</probable-cause>
+  <details>SerialNo=A7162A</details>
+  <device-sequence-number>141015</device-sequence-number>
+  <instance-id>10.141014</instance-id>
+  <id>5020</id>
+  <name>ont-missing</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>No action.</repair-action>
+  <address>/config/system/ont[ont-id='13387']</address>
+  <port>gp3</port>
+  <ont-id>13387</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp3</phys-pon-port>
+  <serial-number>A7162A</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-missing>
+</notification>
+
+$VAR1 = {
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:23:38-06:00',
+          'ont-missing' => {
+                             'address' => '/config/system/ont[ont-id=\'13387\']',
+                             'prev-severity' => 'MINOR',
+                             'phys-pon-port' => 'gp3',
+                             'service-impacting' => 'true',
+                             'perceived-severity' => 'CLEAR',
+                             'phys-pon-shelf' => '1',
+                             'alarm-type' => 'EQUIPMENT',
+                             'hw-failure-event' => 'false',
+                             'probable-cause' => 'Provisioned ONT is not accessible on the PON.',
+                             'id' => '5020',
+                             'name' => 'ont-missing',
+                             'phys-pon-slot' => '2',
+                             'repair-action' => 'No action.',
+                             'equipment-type' => 'ONT',
+                             'vendor-id' => 'CXNK',
+                             'port' => 'gp3',
+                             'ont-id' => '13387',
+                             'category' => 'PON',
+                             'details' => 'SerialNo=A7162A',
+                             'serial-number' => 'A7162A',
+                             'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                             'description' => 'Provisioned ONT is missing',
+                             'alarm' => 'true',
+                             'service-affecting' => 'true',
+                             'device-sequence-number' => '141015',
+                             'instance-id' => '10.141014'
+                           }
+        };
+*/
+message ont_missing {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:38-06:00</eventTime>
+<ont-ds-sdber xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT Downstream SDBER rate exceeded</description>
+  <probable-cause>Downstream Signal Degrade Bit Error Rate (SDBER) exceeded.</probable-cause>
+  <details>SerialNo=A794E6</details>
+  <device-sequence-number>167871</device-sequence-number>
+  <instance-id>14.167868</instance-id>
+  <id>5034</id>
+  <name>ont-ds-sdber</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>QOS</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>No action.</repair-action>
+  <address>/config/system/ont[ont-id='14343']</address>
+  <port>gp1</port>
+  <ont-id>14343</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp1</phys-pon-port>
+  <serial-number>A794E6</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-ds-sdber>
+</notification>
+$VAR1 = {
+          'ont-ds-sdber' => {
+                              'equipment-type' => 'ONT',
+                              'vendor-id' => 'CXNK',
+                              'ont-id' => '14343',
+                              'port' => 'gp1',
+                              'serial-number' => 'A794E6',
+                              'details' => 'SerialNo=A794E6',
+                              'category' => 'PON',
+                              'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                              'description' => 'ONT Downstream SDBER rate exceeded',
+                              'alarm' => 'true',
+                              'instance-id' => '14.167868',
+                              'service-affecting' => 'false',
+                              'device-sequence-number' => '167871',
+                              'address' => '/config/system/ont[ont-id=\'14343\']',
+                              'service-impacting' => 'true',
+                              'phys-pon-port' => 'gp1',
+                              'prev-severity' => 'MINOR',
+                              'perceived-severity' => 'CLEAR',
+                              'alarm-type' => 'QOS',
+                              'hw-failure-event' => 'false',
+                              'phys-pon-shelf' => '1',
+                              'id' => '5034',
+                              'probable-cause' => 'Downstream Signal Degrade Bit Error Rate (SDBER) exceeded.',
+                              'repair-action' => 'No action.',
+                              'phys-pon-slot' => '2',
+                              'name' => 'ont-ds-sdber'
+                            },
+          'eventTime' => '2022-12-26T11:23:38-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0'
+        };
+*/
+
+message ont_ds_sdber {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:23-06:00</eventTime>
+<ont-us-sdber xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT Upstream SDBER rate exceeded</description>
+  <probable-cause>Upstream Signal Degrade Bit Error Rate (SDBER) exceeded.</probable-cause>
+  <details>SerialNo=76069F</details>
+  <device-sequence-number>84434</device-sequence-number>
+  <instance-id>5.84434</instance-id>
+  <id>5033</id>
+  <name>ont-us-sdber</name>
+  <perceived-severity>MINOR</perceived-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>QOS</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>No action;</repair-action>
+  <address>/config/system/ont[ont-id='20580']</address>
+  <port>gp7</port>
+  <ont-id>20580</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp7</phys-pon-port>
+  <serial-number>76069F</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-us-sdber>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T11:23:23-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'ont-us-sdber' => {
+                              'phys-pon-slot' => '2',
+                              'name' => 'ont-us-sdber',
+                              'alarm' => 'true',
+                              'repair-action' => 'No action;',
+                              'service-affecting' => 'false',
+                              'device-sequence-number' => '84434',
+                              'instance-id' => '5.84434',
+                              'phys-pon-shelf' => '1',
+                              'alarm-type' => 'QOS',
+                              'hw-failure-event' => 'false',
+                              'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                              'probable-cause' => 'Upstream Signal Degrade Bit Error Rate (SDBER) exceeded.',
+                              'description' => 'ONT Upstream SDBER rate exceeded',
+                              'id' => '5033',
+                              'port' => 'gp7',
+                              'ont-id' => '20580',
+                              'category' => 'PON',
+                              'perceived-severity' => 'MINOR',
+                              'details' => 'SerialNo=76069F',
+                              'serial-number' => '76069F',
+                              'equipment-type' => 'ONT',
+                              'address' => '/config/system/ont[ont-id=\'20580\']',
+                              'vendor-id' => 'CXNK',
+                              'phys-pon-port' => 'gp7',
+                              'service-impacting' => 'true'
+                            }
+        };
+*/
+message ont_us_sdber {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:38-06:00</eventTime>
+<ont-arrival xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT has arrived on PON port</description>
+  <probable-cause>ONT has arrived on PON port</probable-cause>
+  <details>Vendor-id=CXNK,SerialNo=A7162A,ONTMAC=60:db:98:3c:bb:2d,MTAMAC=60:db:98:3c:bb:2e</details>
+  <device-sequence-number>53073</device-sequence-number>
+  <instance-id>10.141016</instance-id>
+  <id>5001</id>
+  <name>ont-arrival</name>
+  <alarm>false</alarm>
+  <category>PON</category>
+  <address>/interfaces/interface[name='1/2/gp3']</address>
+  <primary-element>ont-id=13387</primary-element>
+  <shelf-id>1</shelf-id>
+  <slot-id>2</slot-id>
+  <port>gp3</port>
+  <model>803G</model>
+  <ont-id>13387</ont-id>
+  <internal-pon-device>2.gpi3</internal-pon-device>
+  <pon-device>2.gp3</pon-device>
+  <range-time>239648</range-time>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp3</phys-pon-port>
+  <serial-number>A7162A</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+  <clei>BVMCN10ARA</clei>
+</ont-arrival>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T11:23:38-06:00',
+          'ont-arrival' => {
+                             'vendor-id' => 'CXNK',
+                             'equipment-type' => 'ONT',
+                             'category' => 'PON',
+                             'details' => 'Vendor-id=CXNK,SerialNo=A7162A,ONTMAC=60:db:98:3c:bb:2d,MTAMAC=60:db:98:3c:bb:2e',
+                             'serial-number' => 'A7162A',
+                             'port' => 'gp3',
+                             'ont-id' => '13387',
+                             'description' => 'ONT has arrived on PON port',
+                             'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                             'device-sequence-number' => '53073',
+                             'primary-element' => 'ont-id=13387',
+                             'instance-id' => '10.141016',
+                             'alarm' => 'false',
+                             'phys-pon-port' => 'gp3',
+                             'pon-device' => '2.gp3',
+                             'slot-id' => '2',
+                             'internal-pon-device' => '2.gpi3',
+                             'address' => '/interfaces/interface[name=\'1/2/gp3\']',
+                             'model' => '803G',
+                             'probable-cause' => 'ONT has arrived on PON port',
+                             'id' => '5001',
+                             'phys-pon-shelf' => '1',
+                             'range-time' => '239648',
+                             'clei' => 'BVMCN10ARA',
+                             'name' => 'ont-arrival',
+                             'phys-pon-slot' => '2',
+                             'shelf-id' => '1'
+                           },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0'
+        };
+*/
+
+message ont_arrival {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:51-06:00</eventTime>
+<ont-departure xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT has departed on PON port</description>
+  <probable-cause>ONT has departed on PON port</probable-cause>
+  <details>Vendor-id=CXNK,SerialNo=DE13AA</details>
+  <device-sequence-number>99930</device-sequence-number>
+  <instance-id>16.154878</instance-id>
+  <id>5002</id>
+  <name>ont-departure</name>
+  <alarm>false</alarm>
+  <category>PON</category>
+  <address>/interfaces/interface[name='1/2/gp8']</address>
+  <primary-element>ont-id=23093</primary-element>
+  <shelf-id>1</shelf-id>
+  <slot-id>2</slot-id>
+  <port>gp8</port>
+  <logical-port>gp8</logical-port>
+  <onu-id>3</onu-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp8</phys-pon-port>
+  <serial-number>DE13AA</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+  <clei>BVMCN10ARA</clei>
+</ont-departure>
+</notification>
+$VAR1 = {
+          'ont-departure' => {
+                               'phys-pon-slot' => '2',
+                               'clei' => 'BVMCN10ARA',
+                               'name' => 'ont-departure',
+                               'shelf-id' => '1',
+                               'id' => '5002',
+                               'probable-cause' => 'ONT has departed on PON port',
+                               'phys-pon-shelf' => '1',
+                               'slot-id' => '2',
+                               'phys-pon-port' => 'gp8',
+                               'address' => '/interfaces/interface[name=\'1/2/gp8\']',
+                               'onu-id' => '3',
+                               'instance-id' => '16.154878',
+                               'device-sequence-number' => '99930',
+                               'primary-element' => 'ont-id=23093',
+                               'alarm' => 'false',
+                               'description' => 'ONT has departed on PON port',
+                               'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                               'details' => 'Vendor-id=CXNK,SerialNo=DE13AA',
+                               'category' => 'PON',
+                               'serial-number' => 'DE13AA',
+                               'port' => 'gp8',
+                               'logical-port' => 'gp8',
+                               'vendor-id' => 'CXNK',
+                               'equipment-type' => 'ONT'
+                             },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:23:51-06:00'
+        };
+*/
+message ont_departure {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:43-06:00</eventTime>
+<user-login xmlns='http://www.calix.com/ns/exa/base'>
+  <description>User login from CLI/Netconf/EWI</description>
+  <probable-cause>User login from CLI/Netconf/EWI</probable-cause>
+  <details>This event is generated when a user logs into CLI/Netconf/EWI</details>
+  <device-sequence-number>106999</device-sequence-number>
+  <instance-id>7.137719</instance-id>
+  <id>101</id>
+  <name>user-login</name>
+  <alarm>false</alarm>
+  <category>SECURITY</category>
+  <address>/config/system/aaa/user[name='sysadmin']</address>
+  <session-id>40861</session-id>
+  <session-login>sysadmin</session-login>
+  <session-manager>netconf</session-manager>
+  <session-ip>44.225.11.206</session-ip>
+  <user-name>sysadmin</user-name>
+</user-login>
+</notification>
+$VAR1 = {
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:23:43-06:00',
+          'user-login' => {
+                            'category' => 'SECURITY',
+                            'details' => 'This event is generated when a user logs into CLI/Netconf/EWI',
+                            'session-id' => '40861',
+                            'address' => '/config/system/aaa/user[name=\'sysadmin\']',
+                            'session-manager' => 'netconf',
+                            'device-sequence-number' => '106999',
+                            'instance-id' => '7.137719',
+                            'name' => 'user-login',
+                            'user-name' => 'sysadmin',
+                            'alarm' => 'false',
+                            'session-ip' => '44.225.11.206',
+                            'probable-cause' => 'User login from CLI/Netconf/EWI',
+                            'session-login' => 'sysadmin',
+                            'description' => 'User login from CLI/Netconf/EWI',
+                            'id' => '101',
+                            'xmlns' => 'http://www.calix.com/ns/exa/base'
+                          }
+        };
+*/
+
+message user_login {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+  fixed32 session_ip = 4;
+  int64 session_id = 5;
+  string user_name = 6;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:50-06:00</eventTime>
+<user-logout xmlns='http://www.calix.com/ns/exa/base'>
+  <description>User logout from CLI/Netconf/EWI</description>
+  <probable-cause>User logout from CLI/Netconf/EWI</probable-cause>
+  <details>This event is generated when a user logs out from CLI/Netconf/EWI</details>
+  <device-sequence-number>107000</device-sequence-number>
+  <instance-id>7.137720</instance-id>
+  <id>102</id>
+  <name>user-logout</name>
+  <alarm>false</alarm>
+  <category>SECURITY</category>
+  <address>/config/system/aaa/user[name='sysadmin']</address>
+  <session-id>40861</session-id>
+  <session-login>sysadmin</session-login>
+  <session-manager>netconf</session-manager>
+  <session-ip>44.225.11.206</session-ip>
+  <user-name>sysadmin</user-name>
+</user-logout>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T11:23:50-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'user-logout' => {
+                             'session-id' => '40861',
+                             'details' => 'This event is generated when a user logs out from CLI/Netconf/EWI',
+                             'category' => 'SECURITY',
+                             'session-manager' => 'netconf',
+                             'address' => '/config/system/aaa/user[name=\'sysadmin\']',
+                             'name' => 'user-logout',
+                             'alarm' => 'false',
+                             'user-name' => 'sysadmin',
+                             'instance-id' => '7.137720',
+                             'device-sequence-number' => '107000',
+                             'xmlns' => 'http://www.calix.com/ns/exa/base',
+                             'id' => '102',
+                             'description' => 'User logout from CLI/Netconf/EWI',
+                             'probable-cause' => 'User logout from CLI/Netconf/EWI',
+                             'session-ip' => '44.225.11.206',
+                             'session-login' => 'sysadmin'
+                           }
+        };
+*/
+
+message user_logout {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+  fixed32 session_ip = 4;
+  int64 session_id = 5;
+  string user_name = 6;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T13:37:47-06:00</eventTime>
+<ont-eth-down xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ont port loss of signal</description>
+  <probable-cause>This alarm is set when the ont reports no signal present on an enabled ethernet interface.</probable-cause>
+  <device-sequence-number>129600</device-sequence-number>
+  <instance-id>9.129600</instance-id>
+  <id>5044</id>
+  <name>ont-eth-down</name>
+  <perceived-severity>MAJOR</perceived-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>Ensure that the physical interface is properly connected and is receiving a valid signal from the far end.</repair-action>
+  <address>/interfaces/interface[name='21798/g1']</address>
+  <ont-id>21798</ont-id>
+  <port>g1</port>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp3</phys-pon-port>
+  <serial-number>DE2D68</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-eth-down>
+</notification>
+$VAR1 = {
+          'ont-eth-down' => {
+                              'category' => 'PON',
+                              'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                              'port' => 'g1',
+                              'hw-failure-event' => 'false',
+                              'device-sequence-number' => '129600',
+                              'perceived-severity' => 'MAJOR',
+                              'service-affecting' => 'true',
+                              'alarm' => 'true',
+                              'name' => 'ont-eth-down',
+                              'probable-cause' => 'This alarm is set when the ont reports no signal present on an enabled ethernet interface.',
+                              'ont-id' => '21798',
+                              'phys-pon-slot' => '2',
+                              'alarm-type' => 'EQUIPMENT',
+                              'phys-pon-shelf' => '1',
+                              'serial-number' => 'DE2D68',
+                              'instance-id' => '9.129600',
+                              'service-impacting' => 'true',
+                              'repair-action' => 'Ensure that the physical interface is properly connected and is receiving a valid signal from the far end.',
+                              'phys-pon-port' => 'gp3',
+                              'vendor-id' => 'CXNK',
+                              'id' => '5044',
+                              'equipment-type' => 'ONT',
+                              'address' => '/interfaces/interface[name=\'21798/g1\']',
+                              'description' => 'ont port loss of signal'
+                            },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T13:37:47-06:00'
+        };
+*/
+message ont_eth_down {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  eth_port port = 3;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:47-06:00</eventTime>
+<ont-eth-down xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ont port loss of signal</description>
+  <probable-cause>This alarm is set when the ont reports no signal present on an enabled ethernet interface.</probable-cause>
+  <device-sequence-number>154877</device-sequence-number>
+  <instance-id>16.154874</instance-id>
+  <id>5044</id>
+  <name>ont-eth-down</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MAJOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>Ensure that the physical interface is properly connected and is receiving a valid signal from the far end.</repair-act
+ion>
+  <address>/interfaces/interface[name='13949/g1']</address>
+  <ont-id>13949</ont-id>
+  <port>g1</port>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>A7940F</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-eth-down>
+</notification>
+$VAR1 = {
+          'ont-eth-down' => {
+                              'ont-id' => '13949',
+                              'port' => 'g1',
+                              'serial-number' => 'A7940F',
+                              'category' => 'PON',
+                              'perceived-severity' => 'CLEAR',
+                              'address' => '/interfaces/interface[name=\'13949/g1\']',
+                              'equipment-type' => 'ONT',
+                              'service-impacting' => 'true',
+                              'phys-pon-port' => 'gp5',
+                              'prev-severity' => 'MAJOR',
+                              'vendor-id' => 'CXNK',
+                              'repair-action' => 'Ensure that the physical interface is properly connected and is receiving a valid signal from the far end.',
+                              'alarm' => 'true',
+                              'phys-pon-slot' => '2',
+                              'name' => 'ont-eth-down',
+                              'instance-id' => '16.154874',
+                              'device-sequence-number' => '154877',
+                              'service-affecting' => 'true',
+                              'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                              'hw-failure-event' => 'false',
+                              'alarm-type' => 'EQUIPMENT',
+                              'phys-pon-shelf' => '1',
+                              'description' => 'ont port loss of signal',
+                              'id' => '5044',
+                              'probable-cause' => 'This alarm is set when the ont reports no signal present on an enabled ethernet interface.'
+                            },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:23:47-06:00'
+        };
+*/
+message ont_eth_down_clear {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  eth_port port = 3;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:34:27-06:00</eventTime>
+<ont-dying-gasp xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT reported dying gasp</description>
+  <probable-cause>ONT is out of service due to loss of power event detected by the ONT.</probable-cause>
+  <details>SerialNo=88AC77</details>
+  <device-sequence-number>263133</device-sequence-number>
+  <instance-id>13.263133</instance-id>
+  <id>5029</id>
+  <name>ont-dying-gasp</name>
+  <perceived-severity>MINOR</perceived-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>None.  ONT powered down.</repair-action>
+  <address>/config/system/ont[ont-id='5521']</address>
+  <port>gp2</port>
+  <ont-id>5521</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp2</phys-pon-port>
+  <serial-number>88AC77</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-dying-gasp>
+</notification>
+$VAR1 = {
+          'ont-dying-gasp' => {
+                                'alarm-type' => 'EQUIPMENT',
+                                'hw-failure-event' => 'false',
+                                'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                'phys-pon-shelf' => '1',
+                                'probable-cause' => 'ONT is out of service due to loss of power event detected by the ONT.',
+                                'id' => '5029',
+                                'description' => 'ONT reported dying gasp',
+                                'alarm' => 'true',
+                                'repair-action' => 'None.  ONT powered down.',
+                                'phys-pon-slot' => '1',
+                                'name' => 'ont-dying-gasp',
+                                'device-sequence-number' => '263133',
+                                'service-affecting' => 'true',
+                                'instance-id' => '13.263133',
+                                'address' => '/config/system/ont[ont-id=\'5521\']',
+                                'equipment-type' => 'ONT',
+                                'phys-pon-port' => 'gp2',
+                                'service-impacting' => 'true',
+                                'vendor-id' => 'CXNK',
+                                'ont-id' => '5521',
+                                'port' => 'gp2',
+                                'serial-number' => '88AC77',
+                                'category' => 'PON',
+                                'perceived-severity' => 'MINOR',
+                                'details' => 'SerialNo=88AC77'
+                              },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:34:27-06:00'
+        };
+*/
+message ont_dying_gasp {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:51-06:00</eventTime>
+<ont-dying-gasp xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT reported dying gasp</description>
+  <probable-cause>ONT is out of service due to loss of power event detected by the ONT.</probable-cause>
+  <details>SerialNo=B079BB</details>
+  <device-sequence-number>104326</device-sequence-number>
+  <instance-id>16.104321</instance-id>
+  <id>5029</id>
+  <name>ont-dying-gasp</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>None.  ONT powered down.</repair-action>
+  <address>/config/system/ont[ont-id='14462']</address>
+  <port>gp1</port>
+  <ont-id>14462</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp1</phys-pon-port>
+  <serial-number>B079BB</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-dying-gasp>
+</notification>
+$VAR1 = {
+          'ont-dying-gasp' => {
+                                'description' => 'ONT reported dying gasp',
+                                'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                'instance-id' => '16.104321',
+                                'device-sequence-number' => '104326',
+                                'service-affecting' => 'true',
+                                'alarm' => 'true',
+                                'vendor-id' => 'CXNK',
+                                'equipment-type' => 'ONT',
+                                'details' => 'SerialNo=B079BB',
+                                'category' => 'PON',
+                                'serial-number' => 'B079BB',
+                                'port' => 'gp1',
+                                'ont-id' => '14462',
+                                'id' => '5029',
+                                'probable-cause' => 'ONT is out of service due to loss of power event detected by the ONT.',
+                                'phys-pon-shelf' => '1',
+                                'alarm-type' => 'EQUIPMENT',
+                                'hw-failure-event' => 'false',
+                                'name' => 'ont-dying-gasp',
+                                'phys-pon-slot' => '2',
+                                'repair-action' => 'None.  ONT powered down.',
+                                'prev-severity' => 'MINOR',
+                                'service-impacting' => 'true',
+                                'phys-pon-port' => 'gp1',
+                                'address' => '/config/system/ont[ont-id=\'14462\']',
+                                'perceived-severity' => 'CLEAR'
+                              },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:23:51-06:00'
+        };
+*/
+
+message ont_dying_gasp_clear {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:24-06:00</eventTime>
+<low-rx-opt-pwr-ne xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>Low Optical Power received, Near-End</description>
+  <probable-cause>The OLT reports low received optical power from an ONT.</probable-cause>
+  <details>SerialNo=DE130F</details>
+  <device-sequence-number>87155</device-sequence-number>
+  <instance-id>4.87149</instance-id>
+  <id>5010</id>
+  <name>low-rx-opt-pwr-ne</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>EQUIPMENT</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>No action.</repair-action>
+  <address>/config/system/ont[ont-id='22250']</address>
+  <port>gp1</port>
+  <ont-id>22250</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>2</phys-pon-slot>
+  <phys-pon-port>gp1</phys-pon-port>
+  <serial-number>DE130F</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</low-rx-opt-pwr-ne>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T11:23:24-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'low-rx-opt-pwr-ne' => {
+                                   'serial-number' => 'DE130F',
+                                   'details' => 'SerialNo=DE130F',
+                                   'category' => 'PON',
+                                   'ont-id' => '22250',
+                                   'port' => 'gp1',
+                                   'vendor-id' => 'CXNK',
+                                   'equipment-type' => 'ONT',
+                                   'instance-id' => '4.87149',
+                                   'device-sequence-number' => '87155',
+                                   'service-affecting' => 'false',
+                                   'alarm' => 'true',
+                                   'description' => 'Low Optical Power received, Near-End',
+                                   'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                   'perceived-severity' => 'CLEAR',
+                                   'service-impacting' => 'true',
+                                   'phys-pon-port' => 'gp1',
+                                   'prev-severity' => 'MINOR',
+                                   'address' => '/config/system/ont[ont-id=\'22250\']',
+                                   'repair-action' => 'No action.',
+                                   'name' => 'low-rx-opt-pwr-ne',
+                                   'phys-pon-slot' => '2',
+                                   'id' => '5010',
+                                   'probable-cause' => 'The OLT reports low received optical power from an ONT.',
+                                   'alarm-type' => 'EQUIPMENT',
+                                   'hw-failure-event' => 'false',
+                                   'phys-pon-shelf' => '1'
+                                 }
+        };
+*/
+message low_rx_opt_pwr_ne {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:13-06:00</eventTime>
+<ntp-server-reachability xmlns='http://www.calix.com/ns/exa/base'>
+  <description>This alarm is to indicate ntp server(s) reachability</description>
+  <probable-cause>ntp server is not reachable</probable-cause>
+  <details>One or more ntp servers are not reachable</details>
+  <device-sequence-number>159994</device-sequence-number>
+  <instance-id>13.159991</instance-id>
+  <id>1918</id>
+  <name>ntp-server-reachability</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>false</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>COMMUNICATION</alarm-type>
+  <category>NTP</category>
+  <hw-failure-event>false</hw-failure-event>
+  <additional-text>Alarm State needs to be fixed</additional-text>
+  <repair-action>Check connectivity</repair-action>
+  <address>/config/system/ntp</address>
+</ntp-server-reachability>
+</notification>
+$VAR1 = {
+          'ntp-server-reachability' => {
+                                         'details' => 'One or more ntp servers are not reachable',
+                                         'category' => 'NTP',
+                                         'perceived-severity' => 'CLEAR',
+                                         'address' => '/config/system/ntp',
+                                         'prev-severity' => 'MINOR',
+                                         'service-impacting' => 'false',
+                                         'name' => 'ntp-server-reachability',
+                                         'repair-action' => 'Check connectivity',
+                                         'alarm' => 'true',
+                                         'instance-id' => '13.159991',
+                                         'service-affecting' => 'false',
+                                         'device-sequence-number' => '159994',
+                                         'xmlns' => 'http://www.calix.com/ns/exa/base',
+                                         'hw-failure-event' => 'false',
+                                         'alarm-type' => 'COMMUNICATION',
+                                         'additional-text' => 'Alarm State needs to be fixed',
+                                         'description' => 'This alarm is to indicate ntp server(s) reachability',
+                                         'id' => '1918',
+                                         'probable-cause' => 'ntp server is not reachable'
+                                       },
+          'eventTime' => '2022-12-26T11:23:13-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0'
+        };
+*/
+message ntp_server_reachability {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+}
+
+message ntp_server_reachability_clear {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:12-06:00</eventTime>
+<dhcp-lease-establishment xmlns='http://www.calix.com/ns/exa/layer2-service-protocols'>
+  <description>Lease establishment</description>
+  <probable-cause>Lease Established</probable-cause>
+  <details>Client initiated lease establishment. IP[209.95.122.4],Mac[d0:76:8f:b0:43:84]</details>
+  <device-sequence-number>200594</device-sequence-number>
+  <instance-id>6.381201</instance-id>
+  <id>2303</id>
+  <name>dhcp-lease-establishment</name>
+  <alarm>false</alarm>
+  <category>GENERAL</category>
+  <address>/interfaces/interface[name='12746/g1']/vlan[vlan-id='2047']/c-vlan[c-vlan-id='34']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <ont-id>12746</ont-id>
+  <port>g1</port>
+  <vlan-id>2047</vlan-id>
+  <c-vlan-id>34</c-vlan-id>
+</dhcp-lease-establishment>
+</notification>
+$VAR1 = {
+          'dhcp-lease-establishment' => {
+                                          'category' => 'GENERAL',
+                                          'details' => 'Client initiated lease establishment. IP[209.95.122.4],Mac[d0:76:8f:b0:43:84]',
+                                          'port' => 'g1',
+                                          'ont-id' => '12746',
+                                          'slot-id' => '1',
+                                          'address' => '/interfaces/interface[name=\'12746/g1\']/vlan[vlan-id=\'2047\']/c-vlan[c-vlan-i
+d=\'34\']',
+                                          'device-sequence-number' => '200594',
+                                          'instance-id' => '6.381201',
+                                          'name' => 'dhcp-lease-establishment',
+                                          'vlan-id' => '2047',
+                                          'alarm' => 'false',
+                                          'shelf-id' => '1',
+                                          'probable-cause' => 'Lease Established',
+                                          'id' => '2303',
+                                          'description' => 'Lease establishment',
+                                          'c-vlan-id' => '34',
+                                          'xmlns' => 'http://www.calix.com/ns/exa/layer2-service-protocols'
+                                        },
+          'eventTime' => '2022-12-26T11:23:12-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0'
+        };
+*/
+message dhcp_lease_establishment {
+  int64 event_time = 1;
+  fixed32 ip = 2;
+  int64 mac = 3;
+  int32 ont_id = 4;
+  eth_port port = 5;
+  int32 vlan_id = 6;
+  optional int32 c_vlan_id = 7;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:23:12-06:00</eventTime>
+<dhcp-lease-termination xmlns='http://www.calix.com/ns/exa/layer2-service-protocols'>
+  <description>Lease termination</description>
+  <probable-cause>Lease Terminated</probable-cause>
+  <details>Session Terminated. IP[209.95.122.4],Mac[d0:76:8f:b0:43:84]</details>
+  <device-sequence-number>200593</device-sequence-number>
+  <instance-id>6.381200</instance-id>
+  <id>2304</id>
+  <name>dhcp-lease-termination</name>
+  <alarm>false</alarm>
+  <category>GENERAL</category>
+  <address>/interfaces/interface[name='12746/g1']/vlan[vlan-id='2047']/c-vlan[c-vlan-id='34']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <ont-id>12746</ont-id>
+  <port>g1</port>
+  <vlan-id>2047</vlan-id>
+  <c-vlan-id>34</c-vlan-id>
+</dhcp-lease-termination>
+</notification>
+$VAR1 = {
+$VAR1 = {
+          'eventTime' => '2022-12-26T11:23:12-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'dhcp-lease-termination' => {
+                                        'name' => 'dhcp-lease-termination',
+                                        'alarm' => 'false',
+                                        'vlan-id' => '2047',
+                                        'shelf-id' => '1',
+                                        'device-sequence-number' => '200593',
+                                        'instance-id' => '6.381200',
+                                        'c-vlan-id' => '34',
+                                        'xmlns' => 'http://www.calix.com/ns/exa/layer2-service-protocols',
+                                        'probable-cause' => 'Lease Terminated',
+                                        'id' => '2304',
+                                        'description' => 'Lease termination',
+                                        'port' => 'g1',
+                                        'ont-id' => '12746',
+                                        'category' => 'GENERAL',
+                                        'details' => 'Session Terminated. IP[209.95.122.4],Mac[d0:76:8f:b0:43:84]',
+                                        'address' => '/interfaces/interface[name=\'12746/g1\']/vlan[vlan-id=\'2047\']/c-vlan[c-vlan-id=\'34\']',
+                                        'slot-id' => '1'
+                                      }
+        };
+*/
+message dhcp_lease_termination {
+  int64 event_time = 1;
+  fixed32 ip = 2;
+  int64 mac = 3;
+  int32 ont_id = 4;
+  eth_port port = 5;
+  int32 vlan_id = 6;
+  optional int32 c_vlan_id = 7;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:26:33-06:00</eventTime>
+<loss-of-pon xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>Last discovered ONT went missing</description>
+  <probable-cause>Last ONT has gone missing, potential fiber issue.</probable-cause>
+  <details>SerialNo=0</details>
+  <device-sequence-number>141017</device-sequence-number>
+  <instance-id>10.141017</instance-id>
+  <id>5005</id>
+  <name>loss-of-pon</name>
+  <perceived-severity>MAJOR</perceived-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>COMMUNICATION</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>Check the fiber.</repair-action>
+  <address>/interfaces/interface[name='1/1/gp8']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <port>gp8</port>
+</loss-of-pon>
+</notification>
+$VAR1 = {
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:26:33-06:00',
+          'loss-of-pon' => {
+                             'port' => 'gp8',
+                             'details' => 'SerialNo=0',
+                             'perceived-severity' => 'MAJOR',
+                             'category' => 'PON',
+                             'address' => '/interfaces/interface[name=\'1/1/gp8\']',
+                             'service-impacting' => 'true',
+                             'slot-id' => '1',
+                             'name' => 'loss-of-pon',
+                             'repair-action' => 'Check the fiber.',
+                             'shelf-id' => '1',
+                             'alarm' => 'true',
+                             'instance-id' => '10.141017',
+                             'service-affecting' => 'true',
+                             'device-sequence-number' => '141017',
+                             'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                             'hw-failure-event' => 'false',
+                             'alarm-type' => 'COMMUNICATION',
+                             'id' => '5005',
+                             'description' => 'Last discovered ONT went missing',
+                             'probable-cause' => 'Last ONT has gone missing, potential fiber issue.'
+                           }
+        };
+*/
+message loss_of_pon {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+  int32 shelf_id = 4;
+  int32 slot_id = 5;
+  pon_port port = 6;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T13:35:52-06:00</eventTime>
+<loss-of-pon xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>Last discovered ONT went missing</description>
+  <probable-cause>Last ONT has gone missing, potential fiber issue.</probable-cause>
+  <details>SerialNo=0</details>
+  <device-sequence-number>141555</device-sequence-number>
+  <instance-id>10.141553</instance-id>
+  <id>5005</id>
+  <name>loss-of-pon</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MAJOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>true</service-affecting>
+  <alarm-type>COMMUNICATION</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>Check the fiber.</repair-action>
+  <address>/interfaces/interface[name='1/1/gp8']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <port>gp8</port>
+</loss-of-pon>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T13:35:52-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'loss-of-pon' => {
+                             'instance-id' => '10.141553',
+                             'service-impacting' => 'true',
+                             'perceived-severity' => 'CLEAR',
+                             'device-sequence-number' => '141555',
+                             'hw-failure-event' => 'false',
+                             'port' => 'gp8',
+                             'details' => 'SerialNo=0',
+                             'slot-id' => '1',
+                             'prev-severity' => 'MAJOR',
+                             'alarm-type' => 'COMMUNICATION',
+                             'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                             'category' => 'PON',
+                             'description' => 'Last discovered ONT went missing',
+                             'address' => '/interfaces/interface[name=\'1/1/gp8\']',
+                             'probable-cause' => 'Last ONT has gone missing, potential fiber issue.',
+                             'shelf-id' => '1',
+                             'id' => '5005',
+                             'alarm' => 'true',
+                             'name' => 'loss-of-pon',
+                             'service-affecting' => 'true',
+                             'repair-action' => 'Check the fiber.'
+                           }
+        };
+*/
+message loss_of_pon_clear {
+  int64 event_time = 1;
+  string system_name = 2;
+  fixed32 system_ip = 3;
+  int32 shelf_id = 4;
+  int32 slot_id = 5;
+  pon_port port = 6;
+}
+
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:24:48-06:00</eventTime>
+<omci-comm-fail xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>OMCI communication with the ONT has failed</description>
+  <probable-cause>OMCI communication with the ONT has failed</probable-cause>
+  <details>Vendor-id=CXNK,SerialNo=BC3F4B</details>
+  <device-sequence-number>56766</device-sequence-number>
+  <instance-id>6.117359</instance-id>
+  <id>5117</id>
+  <name>omci-comm-fail</name>
+  <alarm>false</alarm>
+  <category>PON</category>
+  <address>/interfaces/interface[name='1/1/gp5']</address>
+  <primary-element>CXNK-BC3F4B</primary-element>
+  <secondary-element>ont-id=737</secondary-element>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <port>gp5</port>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>BC3F4B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</omci-comm-fail>
+</notification>
+$VAR1 = {
+          'omci-comm-fail' => {
+                                'description' => 'OMCI communication with the ONT has failed',
+                                'id' => '5117',
+                                'probable-cause' => 'OMCI communication with the ONT has failed',
+                                'phys-pon-shelf' => '1',
+                                'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                'instance-id' => '6.117359',
+                                'device-sequence-number' => '56766',
+                                'primary-element' => 'CXNK-BC3F4B',
+                                'name' => 'omci-comm-fail',
+                                'phys-pon-slot' => '1',
+                                'shelf-id' => '1',
+                                'alarm' => 'false',
+                                'vendor-id' => 'CXNK',
+                                'slot-id' => '1',
+                                'phys-pon-port' => 'gp5',
+                                'equipment-type' => 'ONT',
+                                'secondary-element' => 'ont-id=737',
+                                'address' => '/interfaces/interface[name=\'1/1/gp5\']',
+                                'details' => 'Vendor-id=CXNK,SerialNo=BC3F4B',
+                                'category' => 'PON',
+                                'serial-number' => 'BC3F4B',
+                                'port' => 'gp5'
+                              },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:24:48-06:00'
+        };
+*/
+message omci_comm_fail {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:31:27-06:00</eventTime>
+<ont-sw-mismatch xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT software mismatch</description>
+  <probable-cause>The ONT is not running the expected software version.</probable-cause>
+  <details>SerialNo=BC3F4B</details>
+  <device-sequence-number>117371</device-sequence-number>
+  <instance-id>6.117371</instance-id>
+  <id>5028</id>
+  <name>ont-sw-mismatch</name>
+  <perceived-severity>MINOR</perceived-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>PROCESSING-ERROR</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>A software download failure occured.</repair-action>
+  <address>/config/system/ont[ont-id='737']</address>
+  <port>gp5</port>
+  <ont-id>737</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>BC3F4B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-sw-mismatch>
+</notification>
+$VAR1 = {
+          'ont-sw-mismatch' => {
+                                 'probable-cause' => 'The ONT is not running the expected software version.',
+                                 'id' => '5028',
+                                 'description' => 'ONT software mismatch',
+                                 'phys-pon-shelf' => '1',
+                                 'hw-failure-event' => 'false',
+                                 'alarm-type' => 'PROCESSING-ERROR',
+                                 'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                 'service-affecting' => 'false',
+                                 'device-sequence-number' => '117371',
+                                 'instance-id' => '6.117371',
+                                 'name' => 'ont-sw-mismatch',
+                                 'phys-pon-slot' => '1',
+                                 'alarm' => 'true',
+                                 'repair-action' => 'A software download failure occured.',
+                                 'vendor-id' => 'CXNK',
+                                 'phys-pon-port' => 'gp5',
+                                 'service-impacting' => 'true',
+                                 'equipment-type' => 'ONT',
+                                 'address' => '/config/system/ont[ont-id=\'737\']',
+                                 'category' => 'PON',
+                                 'perceived-severity' => 'MINOR',
+                                 'details' => 'SerialNo=BC3F4B',
+                                 'serial-number' => 'BC3F4B',
+                                 'port' => 'gp5',
+                                 'ont-id' => '737'
+                               },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:31:27-06:00'
+        };
+*/
+message ont_sw_mismatch {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T11:26:07-06:00</eventTime>
+<ont-sw-mismatch xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT software mismatch</description>
+  <probable-cause>The ONT is not running the expected software version.</probable-cause>
+  <details>SerialNo=BC3F4B</details>
+  <device-sequence-number>117361</device-sequence-number>
+  <instance-id>6.116119</instance-id>
+  <id>5028</id>
+  <name>ont-sw-mismatch</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>PROCESSING-ERROR</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>A software download failure occured.</repair-action>
+  <address>/config/system/ont[ont-id='737']</address>
+  <port>gp5</port>
+  <ont-id>737</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>BC3F4B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-sw-mismatch>
+</notification>
+$VAR1 = {
+          'ont-sw-mismatch' => {
+                                 'perceived-severity' => 'CLEAR',
+                                 'phys-pon-port' => 'gp5',
+                                 'service-impacting' => 'true',
+                                 'prev-severity' => 'MINOR',
+                                 'address' => '/config/system/ont[ont-id=\'737\']',
+                                 'repair-action' => 'A software download failure occured.',
+                                 'name' => 'ont-sw-mismatch',
+                                 'phys-pon-slot' => '1',
+                                 'probable-cause' => 'The ONT is not running the expected software version.',
+                                 'id' => '5028',
+                                 'hw-failure-event' => 'false',
+                                 'alarm-type' => 'PROCESSING-ERROR',
+                                 'phys-pon-shelf' => '1',
+                                 'serial-number' => 'BC3F4B',
+                                 'category' => 'PON',
+                                 'details' => 'SerialNo=BC3F4B',
+                                 'ont-id' => '737',
+                                 'port' => 'gp5',
+                                 'vendor-id' => 'CXNK',
+                                 'equipment-type' => 'ONT',
+                                 'service-affecting' => 'false',
+                                 'device-sequence-number' => '117361',
+                                 'instance-id' => '6.116119',
+                                 'alarm' => 'true',
+                                 'description' => 'ONT software mismatch',
+                                 'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base'
+                               },
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T11:26:07-06:00'
+        };
+*/
+message ont_sw_mismatch_clear {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T13:52:28-06:00</eventTime>
+<ont-download-start xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT download starting</description>
+  <probable-cause>ONT download starting</probable-cause>
+  <details>standard-g988</details>
+  <device-sequence-number>56807</device-sequence-number>
+  <instance-id>6.117446</instance-id>
+  <id>5081</id>
+  <name>ont-download-start</name>
+  <alarm>false</alarm>
+  <category>PON</category>
+  <address>/config/system/ont[ont-id='737']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <port>gp5</port>
+  <ont-id>737</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>BC3F4B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-download-start>
+</notification>
+$VAR1 = {
+          'eventTime' => '2022-12-26T13:52:28-06:00',
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'ont-download-start' => {
+                                    'category' => 'PON',
+                                    'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                    'phys-pon-shelf' => '1',
+                                    'slot-id' => '1',
+                                    'details' => 'standard-g988',
+                                    'port' => 'gp5',
+                                    'device-sequence-number' => '56807',
+                                    'serial-number' => 'BC3F4B',
+                                    'instance-id' => '6.117446',
+                                    'name' => 'ont-download-start',
+                                    'alarm' => 'false',
+                                    'vendor-id' => 'CXNK',
+                                    'id' => '5081',
+                                    'shelf-id' => '1',
+                                    'phys-pon-port' => 'gp5',
+                                    'probable-cause' => 'ONT download starting',
+                                    'ont-id' => '737',
+                                    'equipment-type' => 'ONT',
+                                    'phys-pon-slot' => '1',
+                                    'address' => '/config/system/ont[ont-id=\'737\']',
+                                    'description' => 'ONT download starting'
+                                  }
+        };
+*/
+message ont_download_start {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+/*
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-12-26T13:54:08-06:00</eventTime>
+<ont-download-fail xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT download failed</description>
+  <probable-cause>ONT download failed</probable-cause>
+  <details>standard-g988</details>
+  <device-sequence-number>56808</device-sequence-number>
+  <instance-id>6.117447</instance-id>
+  <id>5083</id>
+  <name>ont-download-fail</name>
+  <alarm>false</alarm>
+  <category>PON</category>
+  <address>/config/system/ont[ont-id='737']</address>
+  <shelf-id>1</shelf-id>
+  <slot-id>1</slot-id>
+  <port>gp5</port>
+  <ont-id>737</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp5</phys-pon-port>
+  <serial-number>BC3F4B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-download-fail>
+</notification>
+$VAR1 = {
+          'xmlns' => 'urn:ietf:params:xml:ns:netconf:notification:1.0',
+          'eventTime' => '2022-12-26T13:54:08-06:00',
+          'ont-download-fail' => {
+                                   'category' => 'PON',
+                                   'xmlns' => 'http://www.calix.com/ns/exa/gpon-interface-base',
+                                   'device-sequence-number' => '56808',
+                                   'serial-number' => 'BC3F4B',
+                                   'instance-id' => '6.117447',
+                                   'phys-pon-shelf' => '1',
+                                   'slot-id' => '1',
+                                   'details' => 'standard-g988',
+                                   'port' => 'gp5',
+                                   'name' => 'ont-download-fail',
+                                   'alarm' => 'false',
+                                   'id' => '5083',
+                                   'vendor-id' => 'CXNK',
+                                   'phys-pon-port' => 'gp5',
+                                   'probable-cause' => 'ONT download failed',
+                                   'shelf-id' => '1',
+                                   'address' => '/config/system/ont[ont-id=\'737\']',
+                                   'description' => 'ONT download failed',
+                                   'ont-id' => '737',
+                                   'equipment-type' => 'ONT',
+                                   'phys-pon-slot' => '1'
+                                 }
+        };
+*/
+message ont_download_fail {
+  int64 event_time = 1;
+  int32 ont_id = 2;
+  vendor vendor_id = 3;
+  int32 serial_number = 4;
+}
+
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="487">
+  <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <filter type="xpath" select="/config/system/ont[ont-id='4125']"/>
+  </get>
+</rpc>
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="488">
+  <get xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <filter type="xpath" select="/config/system/ont"/>
+  </get>
+</rpc>

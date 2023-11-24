@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+/*
+sourceIPv4Address
+destinationIPv4Address
+ipNextHopIPv4Address
+ingressInterface
+egressInterface
+packetDeltaCount
+octetDeltaCount
+flowStartSysUpTime
+flowEndSysUpTime
+sourceTransportPort
+destinationTransportPort
+paddingOctets
+tcpControlBits
+protocolIdentifier
+ipClassOfService
+bgpSourceAsNumber
+bgpDestinationAsNumber
+sourceIPv4PrefixLength
+destinationIPv4PrefixLength
+paddingOctets
+*/
+message Flow {
+  fixed32 source_ip = 1;
+  fixed32 destination_ip = 2;
+  int32 source_asn = 3;
+  int32 destination_asn = 4;
+  int32 packet_delta = 5;
+  int32 octet_delta = 6;
+  float duration = 7;
+  int32 protocol = 8;
+  optional int32 source_port = 9;
+  optional int32 destination_port = 10;
+}
+

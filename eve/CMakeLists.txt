@@ -4,7 +4,7 @@ project(eve VERSION 0.1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 
 #add_subdirectory(eve-frontend)
-add_subdirectory(third-party/QCBOR)
+#add_subdirectory(third-party/QCBOR)
 
 add_custom_target (
   eve-frontend ALL
@@ -35,6 +35,8 @@ target_link_directories(eve PUBLIC
 target_link_libraries(eve
     websockets
     ev
+    eio
+    confuse
     sodium
     qcbor
 )

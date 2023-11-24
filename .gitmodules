@@ -1,0 +1,3 @@
+[submodule "firetools/third_party/zlib/src"]
+	path = firetools/third_party/zlib/src
+	url = https://github.com/madler/zlib.git

@@ -1,0 +1,2 @@
+static const char project_name[] = "@PROJECT_NAME@";
+static const char project_version[] = "@PROJECT_VERSION@";
