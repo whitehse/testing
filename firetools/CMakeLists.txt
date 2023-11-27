@@ -8,7 +8,7 @@ project(
 set(CMAKE_C_STANDARD 99)
 
 option(WASM "Whether to cross compile for Web Assembly" OFF)
-option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
+option(ENABLE_WARNINGS "Enable to add warnings to a target." OFF)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
 option(ENABLE_TESTING "Enable a Unit Testing build." ON)
 option(ENABLE_COVERAGE "Enable a Code Coverage build." OFF)
@@ -30,7 +30,6 @@ if (WASM)
 else()
 endif()
 
-
 include(CPM)
 cpmaddpackage("gh:ThrowTheSwitch/Unity#v2.5.2")
 cpmaddpackage("gh:cofyc/argparse@1.1.0")
@@ -41,10 +40,6 @@ include(AddGitSubmodule)
 #add_git_submodule(third_party/zlib)
 
 include(Docs)
-
-if(ENABLE_WARNINGS)
-    include(Warnings)
-endif()
 
 set(LIBRARY_NAME "firetools")
 set(UNIT_TEST_NAME "unit_tests")

@@ -27,9 +27,14 @@ add_executable(exe
   "${EXE_SOURCES}"
 )
 
-if (WASM)
-else()
+#if (WASM)
+#else()
   target_link_libraries(exe m)
-endif()
+#endif()
 
 #target_link_options(main PRIVATE "LINKER:--no-check-features")
+
+set(LEXER_OUT "${PARSER_DIR}/lexer.c")
+set(PARSER_OUT "${PARSER_DIR}/parser.c")
+
+add_subdirectory(parser)
