@@ -1,0 +1,2 @@
+autoreconf -i -f
+CC=/opt/wasi-sdk/bin/clang ./configure --host=wasm32-unknown-wasi
