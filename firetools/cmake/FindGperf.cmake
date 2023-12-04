@@ -1,0 +1,9 @@
+FIND_PROGRAM(GPERF_EXECUTABLE
+    gperf
+)
+
+# handle the QUIETLY and REQUIRED arguments and set GPERF_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gperf DEFAULT_MSG GPERF_EXECUTABLE)
+MARK_AS_ADVANCED(GPERF_EXECUTABLE)

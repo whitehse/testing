@@ -8,12 +8,30 @@ build:
 build_fresh:
 	rm -rf build
 	mkdir build
-	( cd build && cmake .. && cmake --build . )
+	( cd build && cmake \
+    -DMZ_ZLIB=ON \
+    -DMZ_BZIP2=OFF \
+    -DMZ_LZMA=OFF \
+    -DMZ_ZSTD=OFF \
+    -DMZ_OPENSSL=OFF \
+    -DMZ_PKCRYPT=OFF \
+    -DMZ_WZAES=OFF \
+    .. && cmake --build . )
 
 build_fresh_wasm:
 	rm -rf build
 	mkdir build
-	( cd build && cmake -DWASM=ON .. && cmake --build . )
+	( cd build && cmake \
+    -DWASM=ON \
+    -DCMAKE_C_COMPILER=/opt/wasi-sdk/bin/clang \
+    -DMZ_ZLIB=ON \
+    -DMZ_BZIP2=ON \
+    -DMZ_LZMA=OFF \
+    -DMZ_ZSTD=OFF \
+    -DMZ_OPENSSL=OFF \
+    -DMZ_PKCRYPT=ON \
+    -DMZ_WZAES=ON \
+    .. && cmake --build . )
 
 clean:
 	cd build && make clean

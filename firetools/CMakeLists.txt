@@ -31,8 +31,12 @@ else()
 endif()
 
 include(CPM)
-cpmaddpackage("gh:ThrowTheSwitch/Unity#v2.5.2")
-cpmaddpackage("gh:cofyc/argparse@1.1.0")
+if (WASM)
+else()
+  cpmaddpackage("gh:ThrowTheSwitch/Unity#v2.5.2")
+  cpmaddpackage("gh:cofyc/argparse@1.1.0")
+endif()
+
 #cpmaddpackage("gh:zlib-ng/zlib-ng#develop")
 #cpmaddpackage("gh:madler/zlib@1.3")
 
@@ -46,7 +50,12 @@ set(UNIT_TEST_NAME "unit_tests")
 
 #add_subdirectory(third_party)
 add_subdirectory(configured)
+add_subdirectory(third_party)
 add_subdirectory(src)
-add_subdirectory(tests)
+include(CPM)
+if (WASM)
+else()
+  add_subdirectory(tests)
+endif()
 
 #add_test(NAME test_test COMMAND bash "[1 = 0]")

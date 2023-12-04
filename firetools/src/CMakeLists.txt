@@ -37,4 +37,5 @@ add_executable(exe
 set(LEXER_OUT "${PARSER_DIR}/lexer.c")
 set(PARSER_OUT "${PARSER_DIR}/parser.c")
 
+add_subdirectory(spreadsheetmlrw)
 add_subdirectory(parser)
