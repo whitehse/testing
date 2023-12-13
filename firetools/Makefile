@@ -16,6 +16,12 @@ build_fresh:
     -DMZ_OPENSSL=OFF \
     -DMZ_PKCRYPT=OFF \
     -DMZ_WZAES=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DEXPAT_BUILD_TESTS=OFF \
+    -DEXPAT_BUILD_TOOLS=OFF \
+    -DEXPAT_SHARED_LIBS=OFF \
+    -DEXPAT_WITH_SYS_GETRANDOM=OFF \
     .. && cmake --build . )
 
 build_fresh_wasm:
@@ -31,6 +37,12 @@ build_fresh_wasm:
     -DMZ_OPENSSL=OFF \
     -DMZ_PKCRYPT=ON \
     -DMZ_WZAES=ON \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DEXPAT_BUILD_TESTS=OFF \
+    -DEXPAT_BUILD_TOOLS=OFF \
+    -DEXPAT_SHARED_LIBS=OFF \
+    -DEXPAT_WITH_SYS_GETRANDOM=OFF \
     .. && cmake --build . )
 
 clean:
