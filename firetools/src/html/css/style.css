@@ -1,3 +1,42 @@
-h1{
-  text-align: center;
+*{
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
 }
+
+body{
+  font-family: 'Montserrat', sans-serif;
+  background-image: linear-gradient(to right, #9b9fc6, #c5adc5);
+}
+  nav{
+    height: 5rem;
+    width: 100%;
+  }
+    nav a.logo{
+      color: #eddc01;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 35px;
+    }
+    nav ul {
+      display: flex;
+    }
+      nav ul li{
+        list-style: none;
+        display: block;
+        margin: auto;
+      }
+        nav ul li a{
+          display: block;
+          color: #d9d9d9;
+          font-size: 17px;
+          padding: 7px 13px;
+          border-radius: 3px;
+          text-transform: uppercase;
+        }
+        nav ul li a.active,nav ul li a:hover{
+          background: #d78725;
+          color: #f0f0f0;
+          transition: .3s;
+        }
