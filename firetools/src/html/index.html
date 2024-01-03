@@ -5,14 +5,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Nunito+Sans:opsz,wght@6..12,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
   </head>
   <body>
     <nav>
       <!--<a href="#" class="logo">FiReToOlS</a>-->
       <ul>
         <li><a href="#" class="active">Home</a></li>
-        <li><a href="#calculators">Calculators</a></li>
-        <li><a href="#simulations">Simulations</a></li>
+        <li><a href="#learn">Learn</a></li>
+        <li><a href="#calculate">Calculate</a></li>
+        <li><a href="#simulate">Simulate</a></li>
         <li><a href="#save">Save</a></li>
         <li><a href="#backup">Backup</a></li>
         <li><a href="#restore">Restore</a></li>
@@ -22,9 +24,20 @@
 
     <div id="wrapper">
       <div id="top">top div</div>
-      <div id="middle">middle div</div>
+        <input type="file" id="xlsx_upload"/>
+      <div id="middle">
+        <table class="charts-css pie show-heading">
+          <caption> Descriptive Pie Chart Heading </caption>
+          <tr>
+            <td id="my40" style="--start: 0.0; --end: 0.4;"> $ 40K </td>
+          </tr>
+        </table>
+      </div>
       <div id="bottom">bottom div</div>
     </div>
+    <!--
+    <img src="img/img4.svg" alt="fire clouds in the sky background">
+    -->
 <!--
     <main>
       <h3>This is the Home page</h3>

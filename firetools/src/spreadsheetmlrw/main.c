@@ -6,23 +6,66 @@
 #include <stddef.h>
 #include <spreadsheetmlrw.h>
 
-#include <zip.h>
-#include <unzip.h>
+#include <mz.h>
+#include "mz_strm.h"
+#include <mz_strm_mem.h>
+#include "mz_zip.h"
+
+#include <expat.h>
+#include <csv.h>
 
 #define BUF_SIZE 8192
 #define MAX_NAMELEN 256
 
 int main() {
-  puts("Hello, World!");
+  return 44;
+}
+
+int test() {
+  XML_Parser parser = XML_ParserCreate(NULL);
+  struct csv_parser p;
+  char buf[1024];
+  size_t bytes_read;
+  unsigned char options = 0;
+  csv_init(&p, options);
+
   struct ml_type_parse *ml_type_parser;
   ml_type_parser = in_word_set_ml_type ("application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml", 73);
-  printf("Name = %s\n", ml_type_parser->name);
-  printf("Enum = %d\n", (int)ml_type_parser->ml_type);
-  ml_type_parser = in_word_set_ml_type ("application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml", 74);
-  printf("Name = %s\n", ml_type_parser->name);
-  printf("Enum = %d\n", (int)ml_type_parser->ml_type);
 
-  unzFile uf = unzOpen64("/tmp/file.xlsx");
+  //printf("Name = %s\n", ml_type_parser->name);
+  //printf("Enum = %d\n", (int)ml_type_parser->ml_type);
+
+  //ml_type_parser = in_word_set_ml_type ("application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml", 74);
+
+  //printf("Name = %s\n", ml_type_parser->name);
+  //printf("Enum = %d\n", (int)ml_type_parser->ml_type);
+
+  uint8_t *zip_buffer = NULL;
+  int32_t zip_buffer_size = 0;
+  void *stream = NULL;
+  void *zip_handle = NULL;
+  int ret;
+
+  /* TODO: fill zip_buffer with zip contents.. */
+
+  stream = mz_stream_mem_create();
+
+  mz_stream_mem_set_buffer(stream, zip_buffer, zip_buffer_size);
+  mz_stream_open(stream, NULL, MZ_OPEN_MODE_READ);
+
+  zip_handle = mz_zip_create();
+  ret = mz_zip_open(zip_handle, stream, MZ_OPEN_MODE_READ);
+
+  /* TODO: unzip operations.. */
+  ret = mz_zip_goto_first_entry(zip_handle);
+
+  mz_zip_close(zip_handle);
+  mz_zip_delete(&zip_handle);
+
+  mz_stream_mem_delete(&stream);
+
+  //unzFile uf = unzOpen64("/tmp/file.xlsx");
+  /*
   unz_global_info64 pglobal_info;
   int ret = unzGetGlobalInfo64(uf, &pglobal_info);
   if (ret != UNZ_OK) goto out;
@@ -61,5 +104,7 @@ int main() {
 out:
   ret = unzClose(uf);
 
+  */
   return 0;
 }
+

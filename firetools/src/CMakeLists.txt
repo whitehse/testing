@@ -39,3 +39,4 @@ set(PARSER_OUT "${PARSER_DIR}/parser.c")
 
 add_subdirectory(spreadsheetmlrw)
 add_subdirectory(parser)
+#add_subdirectory(mygpu)

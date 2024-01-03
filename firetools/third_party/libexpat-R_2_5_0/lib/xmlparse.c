@@ -892,8 +892,8 @@ gather_time_entropy(void) {
 static unsigned long
 ENTROPY_DEBUG(const char *label, unsigned long entropy) {
   if (getDebugLevel("EXPAT_ENTROPY_DEBUG", 0) >= 1u) {
-    fprintf(stderr, "expat: Entropy: %s --> 0x%0*lx (%lu bytes)\n", label,
-            (int)sizeof(entropy) * 2, entropy, (unsigned long)sizeof(entropy));
+    //fprintf(stderr, "expat: Entropy: %s --> 0x%0*lx (%lu bytes)\n", label,
+    //        (int)sizeof(entropy) * 2, entropy, (unsigned long)sizeof(entropy));
   }
   return entropy;
 }
@@ -7678,12 +7678,12 @@ accountingReportStats(XML_Parser originParser, const char *epilog) {
 
   const float amplificationFactor
       = accountingGetCurrentAmplification(rootParser);
-  fprintf(stderr,
-          "expat: Accounting(%p): Direct " EXPAT_FMT_ULL(
-              "10") ", indirect " EXPAT_FMT_ULL("10") ", amplification %8.2f%s",
-          (void *)rootParser, rootParser->m_accounting.countBytesDirect,
-          rootParser->m_accounting.countBytesIndirect,
-          (double)amplificationFactor, epilog);
+  //fprintf(stderr,
+  //        "expat: Accounting(%p): Direct " EXPAT_FMT_ULL(
+  //            "10") ", indirect " EXPAT_FMT_ULL("10") ", amplification %8.2f%s",
+  //        (void *)rootParser, rootParser->m_accounting.countBytesDirect,
+  //        rootParser->m_accounting.countBytesIndirect,
+  //        (double)amplificationFactor, epilog);
 }
 
 static void
@@ -7698,10 +7698,10 @@ accountingReportDiff(XML_Parser rootParser,
                      enum XML_Account account) {
   assert(! rootParser->m_parentParser);
 
-  fprintf(stderr,
-          " (+" EXPAT_FMT_PTRDIFF_T("6") " bytes %s|%d, xmlparse.c:%d) %*s\"",
-          bytesMore, (account == XML_ACCOUNT_DIRECT) ? "DIR" : "EXP",
-          levelsAwayFromRootParser, source_line, 10, "");
+  //fprintf(stderr,
+  //        " (+" EXPAT_FMT_PTRDIFF_T("6") " bytes %s|%d, xmlparse.c:%d) %*s\"",
+  //        bytesMore, (account == XML_ACCOUNT_DIRECT) ? "DIR" : "EXP",
+  //        levelsAwayFromRootParser, source_line, 10, "");
 
   const char ellipis[] = "[..]";
   const size_t ellipsisLength = sizeof(ellipis) /* because compile-time */ - 1;
@@ -7713,19 +7713,19 @@ accountingReportDiff(XML_Parser rootParser,
       || (after - before)
              <= (ptrdiff_t)(contextLength + ellipsisLength + contextLength)) {
     for (; walker < after; walker++) {
-      fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
+      //fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
     }
   } else {
     for (; walker < before + contextLength; walker++) {
-      fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
+      //fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
     }
-    fprintf(stderr, ellipis);
+    //fprintf(stderr, ellipis);
     walker = after - contextLength;
     for (; walker < after; walker++) {
-      fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
+      //fprintf(stderr, "%s", unsignedCharToPrintable(walker[0]));
     }
   }
-  fprintf(stderr, "\"\n");
+  //fprintf(stderr, "\"\n");
 }
 
 static XML_Bool
@@ -7810,15 +7810,15 @@ entityTrackingReportStats(XML_Parser rootParser, ENTITY *entity,
   const char *const entityName = entity->name;
 #  endif
 
-  fprintf(
-      stderr,
-      "expat: Entities(%p): Count %9d, depth %2d/%2d %*s%s%s; %s length %d (xmlparse.c:%d)\n",
-      (void *)rootParser, rootParser->m_entity_stats.countEverOpened,
-      rootParser->m_entity_stats.currentDepth,
-      rootParser->m_entity_stats.maximumDepthSeen,
-      (rootParser->m_entity_stats.currentDepth - 1) * 2, "",
-      entity->is_param ? "%" : "&", entityName, action, entity->textLen,
-      sourceLine);
+  //fprintf(
+  //    stderr,
+  //    "expat: Entities(%p): Count %9d, depth %2d/%2d %*s%s%s; %s length %d (xmlparse.c:%d)\n",
+  //    (void *)rootParser, rootParser->m_entity_stats.countEverOpened,
+  //    rootParser->m_entity_stats.currentDepth,
+  //    rootParser->m_entity_stats.maximumDepthSeen,
+  //    (rootParser->m_entity_stats.currentDepth - 1) * 2, "",
+  //    entity->is_param ? "%" : "&", entityName, action, entity->textLen,
+  //    sourceLine);
 }
 
 static void
@@ -8386,7 +8386,8 @@ unsignedCharToPrintable(unsigned char c) {
 
 static unsigned long
 getDebugLevel(const char *variableName, unsigned long defaultDebugLevel) {
-  const char *const valueOrNull = getenv(variableName);
+  //const char *const valueOrNull = getenv(variableName);
+  const char *const valueOrNull = NULL;
   if (valueOrNull == NULL) {
     return defaultDebugLevel;
   }
