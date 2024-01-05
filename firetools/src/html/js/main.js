@@ -1,6 +1,7 @@
 const memory2 = new WebAssembly.Memory({ initial: 2000 });
 var malloc;
 var free;
+var doit;
 
 /*
 document.addEventListener("click", (e) => {
@@ -22,17 +23,30 @@ fileInput.onchange = () => {
   const reader = new FileReader();
 
   reader.onloadend = evt => {
-        //evt.target.result is an ArrayBuffer. In js, 
-        //you can't do anything with an ArrayBuffer 
-        //so we have to ???cast??? it to an Uint8Array
-        const uint8_t_arr = new Uint8Array(evt.target.result);
+        //const uint8_t_arr = new Uint8Array(evt.target.result);
 
-        //const summands = new Uint8Array(memory2.buffer);
-        const wasm_array = malloc(uint8_t_arr.length);
-        wasm_array.set(uint8_t_arr);
-        console.log("File was this bytes big:" + uint8_t_arr.length);
-        console.log("File was this bytes big:" + wasm_array.length);
+    //const view1 = new Uint8Array(memory.buffer);
+    //const pInput = instance.exports.malloc(1024);
+    //const pInput = malloc(1024);
+    //const view2 = new Uint8Array(memory.buffer);
+    //free(pInput);
 
+        const file_data = malloc(evt.target.result.byteLength);
+        //const wasm_array = new Uint8Array(malloc(uint8_t_arr.length));
+        //const wasm_array = new Uint8Array(malloc(uint8_t_arr.length));
+        //wasm_array = malloc(uint8_t_arr.length);
+        //wasm_array.set(uint8_t_arr);
+        //wasm_array = Object.assign({},uint8_t_arr);
+        //for (var i=0; i<evt.target.result.byteLength; i++) {
+          //memory2.buffer[i] = evt.target.result[i];
+        //  file_data[i] = evt.target.result[i];
+        //}
+        file_data[0]=4294967295;
+        console.log("File was this bytes big:" + evt.target.result.byteLength);
+        //console.log("File was this bytes big:" + wasm_array.length);
+
+        var ret = doit(file_data[0], evt.target.result.byteLength);
+        console.log(ret);
         //var dst = new ArrayBuffer(src.byteLength);
         //new Uint8Array(dst).set(new Uint8Array(src));
 
@@ -109,6 +123,7 @@ let intervalID = setInterval(() => {
     const importObject2 = {
       env: {
         memory: memory2,
+        imported_func: (arg) => console.log(arg),
       },
     };
     const { instance } = await WebAssembly.instantiate(bytes2, importObject2);
@@ -116,6 +131,7 @@ let intervalID = setInterval(() => {
     var test = instance.exports.test;
     malloc = instance.exports.malloc;
     free = instance.exports.free;
+    doit = instance.exports.doit;
     var none = test();
 
 /*

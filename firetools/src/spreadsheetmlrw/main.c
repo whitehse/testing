@@ -14,11 +14,72 @@
 #include <expat.h>
 #include <csv.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #define BUF_SIZE 8192
 #define MAX_NAMELEN 256
 
+extern void imported_func(int num);
+
 int main() {
-  return 44;
+  char *source = NULL;
+  long bufsize;
+  FILE *fp = fopen("/tmp/test.xlsx", "r");
+  if (fp != NULL) {
+    /* Go to the end of the file. */
+    if (fseek(fp, 0L, SEEK_END) == 0) {
+        /* Get the size of the file. */
+        bufsize = ftell(fp);
+        if (bufsize == -1) { /* Error */ }
+
+        /* Allocate our buffer to that size. */
+        source = malloc(sizeof(char) * (bufsize + 1));
+
+        /* Go back to the start of the file. */
+        if (fseek(fp, 0L, SEEK_SET) != 0) { /* Error */ }
+
+        /* Read the entire file into memory. */
+        size_t newLen = fread(source, sizeof(char), bufsize, fp);
+        if ( ferror( fp ) != 0 ) {
+            fputs("Error reading file", stderr);
+        } else {
+            source[newLen++] = '\0'; /* Just to be safe. */
+        }
+    }
+    fclose(fp);
+  }
+  doit(source, bufsize);
+}
+
+int doit(void *data, int length) {
+  uint8_t *zip_buffer = NULL;
+  int32_t zip_buffer_size = 0;
+  void *stream = NULL;
+  void *zip_handle = NULL;
+  int ret;
+
+  //imported_func(42);
+  stream = mz_stream_mem_create();
+
+  mz_stream_mem_set_buffer(stream, data, length);
+  mz_stream_open(stream, NULL, MZ_OPEN_MODE_READ);
+
+  zip_handle = mz_zip_create();
+  ret = mz_zip_open(zip_handle, stream, MZ_OPEN_MODE_READ);
+
+  /* TODO: unzip operations.. */
+  ret = mz_zip_goto_first_entry(zip_handle);
+  //imported_func(ret);
+  //imported_func(43);
+
+  mz_zip_close(zip_handle);
+  mz_zip_delete(&zip_handle);
+
+  mz_stream_mem_delete(&stream);
+
+  int *first_val = data;
+  return length;
 }
 
 int test() {
