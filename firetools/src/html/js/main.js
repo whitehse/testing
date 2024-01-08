@@ -1,7 +1,8 @@
-const memory2 = new WebAssembly.Memory({ initial: 2000 });
+const memory2 = new WebAssembly.Memory({ initial: 500 });
 var malloc;
 var free;
 var doit;
+var getspace;
 
 /*
 document.addEventListener("click", (e) => {
@@ -23,56 +24,20 @@ fileInput.onchange = () => {
   const reader = new FileReader();
 
   reader.onloadend = evt => {
-        //const uint8_t_arr = new Uint8Array(evt.target.result);
+        const uint8_t_arr = new Uint8Array(evt.target.result);
+        var fileSize = evt.target.result.byteLength;
 
-    //const view1 = new Uint8Array(memory.buffer);
-    //const pInput = instance.exports.malloc(1024);
-    //const pInput = malloc(1024);
-    //const view2 = new Uint8Array(memory.buffer);
-    //free(pInput);
-
-        const file_data = malloc(evt.target.result.byteLength);
-        //const wasm_array = new Uint8Array(malloc(uint8_t_arr.length));
-        //const wasm_array = new Uint8Array(malloc(uint8_t_arr.length));
-        //wasm_array = malloc(uint8_t_arr.length);
-        //wasm_array.set(uint8_t_arr);
-        //wasm_array = Object.assign({},uint8_t_arr);
-        //for (var i=0; i<evt.target.result.byteLength; i++) {
-          //memory2.buffer[i] = evt.target.result[i];
-        //  file_data[i] = evt.target.result[i];
-        //}
-        file_data[0]=4294967295;
-        console.log("File was this bytes big:" + evt.target.result.byteLength);
-        //console.log("File was this bytes big:" + wasm_array.length);
-
-        var ret = doit(file_data[0], evt.target.result.byteLength);
+        var offset = malloc(fileSize);
+        let wasmSpace = new Uint8Array(memory2.buffer, offset, fileSize);
+        for (var i=0; i<fileSize; i++) {
+          wasmSpace[i] = uint8_t_arr[i]
+        }
+        console.log("File was this bytes big:" + fileSize);
+        console.log("First two bytes of file (uint8_t_arr) are: " + uint8_t_arr[0] + " " + uint8_t_arr[1]);
+        console.log("First two bytes of file (wasmSpace) are: " + wasmSpace[0] + " " + wasmSpace[1]);
+        var ret = doit(offset, fileSize);
         console.log(ret);
-        //var dst = new ArrayBuffer(src.byteLength);
-        //new Uint8Array(dst).set(new Uint8Array(src));
-
-        //for (let i = 0; i < 10; i++) {
-        //  summands[i] = i;
-        //}
-
-        //Right now, we have the file as a unit8array in javascript memory. 
-        //As far as I understand, wasm can't directly access javascript memory. 
-        //Which is why we need to allocate special wasm memory and then
-        //copy the file from javascript memory into wasm memory so our wasm functions 
-        //can work on it.
-
-        //Retreiving our (modified) memory is also straight forward. 
-        //First we get some javascript memory and then we copy the 
-        //relevant chunk of the wasm memory into our javascript object.
-        //const returnArr = new Uint8Array(uint8_t_arr.length);
-        //If returnArr is std::vector<uint8_t>, then is probably similar to 
-        //returnArr.assign(ptr, ptr + dataSize)
-        //returnArr.set(window.Module.HEAPU8.subarray(uint8_t_ptr, uint8_t_ptr + uint8_t_arr.length));
-
-        //Lastly, according to the docs, we should call ._free here.
-        //Do we need to call the gc somehow?
-        //window.Module._free(uint8_t_ptr);
     }
-
   reader.readAsArrayBuffer(selectedFile);
 }
 
@@ -132,6 +97,7 @@ let intervalID = setInterval(() => {
     malloc = instance.exports.malloc;
     free = instance.exports.free;
     doit = instance.exports.doit;
+    getspace = instance.exports.getspace;
     var none = test();
 
 /*

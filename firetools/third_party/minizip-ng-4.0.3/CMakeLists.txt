@@ -46,10 +46,10 @@ cmake_dependent_option(MZ_LIBCOMP "Enables Apple compression" ON "APPLE" OFF)
 option(MZ_FETCH_LIBS "Enables fetching third-party libraries if not found" ${WIN32})
 option(MZ_FORCE_FETCH_LIBS "Enables fetching third-party libraries always" OFF)
 # Encryption support options
-option(MZ_PKCRYPT "Enables PKWARE traditional encryption" ON)
-option(MZ_WZAES "Enables WinZIP AES encryption" ON)
-cmake_dependent_option(MZ_OPENSSL "Enables OpenSSL for encryption" ON "UNIX" OFF)
-cmake_dependent_option(MZ_LIBBSD "Builds with libbsd crypto random" ON "UNIX" OFF)
+option(MZ_PKCRYPT "Enables PKWARE traditional encryption" OFF)
+option(MZ_WZAES "Enables WinZIP AES encryption" OFF)
+cmake_dependent_option(MZ_OPENSSL "Enables OpenSSL for encryption" OFF "UNIX" OFF)
+cmake_dependent_option(MZ_LIBBSD "Builds with libbsd crypto random" OFF "UNIX" OFF)
 # Character conversion options
 option(MZ_ICONV "Enables iconv for string encoding conversion" ON)
 # Code generation options
@@ -105,7 +105,7 @@ set(MINIZIP_LFG)
 
 # Initial source files
 set(MINIZIP_SRC
-    mz_crypt.c
+    #mz_crypt.c
     mz_os.c
     mz_strm.c
     mz_strm_buf.c
@@ -118,7 +118,7 @@ set(MINIZIP_SRC
 set(MINIZIP_HDR
     mz.h
     mz_os.h
-    mz_crypt.h
+    #mz_crypt.h
     mz_strm.h
     mz_strm_buf.h
     mz_strm_mem.h
@@ -998,7 +998,7 @@ add_feature_info(MZ_FORCE_FETCH_LIBS MZ_FORCE_FETCH_LIBS "Enables fetching third
 # Encryption support options
 add_feature_info(MZ_PKCRYPT MZ_PKCRYPT "Enables PKWARE traditional encryption")
 add_feature_info(MZ_WZAES MZ_WZAES "Enables WinZIP AES encryption")
-add_feature_info(MZ_OPENSSL MZ_OPENSSL "Enables OpenSSL for encryption")
+#add_feature_info(MZ_OPENSSL MZ_OPENSSL "Enables OpenSSL for encryption")
 add_feature_info(MZ_LIBBSD MZ_LIBBSD "Builds with libbsd crypto random")
 # Character conversion options
 add_feature_info(MZ_ICONV MZ_ICONV "Enables iconv string encoding conversion library")

@@ -16,7 +16,7 @@
 */
 
 #include "mz.h"
-#include "mz_crypt.h"
+//#include "mz_crypt.h"
 #include "mz_strm.h"
 #ifdef HAVE_BZIP2
 #  include "mz_strm_bzip.h"
@@ -2042,7 +2042,7 @@ int32_t mz_zip_entry_read(void *handle, void *buf, int32_t len) {
     /* aes encryption validation will fail if compressed_size > 0 */
     read = mz_stream_read(zip->compress_stream, buf, len);
     if (read > 0)
-        zip->entry_crc32 = mz_crypt_crc32_update(zip->entry_crc32, buf, read);
+        //zip->entry_crc32 = mz_crypt_crc32_update(zip->entry_crc32, buf, read);
 
     mz_zip_print("Zip - Entry - Read - %" PRId32 " (max %" PRId32 ")\n", read, len);
 
@@ -2057,7 +2057,7 @@ int32_t mz_zip_entry_write(void *handle, const void *buf, int32_t len) {
         return MZ_PARAM_ERROR;
     written = mz_stream_write(zip->compress_stream, buf, len);
     if (written > 0)
-        zip->entry_crc32 = mz_crypt_crc32_update(zip->entry_crc32, buf, written);
+        //zip->entry_crc32 = mz_crypt_crc32_update(zip->entry_crc32, buf, written);
 
     mz_zip_print("Zip - Entry - Write - %" PRId32 " (max %" PRId32 ")\n", written, len);
 
