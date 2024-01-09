@@ -20,6 +20,12 @@
 //#define BUF_SIZE 8192
 //#define MAX_NAMELEN 256
 
+char string_buffer[256];
+
+void* get_string_buffer() {
+  return &string_buffer;
+}
+
 extern void imported_func(int num);
 
 int main() {
@@ -56,6 +62,8 @@ int doit(void *data, int length) {
   void *zip_handle = NULL;
   int ret;
 
+  memcpy (string_buffer, "stuff\0", 6);
+
   stream = mz_stream_mem_create();
 
   mz_stream_mem_set_buffer(stream, data, length);
@@ -70,6 +78,9 @@ int doit(void *data, int length) {
   //imported_func((int)space[1]);
 
   /* TODO: unzip operations.. */
+  uint64_t count;
+  ret = mz_zip_get_number_entry(zip_handle, &count);
+  imported_func((int)count);
   ret = mz_zip_goto_first_entry(zip_handle);
   imported_func(ret);
 

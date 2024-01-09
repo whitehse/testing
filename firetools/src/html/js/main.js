@@ -2,7 +2,7 @@ const memory2 = new WebAssembly.Memory({ initial: 500 });
 var malloc;
 var free;
 var doit;
-var getspace;
+var get_string_buffer;
 
 /*
 document.addEventListener("click", (e) => {
@@ -97,7 +97,7 @@ let intervalID = setInterval(() => {
     malloc = instance.exports.malloc;
     free = instance.exports.free;
     doit = instance.exports.doit;
-    getspace = instance.exports.getspace;
+    get_string_buffer = instance.exports.get_string_buffer;
     var none = test();
 
 /*
