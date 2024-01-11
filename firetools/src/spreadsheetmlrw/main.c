@@ -10,6 +10,7 @@
 #include "mz_strm.h"
 #include <mz_strm_mem.h>
 #include "mz_zip.h"
+//#include "mz_zip_rw.h"
 
 #include <expat.h>
 #include <csv.h>
@@ -21,9 +22,14 @@
 //#define MAX_NAMELEN 256
 
 char string_buffer[256];
+int string_len = 0;
 
 void* get_string_buffer() {
   return &string_buffer;
+}
+
+int get_string_len() {
+  return string_len;
 }
 
 extern void imported_func(int num);
@@ -62,7 +68,8 @@ int doit(void *data, int length) {
   void *zip_handle = NULL;
   int ret;
 
-  memcpy (string_buffer, "stuff\0", 6);
+  memcpy (string_buffer, "stuff", 5);
+  string_len = 5;
 
   stream = mz_stream_mem_create();
 
@@ -81,8 +88,33 @@ int doit(void *data, int length) {
   uint64_t count;
   ret = mz_zip_get_number_entry(zip_handle, &count);
   imported_func((int)count);
+
+  mz_zip_file *file_info;
+/*
   ret = mz_zip_goto_first_entry(zip_handle);
+  while (ret == MZ_OK) {
+    //ret = mz_zip_entry_get_local_info(zip_handle, &file_info);
+    ret = mz_zip_entry_get_info(zip_handle, &file_info);
+    string_len = strlen(file_info->filename);
+    memcpy (string_buffer, file_info->filename, string_len);
+    imported_func(ret);
+    ret = mz_zip_goto_next_entry(zip_handle);
+  }
+
+  ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
+  ret = mz_zip_entry_get_info(zip_handle, &file_info);
+  string_len = strlen(file_info->filename);
+  memcpy (string_buffer, file_info->filename, string_len);
   imported_func(ret);
+*/
+  //ret = mz_stream_mem_open(stream, "[Content_Types].xml", MZ_OPEN_MODE_READ);
+  //ret = mz_stream_mem_read(stream, string_buffer, 16);
+  //string_len = 16;
+  imported_func(ret);
+
+  //ret = mz_zip_reader_entry_get_info(zip_handle, &file_info);
+  //string_len = strlen (file_info->filename);
+  //memcpy (string_buffer, file_info->filename, string_len);
 
   mz_zip_close(zip_handle);
   mz_zip_delete(&zip_handle);

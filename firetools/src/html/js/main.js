@@ -3,6 +3,7 @@ var malloc;
 var free;
 var doit;
 var get_string_buffer;
+var get_string_len;
 
 /*
 document.addEventListener("click", (e) => {
@@ -15,6 +16,15 @@ document.addEventListener("click", (e) => {
   //hashRoute();
 });
 */
+
+function mylog (arg) {
+  const stringBuffer = new Uint8Array(memory2.buffer, get_string_buffer(), get_string_len());
+  let str = '';
+  for (let i=0; i<stringBuffer.length; i++) {
+    str += String.fromCharCode(stringBuffer[i]);
+  }
+  console.log(str);
+}
 
 const fileInput = document.getElementById('xlsx_upload');
 fileInput.onchange = () => {
@@ -88,7 +98,7 @@ let intervalID = setInterval(() => {
     const importObject2 = {
       env: {
         memory: memory2,
-        imported_func: (arg) => console.log(arg),
+        imported_func: (arg) => mylog(arg),
       },
     };
     const { instance } = await WebAssembly.instantiate(bytes2, importObject2);
@@ -98,6 +108,7 @@ let intervalID = setInterval(() => {
     free = instance.exports.free;
     doit = instance.exports.doit;
     get_string_buffer = instance.exports.get_string_buffer;
+    get_string_len = instance.exports.get_string_len;
     var none = test();
 
 /*
