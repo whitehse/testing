@@ -23,6 +23,8 @@ function mylog (arg) {
   for (let i=0; i<stringBuffer.length; i++) {
     str += String.fromCharCode(stringBuffer[i]);
   }
+  console.log("Arg: " + arg);
+  console.log("Length: " + get_string_len());
   console.log(str);
 }
 

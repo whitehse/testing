@@ -29,13 +29,14 @@ build_fresh_wasm:
 	mkdir build
 	( cd build && cmake \
     -DWASM=ON \
+    -DMZ_FETCH_LIBS=ON \
     -DCMAKE_C_COMPILER=/opt/wasi-sdk/bin/clang \
     -DMZ_ZLIB=ON \
     -DMZ_BZIP2=ON \
     -DMZ_LZMA=OFF \
     -DMZ_ZSTD=OFF \
     -DMZ_OPENSSL=OFF \
-    -DMZ_PKCRYPT=ON \
+    -DMZ_PKCRYPT=OFF \
     -DMZ_WZAES=ON \
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
