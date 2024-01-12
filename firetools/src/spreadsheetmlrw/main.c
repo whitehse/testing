@@ -24,6 +24,9 @@
 char string_buffer[256];
 int string_len = 0;
 
+char file_buf[4096];
+int file_bytes_read;
+
 void* get_string_buffer() {
   return &string_buffer;
 }
@@ -33,6 +36,30 @@ int get_string_len() {
 }
 
 extern void imported_func(int num);
+
+static void XMLCALL
+startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  int i;
+  int *const depthPtr = (int *)userData;
+  (void)atts;
+
+  for (i = 0; i < *depthPtr; i++)
+    ;
+    //putchar('\t');
+  //printf("%" XML_FMT_STR "\n", name);
+  string_len = strlen(name);
+  memcpy (string_buffer, name, string_len);
+  imported_func(*depthPtr);
+  *depthPtr += 1;
+}
+
+static void XMLCALL
+endElement(void *userData, const XML_Char *name) {
+  int *const depthPtr = (int *)userData;
+  (void)name;
+
+  *depthPtr -= 1;
+}
 
 int main() {
 /*
@@ -106,32 +133,23 @@ int doit(void *data, int length) {
   //memcpy (string_buffer, "Successfully read from file", 27);
   //string_len = 27;
   //imported_func(1);
-  string_len = mz_zip_entry_read(zip_handle, string_buffer, 16);
-  imported_func(1);
+  //string_len = mz_zip_entry_read(zip_handle, string_buffer, 16);
+  //imported_func(1);
+  file_bytes_read = mz_zip_entry_read(zip_handle, file_buf, sizeof(file_buf));
+  imported_func(file_bytes_read);
 
-/*
-  while (ret == MZ_OK) {
-    //ret = mz_zip_entry_get_local_info(zip_handle, &file_info);
-    ret = mz_zip_entry_get_info(zip_handle, &file_info);
-    string_len = strlen(file_info->filename);
-    memcpy (string_buffer, file_info->filename, string_len);
-    imported_func(ret);
-    ret = mz_zip_goto_next_entry(zip_handle);
-  }
+  XML_Parser parser = XML_ParserCreate(NULL);
 
-  ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
-  ret = mz_zip_entry_get_info(zip_handle, &file_info);
-  string_len = strlen(file_info->filename);
-  memcpy (string_buffer, file_info->filename, string_len);
-  imported_func(ret);
-*/
-  //ret = mz_stream_mem_open(stream, "[Content_Types].xml", MZ_OPEN_MODE_READ);
-  //ret = mz_stream_mem_read(stream, string_buffer, 16);
-  //string_len = 16;
+  int done;
+  int depth = 0;
 
-  //ret = mz_zip_reader_entry_get_info(zip_handle, &file_info);
-  //string_len = strlen (file_info->filename);
-  //memcpy (string_buffer, file_info->filename, string_len);
+  XML_SetUserData(parser, &depth);
+  XML_SetElementHandler(parser, startElement, endElement);
+
+  ////XML_ParseBuffer(parser, (int)file_bytes_read, done)
+  XML_Parse(parser, file_buf, file_bytes_read, 0);
+
+  XML_ParserFree(parser);
 
   mz_zip_close(zip_handle);
   mz_zip_delete(&zip_handle);
@@ -142,6 +160,7 @@ int doit(void *data, int length) {
   return length;
 }
 
+/*
 int test() {
   XML_Parser parser = XML_ParserCreate(NULL);
   struct csv_parser p;
@@ -167,8 +186,9 @@ int test() {
   void *zip_handle = NULL;
   int ret;
 
+*/
   /* TODO: fill zip_buffer with zip contents.. */
-
+/*
   stream = mz_stream_mem_create();
 
   mz_stream_mem_set_buffer(stream, zip_buffer, zip_buffer_size);
@@ -176,8 +196,9 @@ int test() {
 
   zip_handle = mz_zip_create();
   ret = mz_zip_open(zip_handle, stream, MZ_OPEN_MODE_READ);
-
+*/
   /* TODO: unzip operations.. */
+/*
   ret = mz_zip_goto_first_entry(zip_handle);
 
   mz_zip_close(zip_handle);
@@ -185,47 +206,6 @@ int test() {
 
   mz_stream_mem_delete(&stream);
 
-  //unzFile uf = unzOpen64("/tmp/file.xlsx");
-  /*
-  unz_global_info64 pglobal_info;
-  int ret = unzGetGlobalInfo64(uf, &pglobal_info);
-  if (ret != UNZ_OK) goto out;
-  printf("The zip file contains %lu entries. The global comment is %d bytes long.\n", pglobal_info.number_entry, pglobal_info.size_comment);
-  ret = unzGoToFirstFile(uf);
-  if (ret != UNZ_OK) goto out;
-  unz_file_info64 pfile_info;
-  char filename[MAX_NAMELEN];
-  ret = unzGetCurrentFileInfo64(uf, &pfile_info, filename, MAX_NAMELEN, NULL, 0, NULL, 0);
-  if (ret != UNZ_OK) goto out;
-  printf("The filename inside the zipfile is: \"%s\"\n", filename);
-
-  char buf[BUF_SIZE];
-  ret = unzOpenCurrentFile(uf);
-  printf("Return value from unzOpenCurrentFile is %d\n", ret);
-  if (ret != UNZ_OK) goto out;
-  puts("File opened");
-
-  ret = unzReadCurrentFile(uf, buf, BUF_SIZE);
-  if (ret < 0) goto out;
-  printf("file has %.*s\n", ret, buf);
-
-  ret = unzCloseCurrentFile(uf);
-  if (ret != UNZ_OK) goto out;
-
-  ret = unzGoToNextFile(uf);
-
-  while(ret == UNZ_OK) {
-    ret = unzGetCurrentFileInfo64(uf, &pfile_info, filename, MAX_NAMELEN, NULL, 0, NULL, 0);
-    if (ret != UNZ_OK) goto out;
-    printf("The filename inside the zipfile is: \"%s\"\n", filename);
-    ret = unzGoToNextFile(uf);
-  }
-
-
-out:
-  ret = unzClose(uf);
-
-  */
   return 0;
 }
-
+*/

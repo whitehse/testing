@@ -22,6 +22,7 @@ build_fresh:
     -DEXPAT_BUILD_TOOLS=OFF \
     -DEXPAT_SHARED_LIBS=OFF \
     -DEXPAT_WITH_SYS_GETRANDOM=OFF \
+    -DEXPAT_WITH_GETRANDOM=OFF \
     .. && cmake --build . )
 
 build_fresh_wasm:
@@ -32,7 +33,7 @@ build_fresh_wasm:
     -DMZ_FETCH_LIBS=ON \
     -DCMAKE_C_COMPILER=/opt/wasi-sdk/bin/clang \
     -DMZ_ZLIB=ON \
-    -DMZ_BZIP2=ON \
+    -DMZ_BZIP2=OFF \
     -DMZ_LZMA=OFF \
     -DMZ_ZSTD=OFF \
     -DMZ_OPENSSL=OFF \
@@ -44,6 +45,8 @@ build_fresh_wasm:
     -DEXPAT_BUILD_TOOLS=OFF \
     -DEXPAT_SHARED_LIBS=OFF \
     -DEXPAT_WITH_SYS_GETRANDOM=OFF \
+    -DEXPAT_DEV_URANDOM=OFF \
+    -DEXPAT_WITH_GETRANDOM=OFF \
     .. && cmake --build . )
 
 clean:

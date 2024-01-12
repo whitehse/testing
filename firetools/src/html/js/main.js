@@ -105,13 +105,13 @@ let intervalID = setInterval(() => {
     };
     const { instance } = await WebAssembly.instantiate(bytes2, importObject2);
     //console.log(instance);
-    var test = instance.exports.test;
+    //var test = instance.exports.test;
     malloc = instance.exports.malloc;
     free = instance.exports.free;
     doit = instance.exports.doit;
     get_string_buffer = instance.exports.get_string_buffer;
     get_string_len = instance.exports.get_string_len;
-    var none = test();
+    //var none = test();
 
 /*
     const memory = new WebAssembly.Memory({ initial: 2 });

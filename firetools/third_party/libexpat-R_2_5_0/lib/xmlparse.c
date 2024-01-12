@@ -60,7 +60,16 @@
 
 #define XML_BUILDING_EXPAT 1
 
+
 #include <expat_config.h>
+
+#undef HAVE_GETRANDOM
+#undef HAVE_SYSCALL_GETRANDOM
+#undef HAVE_ARC4RANDOM_BUF
+#undef HAVE_ARC4RANDOM
+#undef XML_DEV_URANDOM
+#undef _WIN32
+#define XML_POOR_ENTROPY 1
 
 #if ! defined(_GNU_SOURCE)
 #  define _GNU_SOURCE 1 /* syscall prototype */
@@ -874,7 +883,8 @@ gather_time_entropy(void) {
   struct timeval tv;
   int gettimeofday_res;
 
-  gettimeofday_res = gettimeofday(&tv, NULL);
+  //gettimeofday_res = gettimeofday(&tv, NULL);
+  gettimeofday_res = 1;
 
 #    if defined(NDEBUG)
   (void)gettimeofday_res;
@@ -883,7 +893,8 @@ gather_time_entropy(void) {
 #    endif /* defined(NDEBUG) */
 
   /* Microseconds time is <20 bits entropy */
-  return tv.tv_usec;
+  //return tv.tv_usec;
+  return 42;
 #  endif
 }
 
@@ -929,7 +940,8 @@ generate_hash_secret_salt(XML_Parser parser) {
   /* .. and self-made low quality for backup: */
 
   /* Process ID is 0 bits entropy if attacker has local access */
-  entropy = gather_time_entropy() ^ getpid();
+  //entropy = gather_time_entropy() ^ getpid();
+  entropy = gather_time_entropy();
 
   /* Factors are 2^31-1 and 2^61-1 (Mersenne primes M31 and M61) */
   if (sizeof(unsigned long) == 4) {
