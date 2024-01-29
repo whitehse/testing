@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <sys/queue.h>
 #include <spreadsheetmlrw.h>
 
 #include <mz.h>
@@ -20,6 +21,24 @@
 
 //#define BUF_SIZE 8192
 //#define MAX_NAMELEN 256
+
+/*
+TAILQ_HEAD(tailhead, entry) head;
+
+struct entry {
+  char c;
+  TAILQ_ENTRY(entry) entries;
+};
+
+void add_to_queue(char ch) {
+  struct entry *elem;
+  elem = malloc(sizeof(struct entry));
+  if (elem) {
+    elem->c = ch;
+  }
+  TAILQ_INSERT_HEAD(&head, elem, entries);
+}
+*/
 
 char string_buffer[256];
 int string_len = 0;
@@ -105,7 +124,7 @@ int doit(void *data, int length) {
 
   zip_handle = mz_zip_create();
   ret = mz_zip_open(zip_handle, stream, MZ_OPEN_MODE_READ);
-  imported_func(ret);
+  //imported_func(ret);
 
   char *char_data = (char *)data;
   //imported_func((int)space[0]);
@@ -125,10 +144,10 @@ int doit(void *data, int length) {
   ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
   ret = mz_zip_entry_read_open(zip_handle, 0, NULL);
   if (ret != MZ_OK) {
-    imported_func(ret);
+    //imported_func(ret);
     memcpy (string_buffer, "Unable to open file inside zip", 30);
     string_len = 30;
-    imported_func(1);
+    //imported_func(1);
   }
   //memcpy (string_buffer, "Successfully read from file", 27);
   //string_len = 27;
@@ -136,7 +155,7 @@ int doit(void *data, int length) {
   //string_len = mz_zip_entry_read(zip_handle, string_buffer, 16);
   //imported_func(1);
   file_bytes_read = mz_zip_entry_read(zip_handle, file_buf, sizeof(file_buf));
-  imported_func(file_bytes_read);
+  //imported_func(file_bytes_read);
 
   XML_Parser parser = XML_ParserCreate(NULL);
 

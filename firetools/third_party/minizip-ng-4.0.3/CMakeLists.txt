@@ -197,6 +197,7 @@ if(MZ_ZLIB)
         set(PC_PRIVATE_DEPS "zlib")
         set(ZLIB_COMPAT ON)
     elseif(MZ_FETCH_LIBS)
+        set(ZLIB_TAG v1.3)
         clone_repo(zlib https://github.com/madler/zlib)
 
         # Don't automatically add all targets to the solution
