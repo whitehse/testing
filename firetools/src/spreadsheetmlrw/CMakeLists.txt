@@ -20,6 +20,7 @@ include_directories(
   "."
   "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_SOURCE_DIR}/third_party/libcsv/"
+  "${PROJECT_SOURCE_DIR}/third_party/hashmap/include/"
   "${CMAKE_BINARY_DIR}/configured_files/include"
   "${CMAKE_BINARY_DIR}/third_party/minizip-ng/"
 )
