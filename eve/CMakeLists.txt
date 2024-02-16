@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 99)
 
 #add_subdirectory(eve-frontend)
 #add_subdirectory(third-party/QCBOR)
+add_subdirectory(third_party)
 
 add_custom_target (
   eve-frontend ALL
@@ -25,6 +26,7 @@ add_executable(eve
 
 target_include_directories(eve PUBLIC 
     eve-backend
+    hal/third_party/libev-4.33/
     /usr/local/include
 )
 
@@ -35,25 +37,27 @@ target_link_directories(eve PUBLIC
 target_link_libraries(eve
     websockets
     ev
-    eio
     confuse
     sodium
-    qcbor
 )
     #qcbor -static
+    #eio
+    #qcbor
 
 target_link_libraries(eve
 )
 # hal
 add_executable(hal
-    hal/hal.c
-    hal/monocypher/monocypher.c
+    hal/src/hal.c
+    hal/src/monocypher.c
 )
 
 target_include_directories(hal PUBLIC 
-    hal
-    hal/libev-4.33
-    hal/monocypher
+    hal/src/
+    hal/third_party/libev-4.33/
+    hal/third_party/include
+    hal/third_party/include/libnl-tiny
+    hal/third_party/include/hashmap
 )
 
 target_link_directories(hal PUBLIC
@@ -61,6 +65,7 @@ target_link_directories(hal PUBLIC
 )
 
 target_link_libraries(hal
+    nl-3
     #sodium
 )
 
@@ -100,3 +105,4 @@ set(CMAKE_C_FLAGS_RELEASE "-O3")
 find_program(asciidoctor_exe NAMES asciidoctor)
 find_program(antora_exe NAMES antora)
 ]]
+

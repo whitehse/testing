@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libassh
+Description: The asynchronous ssh2 library
+Version: 1.1
+Cflags: -I${includedir}
+Libs: -L${libdir} -lassh
