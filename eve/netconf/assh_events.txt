@@ -1,0 +1,38 @@
+/*
+ * Events:
+ *   ASSH_EVENT_READ                       - event is reported in order to gather incoming ssh stream data from the remote host.
+ *   ASSH_EVENT_WRITE                      - reported when some ssh stream data is available for sending to the remote host.
+ *   ASSH_EVENT_DISCONNECT                 - reported when the remote host transmitted an SSH_MSG_DISCONNECT message.
+ *   ASSH_EVENT_DEBUG                      - reported when the remote host transmitted an SSH_MSG_DEBUG message.
+ *   ASSH_EVENT_SESSION_ERROR              - reported when an error occurs.
+ *   ASSH_EVENT_KEX_HOSTKEY_LOOKUP         - event is returned when a client needs to lookup a server host key in the local database.
+ *   ASSH_EVENT_KEX_DONE                   - event is returned when a kex exchange has completed.
+ *   ASSH_EVENT_SERVICE_START              - event is reported when a service has started.
+ *   ASSH_EVENT_USERAUTH_CLIENT_USER       - event is reported when the client-side user authentication service is running and the service needs to provide a user name to the server.
+ *   ASSH_EVENT_USERAUTH_CLIENT_METHODS    - event is reported when the client-side user authentication service is running, before every authentication attempt. The methods field indicates the authentication methods that are accepted by the server. One of these methods must be selected by setting the select field.
+ *   ASSH_EVENT_USERAUTH_CLIENT_BANNER     - event is reported when the client-side user authentication service is running and a banner message is received.
+ *   ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE   - event is reported when the client-side user authentication service is running and a password change request message is received.
+ *   ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD   - event is reported when the keyboard interactive authentication has been selected and the server sent a SSH_MSG_USERAUTH_INFO_REQUEST message.
+ *   ASSH_EVENT_USERAUTH_CLIENT_SUCCESS    - 
+ *   ASSH_EVENT_USERAUTH_CLIENT_SIGN       - event is reported when the client-side user authentication service is running and a public key has been provided for public key authentication.
+ *   ASSH_EVENT_USERAUTH_SERVER_METHODS    - event is reported when the server-side user authentication service is running and some authentication methods must be selected.
+ *   ASSH_EVENT_USERAUTH_SERVER_NONE       - event is reported when the server-side user authentication service is running and the client has selected the none method.
+ *   ASSH_EVENT_USERAUTH_SERVER_USERKEY    - event is reported when the server-side user authentication service is running and the client has selected the user public key method.
+ *   ASSH_EVENT_USERAUTH_SERVER_PASSWORD   - event is reported when the server-side user authentication service is running and the client has selected the password method.
+ *   ASSH_EVENT_USERAUTH_SERVER_KBINFO     - event is reported when the server-side user authentication service is running and the client has selected the keyboard interactive method.
+ *   ASSH_EVENT_USERAUTH_SERVER_KBRESPONSE - event is reported when the server-side user authentication service is running and the client has replied to a previous SSH_MSG_USERAUTH_INFO_REQUEST message by sending a SSH_MSG_USERAUTH_INFO_RESPONSE message.
+ *   ASSH_EVENT_USERAUTH_SERVER_HOSTBASED  - event is reported when the server-side user authentication service is running and the client has selected the hostbased method.
+ *   ASSH_EVENT_USERAUTH_SERVER_SUCCESS    - event is reported when an user authentication request is successful. The method field indicates which method has been used successfully.
+ *   ASSH_EVENT_REQUEST                    - event is reported when an user authentication request is successful. The method field indicates which method has been used successfully.
+ *   ASSH_EVENT_REQUEST_ABORT              - event is reported when a channel is closing or the connection is ending and some associated requests have been postponed.
+ *   ASSH_EVENT_REQUEST_SUCCESS            - event is reported after a successful call to the assh_request function when the want_reply parameter was set and the remote host replied with a success message.
+ *   ASSH_EVENT_REQUEST_FAILURE            - event is reported after a successful call to the assh_channel_open function when the channel open is rejected by the remote host.
+ *   ASSH_EVENT_CHANNEL_OPEN               - event is reported after a successful call to the assh_channel_open function when the channel open is rejected by the remote host.
+ *   ASSH_EVENT_CHANNEL_CONFIRMATION       - event is reported after a successful call to the assh_channel_open function when the channel open is accepted by the remote host.
+ *   ASSH_EVENT_CHANNEL_FAILURE            - event is reported after a successful call to the assh_channel_open function when the channel open is rejected by the remote host.
+ *   ASSH_EVENT_CHANNEL_DATA               - event is reported when the assh_service_connection service is running and some incoming channel data are available.
+ *   ASSH_EVENT_CHANNEL_WINDOW             - event is reported when the assh_service_connection service is running and an SSH_MSG_CHANNEL_WINDOW_ADJUST message has been received.
+ *   ASSH_EVENT_CHANNEL_EOF                - event is reported when the assh_service_connection service is running and the remote host has sent the SSH_MSG_CHANNEL_EOF message.
+ *   ASSH_EVENT_CHANNEL_CLOSE              - event is reported for open channels when the channel is in ASSH_CHANNEL_ST_CLOSING state and all data and requests associated with the channel have been reported using appropriate events.
+ *   ASSH_EVENT_CHANNEL_ABORT              - event is reported when the connection is ending and some channel open have been postponed.
+*/
