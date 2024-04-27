@@ -54,7 +54,7 @@ int get_string_len() {
   return string_len;
 }
 
-extern void imported_func(int num);
+//extern void imported_func(int num);
 
 static void XMLCALL
 startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -68,7 +68,7 @@ startElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   //printf("%" XML_FMT_STR "\n", name);
   string_len = strlen(name);
   memcpy (string_buffer, name, string_len);
-  imported_func(*depthPtr);
+  //imported_func(*depthPtr);
   *depthPtr += 1;
 }
 
@@ -124,38 +124,28 @@ int doit(void *data, int length) {
 
   zip_handle = mz_zip_create();
   ret = mz_zip_open(zip_handle, stream, MZ_OPEN_MODE_READ);
-  //imported_func(ret);
 
   char *char_data = (char *)data;
-  //imported_func((int)space[0]);
-  //imported_func((int)space[1]);
 
   /* TODO: unzip operations.. */
   uint64_t count;
   ret = mz_zip_get_number_entry(zip_handle, &count);
-  //imported_func((int)count);
 
   mz_zip_file *file_info;
   //ret = mz_zip_goto_first_entry(zip_handle);
   //ret = mz_zip_entry_get_info(zip_handle, &file_info);
   //string_len = strlen(file_info->filename);
   //memcpy (string_buffer, file_info->filename, string_len);
-  //imported_func(ret);
   ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
   ret = mz_zip_entry_read_open(zip_handle, 0, NULL);
   if (ret != MZ_OK) {
-    //imported_func(ret);
     memcpy (string_buffer, "Unable to open file inside zip", 30);
     string_len = 30;
-    //imported_func(1);
   }
   //memcpy (string_buffer, "Successfully read from file", 27);
   //string_len = 27;
-  //imported_func(1);
   //string_len = mz_zip_entry_read(zip_handle, string_buffer, 16);
-  //imported_func(1);
   file_bytes_read = mz_zip_entry_read(zip_handle, file_buf, sizeof(file_buf));
-  //imported_func(file_bytes_read);
 
   XML_Parser parser = XML_ParserCreate(NULL);
 

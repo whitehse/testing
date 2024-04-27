@@ -149,11 +149,11 @@ int doit(void *data, int length) {
 
   mz_zip_file *file_info;
   //ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
-  ret = mz_zip_locate_entry(zip_handle, "xl/worksheets/sheet1.xml", 0);
+  //ret = mz_zip_locate_entry(zip_handle, "xl/worksheets/sheet1.xml", 0);
+  ret = mz_zip_locate_entry(zip_handle, "xl/workbook.xml", 0);
   ret = mz_zip_entry_read_open(zip_handle, 0, NULL);
   if (ret != MZ_OK) {
   }
-  file_bytes_read = mz_zip_entry_read(zip_handle, file_buf, sizeof(file_buf));
 
   XML_Parser parser = XML_ParserCreate(NULL);
 
@@ -163,7 +163,9 @@ int doit(void *data, int length) {
   XML_SetUserData(parser, &depth);
   XML_SetElementHandler(parser, startElement, endElement);
   XML_SetCharacterDataHandler(parser, charHandler);
-  XML_Parse(parser, file_buf, file_bytes_read, 0);
+  while (file_bytes_read = mz_zip_entry_read(zip_handle, file_buf, sizeof(file_buf))) {
+      XML_Parse(parser, file_buf, file_bytes_read, 0);
+  }
   XML_ParserFree(parser);
 
   mz_zip_close(zip_handle);
@@ -202,6 +204,7 @@ int main (void) {
   fclose(f);
 
   doit (buf, fsize);
+  free(buf);
 
   return yyparse ();
 }
