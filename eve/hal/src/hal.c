@@ -35,7 +35,7 @@ struct ucred {
 //#include <netlink/msg.h>
 #include <linux/nl80211.h>
 
-#include <hal_config.h>
+//#include <hal_config.h>
 
 /* openssl non-blocking helper */
 /* https://github.com/darrenjs/openssl_examples */
@@ -53,8 +53,8 @@ struct ucred {
 #include <hashmap.h>
 
 /* Custom protobuf headers */
-#include <axos.pb-c.h>
-#include <objects.pb-c.h>
+//#include <axos.pb-c.h>
+//#include <objects.pb-c.h>
 
 #define RING_FRAMES     256
 #define PKT_OFFSET      (TPACKET_ALIGN(sizeof(struct tpacket2_hdr)) + \
@@ -246,8 +246,8 @@ static int finish_handler(struct nl_msg *msg, void *arg) {
 int main(void) {
   loop = EV_DEFAULT;
 
-  printf("Project Name: %s\n", project_name);
-  printf("Project Version: %s\n", project_version);
+  //printf("Project Name: %s\n", project_name);
+  //printf("Project Version: %s\n", project_version);
 
   total_frames_captured = 0;
   bad_frames = 0;

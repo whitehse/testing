@@ -16,7 +16,7 @@
 #include <sys/ioctl.h>
 
 #include <ev.h>
-#include <eio.h>
+//#include <eio.h>
 #include <libwebsockets.h>
 #include <sodium.h>
 #include <confuse.h>
@@ -31,16 +31,20 @@ int sockets[10];
 
 /* idle watcher callback, only used when eio_poll */
 /* didn't handle all results in one call */
+/*
 static void repeat (EV_P_ ev_idle *w, int revents) {
   if (eio_poll () != -1)
     ev_idle_stop (EV_A_ w);
 }
+*/
 
 /* eio has some results, process them */
+/*
 static void ready (EV_P_ ev_async *w, int revents) {
   if (eio_poll () == -1)
     ev_idle_start (EV_A_ &repeat_watcher);
 }
+*/
 
 /* Read client message */
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents){
