@@ -26,14 +26,15 @@
 #include <unistd.h>
 #include <signal.h>
 #include <ev.h>
-#include <eio.h>
 #include <netconf.h>
+#include <time.h>
 
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
 ev_io stdin_watcher;
 ev_io stdout_watcher;
 ev_timer timeout_watcher;
+time_t seconds;
 
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   fprintf (stderr, "timeout\n");
@@ -48,7 +49,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     switch (event.id) {
       case ASSH_EVENT_READ:
       case ASSH_EVENT_WRITE:
+        seconds = time(NULL);
+        printf("ASSH_EVENT_READ or WRITE:begin: %ld\n", seconds);
         asshh_fd_event(ssh->session, &event, w->fd);
+        seconds = time(NULL);
+        printf("ASSH_EVENT_READ or WRITE:end: %ld\n", seconds);
         break;
 
       case ASSH_EVENT_SESSION_ERROR:
@@ -88,17 +93,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
-/*
-        asshh_client_event_auth(ssh->session, stderr, stdin, ssh->user, ssh->hostname,
-          ssh->auth_methods, asshh_client_user_key_default, &event);
-
-        struct assh_event_userauth_client_user_s *eu = &event.userauth_client.user;
-        assh_buffer_strset(&eu->username, ssh->user);
-*/
-/*
-        struct assh_event_kex_hostkey_lookup_s *ek = &event.kex.hostkey_lookup;
-        ek->accept = 1;
-*/
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
@@ -170,9 +164,6 @@ int main(int argc, char **argv) {
 
   int number_of_e7s = 5;
   char *e7s[] = {"192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15"};
-
-  //int number_of_e7s = 1;
-  //char *e7s[] = {"192.168.35.15"};
 
   const char *command = argv[2];
   const char *port = "22";
