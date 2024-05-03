@@ -36,6 +36,9 @@ ev_io stdout_watcher;
 ev_timer timeout_watcher;
 time_t seconds;
 
+struct 
+  ssh_t ssh[number_of_e7s];
+
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   fprintf (stderr, "timeout\n");
 }
@@ -47,12 +50,47 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   assh_status_t err = ASSH_OK;
   ssize_t r;
   int looped = 0;
-
-  while (assh_event_get(ssh->session, &event, t)) {
-    //printf("Loop %d, ", looped);
-    //looped = looped + 1;
+  int result = assh_event_get(ssh->session, &event, t);
+  printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
+  if (event.id < 0 || event.id > 100) {
+    sleep(60);
+  }
+  if (result == 0) {
+    ev_io_stop (loop, w);
+    goto out;
+  }
+/*
+  if (!result) {
+    if (revents & EV_READ) {
+      char* buf[4096];
+      r = read(w->fd, buf, 4096);
+      switch (r) {
+        case -1:
+          r = 0;
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            //break;
+            goto out;
+          }
+        case 0:
+          r = -1;
+          //err = ASSH_ERR_IO;
+          ev_io_stop (loop, w);
+        default:
+          //ter->transferred = r;
+          break;
+      }
+      printf("Read %d unexpected bytes, on socket %d, ", r, w->fd);
+    }
+    if (revents & EV_WRITE) {
+    }
+  }
+*/
+  while (result) {
+    printf("Loop %d, ", looped);
+    looped = looped + 1;
     switch (event.id) {
       case ASSH_EVENT_READ:
+        printf("EVENT Read Called, ");
         struct assh_event_transport_read_s *ter = &event.transport.read;
         r = read(w->fd, ter->buf.data, ter->buf.size);
         switch (r) {
@@ -63,9 +101,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
               assh_event_done(ssh->session, &event, err);
               goto out;
             }
+            break;
           case 0:
             r = -1;
             err = ASSH_ERR_IO;
+            //ev_io_stop (loop, w);
           default:
             ter->transferred = r;
             break;
@@ -86,6 +126,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 */
 
       case ASSH_EVENT_WRITE:
+        printf("EVENT Write Called, ");
         struct assh_event_transport_write_s *tew = &event.transport.write;
         r = write(w->fd, tew->buf.data, tew->buf.size);
         switch (r) {
@@ -96,9 +137,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
               assh_event_done(ssh->session, &event, err);
               goto out;
             }
+            break;
           case 0:
             r = -1;
             err = ASSH_ERR_IO;
+            ev_io_stop (loop, w);
           default:
             tew->transferred = r;
             break;
@@ -226,6 +269,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         printf("Some other event happened: %d\n", event.id);
         assh_event_done(ssh->session, &event, ASSH_OK);
     }
+    result = assh_event_get(ssh->session, &event, t);
   }
 out:
   return;
@@ -250,8 +294,8 @@ int main(int argc, char **argv) {
   char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11"};
 
   const char *command = argv[2];
-  const char *port = "22";
-  //const char *port = "830";
+  //const char *port = "22";
+  const char *port = "830";
 
   struct ev_loop *loop = EV_DEFAULT;
 
@@ -355,15 +399,19 @@ int main(int argc, char **argv) {
 
     printf("Finished setting ssh for %s\n", e7s[i]);
 
-    ev_io *socket_watcher[number_of_e7s];
+    ev_io *socket_watcher[number_of_e7s*2];
     socket_watcher[i] = malloc(sizeof(ev_io));
+    socket_watcher[i+1] = malloc(sizeof(ev_io));
 
-    ev_io_init (socket_watcher[i], socket_cb, sock[i], EV_READ|EV_WRITE);
+    ev_io_init (socket_watcher[i], socket_cb, sock[i], EV_READ);
+    ev_io_init (socket_watcher[i+1], socket_cb, sock[i], EV_WRITE);
     socket_watcher[i]->data = &ssh[i];
+    socket_watcher[i+1]->data = &ssh[i];
     ev_io_start (loop, socket_watcher[i]);
+    ev_io_start (loop, socket_watcher[i+1]);
   }
 
-  ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 1.);
+  ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 10.);
   ev_timer_start (loop, &timeout_watcher);
   printf("Set timer event\n");
 
