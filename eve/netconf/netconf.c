@@ -36,9 +36,6 @@ ev_io stdout_watcher;
 ev_timer timeout_watcher;
 time_t seconds;
 
-struct 
-  ssh_t ssh[number_of_e7s];
-
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   fprintf (stderr, "timeout\n");
 }
@@ -56,35 +53,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     sleep(60);
   }
   if (result == 0) {
-    ev_io_stop (loop, w);
+    ev_io_stop (loop, ssh->socket_watcher_reader);
+    ev_io_stop (loop, ssh->socket_watcher_writer);
     goto out;
   }
-/*
-  if (!result) {
-    if (revents & EV_READ) {
-      char* buf[4096];
-      r = read(w->fd, buf, 4096);
-      switch (r) {
-        case -1:
-          r = 0;
-          if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            //break;
-            goto out;
-          }
-        case 0:
-          r = -1;
-          //err = ASSH_ERR_IO;
-          ev_io_stop (loop, w);
-        default:
-          //ter->transferred = r;
-          break;
-      }
-      printf("Read %d unexpected bytes, on socket %d, ", r, w->fd);
-    }
-    if (revents & EV_WRITE) {
-    }
-  }
-*/
+
   while (result) {
     printf("Loop %d, ", looped);
     looped = looped + 1;
@@ -92,6 +65,15 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
       case ASSH_EVENT_READ:
         printf("EVENT Read Called, ");
         struct assh_event_transport_read_s *ter = &event.transport.read;
+        if (revents & EV_WRITE && ssh->writer_running) {
+          printf("Libev and libassh are out of sync. Start reader, stop writer\n");
+          ev_io_stop(loop, ssh->socket_watcher_writer);
+          ssh->writer_running = 0;
+          ev_io_start(loop, ssh->socket_watcher_reader);
+          ssh->reader_running = 0;
+          assh_event_done(ssh->session, &event, err);
+          goto out;
+        }
         r = read(w->fd, ter->buf.data, ter->buf.size);
         switch (r) {
           case -1:
@@ -114,20 +96,18 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         assh_event_done(ssh->session, &event, err);
         break;
 
-/*
-      case ASSH_EVENT_WRITE:
-        //seconds = time(NULL);
-        //printf("ASSH_EVENT_READ or WRITE:begin: %ld\n", seconds);
-        asshh_fd_event(ssh->session, &event, w->fd);
-        //seconds = time(NULL);
-        //printf("ASSH_EVENT_READ or WRITE:end: %ld\n", seconds);
-        assh_status_t err = ASSH_OK;
-        ssize_t r;
-*/
-
       case ASSH_EVENT_WRITE:
         printf("EVENT Write Called, ");
         struct assh_event_transport_write_s *tew = &event.transport.write;
+        if (revents & EV_READ && ssh->reader_running) {
+          printf("Libev and libassh are out of sync. Stop reader, start writer\n");
+          ev_io_stop(loop, ssh->socket_watcher_reader);
+          ssh->reader_running = 0;
+          ev_io_start(loop, ssh->socket_watcher_writer);
+          ssh->writer_running = 1;
+          assh_event_done(ssh->session, &event, err);
+          goto out;
+        }
         r = write(w->fd, tew->buf.data, tew->buf.size);
         switch (r) {
           case -1:
@@ -163,9 +143,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
         printf("Host key lookup called, ", r);
-/*
-        asshh_client_event_hk_lookup(ssh->session, stderr, stdin, ssh->hostname, &event);
-*/
         struct assh_event_kex_hostkey_lookup_s *ek = &event.kex.hostkey_lookup;
         ek->accept = 1;
         assh_event_done(ssh->session, &event, ASSH_OK);
@@ -175,7 +152,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         printf("Client Banner called, ", r);
         struct assh_event_userauth_client_banner_s *eb = &event.userauth_client.banner;
         assert(&event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
-        //fprintf(stderr, "%s\n", eb->text);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
@@ -203,30 +179,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
-/*
-      case ASSH_EVENT_SERVICE_START:
-        assh_bool_t conn = &event.service.start.srv == &assh_service_connection;
-        assh_event_done(ssh->session, &event, ASSH_OK);
-        if (conn) {
-            fprintf(stderr, "conn is true\n");
-*/
-/*
-          //assert(ctx->state == ASSH_CLIENT_INTER_ST_INIT);
-          assert(ssh->inter == ASSH_CLIENT_INTER_ST_INIT);
-
-          if (asshh_inter_open_session(ssh->session, ssh->inter->channel))
-            fprintf(stderr, "ERR\n");
-//            goto err;
-
-          //ASSH_SET_STATE(ctx, state, ASSH_CLIENT_INTER_ST_SESSION);
-          ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_SESSION);
-*/
-/*
-        } else {
-            fprintf(stderr, "conn is false\n");
-        }
-        break;
-*/
       case ASSH_EVENT_SERVICE_START:
         printf("Service Start called, ", r);
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
@@ -286,12 +238,12 @@ int main(int argc, char **argv) {
   if (user == NULL)
     ERROR("Unspecified user name\n");
 
-  //int number_of_e7s = 5;
-  //char *e7s[] = {"192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15"};
-  //int number_of_e7s = 119;
-  //char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11", "192.168.38.12", "192.168.38.13", "192.168.38.14", "192.168.38.15", "192.168.38.16", "192.168.38.17", "192.168.38.18", "192.168.38.19", "192.168.38.20", "192.168.34.11", "192.168.34.12", "192.168.34.13", "192.168.34.14", "192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15", "192.168.33.11", "192.168.33.12", "192.168.33.13", "192.168.33.14", "192.168.36.11", "192.168.36.12", "192.168.36.13", "192.168.42.11", "192.168.42.12", "192.168.42.13", "192.168.42.14", "192.168.42.15", "192.168.42.16", "192.168.42.17", "192.168.42.18", "192.168.44.11", "192.168.44.12", "192.168.44.13", "192.168.44.14", "192.168.44.15", "192.168.44.16", "192.168.44.17", "192.168.44.18", "192.168.47.11", "192.168.47.12", "192.168.47.13", "192.168.47.14", "192.168.47.15", "192.168.51.11", "192.168.51.12", "192.168.51.13", "192.168.51.14", "192.168.51.15", "192.168.51.16", "192.168.51.17", "192.168.51.18", "192.168.49.11", "192.168.49.12", "192.168.46.11", "192.168.46.12", "192.168.46.13", "192.168.46.14", "192.168.46.15", "192.168.46.16", "192.168.46.17", "192.168.46.18", "192.168.45.11", "192.168.45.12", "192.168.45.13", "192.168.45.14", "192.168.48.11", "192.168.48.12", "192.168.48.13", "192.168.48.14", "192.168.48.15", "192.168.48.16", "192.168.50.11", "192.168.50.12", "192.168.50.13", "192.168.50.14", "192.168.50.15", "192.168.52.11", "192.168.52.12", "192.168.52.13", "192.168.53.11", "192.168.53.12", "192.168.53.13", "192.168.53.14", "192.168.53.15", "192.168.53.16", "192.168.54.11", "192.168.54.12", "192.168.54.13", "192.168.54.14", "192.168.54.15", "192.168.43.11", "192.168.43.12", "192.168.43.13", "192.168.43.14", "192.168.43.15"};
-  int number_of_e7s = 20;
-  char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11"};
+  //int number_of_e7s = 1;
+  //char *e7s[] = {"192.168.35.15"};
+  int number_of_e7s = 119;
+  char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11", "192.168.38.12", "192.168.38.13", "192.168.38.14", "192.168.38.15", "192.168.38.16", "192.168.38.17", "192.168.38.18", "192.168.38.19", "192.168.38.20", "192.168.34.11", "192.168.34.12", "192.168.34.13", "192.168.34.14", "192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15", "192.168.33.11", "192.168.33.12", "192.168.33.13", "192.168.33.14", "192.168.36.11", "192.168.36.12", "192.168.36.13", "192.168.42.11", "192.168.42.12", "192.168.42.13", "192.168.42.14", "192.168.42.15", "192.168.42.16", "192.168.42.17", "192.168.42.18", "192.168.44.11", "192.168.44.12", "192.168.44.13", "192.168.44.14", "192.168.44.15", "192.168.44.16", "192.168.44.17", "192.168.44.18", "192.168.47.11", "192.168.47.12", "192.168.47.13", "192.168.47.14", "192.168.47.15", "192.168.51.11", "192.168.51.12", "192.168.51.13", "192.168.51.14", "192.168.51.15", "192.168.51.16", "192.168.51.17", "192.168.51.18", "192.168.49.11", "192.168.49.12", "192.168.46.11", "192.168.46.12", "192.168.46.13", "192.168.46.14", "192.168.46.15", "192.168.46.16", "192.168.46.17", "192.168.46.18", "192.168.45.11", "192.168.45.12", "192.168.45.13", "192.168.45.14", "192.168.48.11", "192.168.48.12", "192.168.48.13", "192.168.48.14", "192.168.48.15", "192.168.48.16", "192.168.50.11", "192.168.50.12", "192.168.50.13", "192.168.50.14", "192.168.50.15", "192.168.52.11", "192.168.52.12", "192.168.52.13", "192.168.53.11", "192.168.53.12", "192.168.53.13", "192.168.53.14", "192.168.53.15", "192.168.53.16", "192.168.54.11", "192.168.54.12", "192.168.54.13", "192.168.54.14", "192.168.54.15", "192.168.43.11", "192.168.43.12", "192.168.43.13", "192.168.43.14", "192.168.43.15"};
+  //int number_of_e7s = 20;
+  //char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11"};
 
   const char *command = argv[2];
   //const char *port = "22";
@@ -341,19 +293,6 @@ int main(int argc, char **argv) {
     if (status == -1) {
       perror("calling fcntl");
     }
-/*
-    sock[i] = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, '0', sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(e7s[i]);
-    serv_addr.sin_port = htons(22);
-
-    if(connect(sock[i], (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0 && errno != EINPROGRESS) {
-       perror("Connect failed");
-       abort();
-    }
-*/
 
     printf("Socket was opened for %s\n", e7s[i]);
 
@@ -385,10 +324,6 @@ int main(int argc, char **argv) {
     inter[i] = malloc(sizeof(struct asshh_client_inter_session_s));
     asshh_client_init_inter_session(inter[i], command, NULL);
 
-    //struct asshh_inter_subsystem_s *sub[number_of_e7s];
-    //sub[i] = malloc(sizeof(struct asshh_inter_subsystem_s));
-    //asshh_inter_init_subsystem(sub[i], "netconf");
-
     printf("Finished client_init_inter_session for %s\n", e7s[i]);
 
     ssh[i].session = session[i];
@@ -400,15 +335,20 @@ int main(int argc, char **argv) {
     printf("Finished setting ssh for %s\n", e7s[i]);
 
     ev_io *socket_watcher[number_of_e7s*2];
-    socket_watcher[i] = malloc(sizeof(ev_io));
-    socket_watcher[i+1] = malloc(sizeof(ev_io));
+    socket_watcher[i*2] = malloc(sizeof(ev_io));
+    socket_watcher[i*2+1] = malloc(sizeof(ev_io));
 
-    ev_io_init (socket_watcher[i], socket_cb, sock[i], EV_READ);
-    ev_io_init (socket_watcher[i+1], socket_cb, sock[i], EV_WRITE);
-    socket_watcher[i]->data = &ssh[i];
-    socket_watcher[i+1]->data = &ssh[i];
-    ev_io_start (loop, socket_watcher[i]);
-    ev_io_start (loop, socket_watcher[i+1]);
+    ev_io_init (socket_watcher[i*2], socket_cb, sock[i], EV_READ);
+    ssh[i].socket_watcher_reader = socket_watcher[i*2];
+    ev_io_init (socket_watcher[i*2+1], socket_cb, sock[i], EV_WRITE);
+    ssh[i].socket_watcher_writer = socket_watcher[i*2+1];
+
+    socket_watcher[i*2]->data = &ssh[i];
+    socket_watcher[i*2+1]->data = &ssh[i];
+    ev_io_start (loop, ssh[i].socket_watcher_reader);
+    ssh[i].reader_running = 1;
+    ev_io_start (loop, ssh[i].socket_watcher_writer);
+    ssh[i].writer_running = 1;
   }
 
   ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 10.);
