@@ -1,3 +1,21 @@
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <time.h>
+#include <sys/eventfd.h>
+#include <liburing.h>
+#include <fcntl.h>
+
 #include <assh/assh_session.h>
 #include <assh/assh_context.h>
 #include <assh/assh_service.h>
@@ -12,22 +30,8 @@
 #include <assh/assh_event.h>
 #include <assh/assh_algo.h>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 #include <ev.h>
 #include <netconf.h>
-#include <time.h>
 
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
@@ -36,8 +40,53 @@ ev_io stdout_watcher;
 ev_timer timeout_watcher;
 time_t seconds;
 
+#define BUFF_SZ   512
+
+char buff[BUFF_SZ + 1];
+struct io_uring ring;
+
+int setup_io_uring(int efd) {
+  int ret = io_uring_queue_init(8, &ring, 0);
+  if (ret) {
+    fprintf(stderr, "Unable to setup io_uring: %s\n", strerror(-ret));
+    return 1;
+  }
+  io_uring_register_eventfd(&ring, efd);
+  return 0;
+}
+
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   fprintf (stderr, "timeout\n");
+}
+
+static void iou_cb (struct ev_loop *loop, ev_io *w, int revents) {
+  puts("iou_cb was called");
+  struct io_uring_cqe *cqe;
+  eventfd_t v;
+  //int ret = eventfd_read(efd, &v);
+  int ret = eventfd_read(w->fd, &v);
+  while(ret == 0) {
+    int seq_ret = io_uring_wait_cqe(&ring, &cqe);
+    if (seq_ret < 0) {
+        fprintf(stderr, "Error waiting for completion: %s\n",
+                strerror(-ret));
+        //return NULL;
+    }
+    if (cqe->res < 0) {
+      fprintf(stderr, "Error in async operation: %s\n", strerror(-cqe->res));
+    }
+    printf("Result of the operation: %d\n", cqe->res);
+    io_uring_cqe_seen(&ring, cqe);
+
+    printf("Contents read from file:\n%s\n", buff);
+    //return NULL;
+    ret = eventfd_read(w->fd, &v);
+  }
+  //if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    //goto out;
+  //}
+  //if (ret < 0) perror("eventfd_read");
+//out:
 }
 
 static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
@@ -48,7 +97,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   ssize_t r;
   int looped = 0;
   int result = assh_event_get(ssh->session, &event, t);
-  printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
+  //printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
   if (event.id < 0 || event.id > 100) {
     sleep(60);
   }
@@ -59,14 +108,14 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   }
 
   while (result) {
-    printf("Loop %d, ", looped);
+    //printf("Loop %d, ", looped);
     looped = looped + 1;
     switch (event.id) {
       case ASSH_EVENT_READ:
-        printf("EVENT Read Called, ");
+        //printf("EVENT Read Called, ");
         struct assh_event_transport_read_s *ter = &event.transport.read;
         if (revents & EV_WRITE && ssh->writer_running) {
-          printf("Libev and libassh are out of sync. Start reader, stop writer\n");
+          //printf("Libev and libassh are out of sync. Start reader, stop writer\n");
           ev_io_stop(loop, ssh->socket_watcher_writer);
           ssh->writer_running = 0;
           ev_io_start(loop, ssh->socket_watcher_reader);
@@ -92,15 +141,15 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
             ter->transferred = r;
             break;
         }
-        printf("Read %d bytes, ", r);
+        //printf("Read %d bytes, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       case ASSH_EVENT_WRITE:
-        printf("EVENT Write Called, ");
+        //printf("EVENT Write Called, ");
         struct assh_event_transport_write_s *tew = &event.transport.write;
         if (revents & EV_READ && ssh->reader_running) {
-          printf("Libev and libassh are out of sync. Stop reader, start writer\n");
+          //printf("Libev and libassh are out of sync. Stop reader, start writer\n");
           ev_io_stop(loop, ssh->socket_watcher_reader);
           ssh->reader_running = 0;
           ev_io_start(loop, ssh->socket_watcher_writer);
@@ -126,13 +175,12 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
             tew->transferred = r;
             break;
         }
-        printf("Wrote %d bytes, ", r);
+        //printf("Wrote %d bytes, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       case ASSH_EVENT_SESSION_ERROR:
-        fprintf(stderr, "SSH error: %s\n",
-        assh_error_str(event.session.error.code));
+        fprintf(stderr, "SSH error: %s\n", assh_error_str(event.session.error.code));
         /* TODO This may not be the right thing to do */
         //assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         //close(w->fd);
@@ -142,21 +190,21 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
-        printf("Host key lookup called, ", r);
+        //printf("Host key lookup called, ", r);
         struct assh_event_kex_hostkey_lookup_s *ek = &event.kex.hostkey_lookup;
         ek->accept = 1;
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_BANNER:
-        printf("Client Banner called, ", r);
+        //printf("Client Banner called, ", r);
         struct assh_event_userauth_client_banner_s *eb = &event.userauth_client.banner;
         assert(&event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_USER:
-        printf("Client User called, ", r);
+        //printf("Client User called, ", r);
         struct assh_event_userauth_client_user_s *eu = &event.userauth_client.user;
         //assh_buffer_strset(&eu->username, ssh->user);
         assh_buffer_strset(&eu->username, "sysadmin");
@@ -164,7 +212,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_METHODS:
-        printf("Client User methods called, ", r);
+        //printf("Client User methods called, ", r);
         struct assh_event_userauth_client_methods_s *ev = &event.userauth_client.methods;
         assh_buffer_strset(&ev->password, "sysadmin");
         ev->select = ASSH_USERAUTH_METHOD_PASSWORD;
@@ -172,32 +220,32 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
-        printf("Client PWChange called, ", r);
+        //printf("Client PWChange called, ", r);
         assh_event_done(ssh->session, &event, ASSH_OK);
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
-        printf("Client Keyboard called, ", r);
+        //printf("Client Keyboard called, ", r);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_SERVICE_START:
-        printf("Service Start called, ", r);
+        //printf("Service Start called, ", r);
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
-        printf("Channel Confirmation called, ", r);
+        //printf("Channel Confirmation called, ", r);
       case ASSH_EVENT_CHANNEL_FAILURE:
-        printf("Channel Failure called, ", r);
+        //printf("Channel Failure called, ", r);
       case ASSH_EVENT_REQUEST_SUCCESS:
-        printf("Request Success called, ", r);
+        //printf("Request Success called, ", r);
       case ASSH_EVENT_REQUEST_FAILURE:
-        printf("Request Failure called, ", r);
+        //printf("Request Failure called, ", r);
       case ASSH_EVENT_CHANNEL_CLOSE:
-        printf("Channel Close called, ", r);
+        //printf("Channel Close called, ", r);
         asshh_client_event_inter_session(ssh->session, &event, ssh->inter);
         if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED)
           assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         break;
 
       case ASSH_EVENT_CHANNEL_DATA:
-        printf("Channel Data called, ", r);
+        //printf("Channel Data called, ", r);
         struct assh_event_channel_data_s *ec = &event.connection.channel_data;
         assh_status_t err = ASSH_OK;
 
@@ -213,12 +261,12 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           default:
             ec->transferred = r;
         }
-        printf("Wrote %d bytes to stdout, ", r);
+        //printf("Wrote %d bytes to stdout, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       default:
-        printf("Some other event happened: %d\n", event.id);
+        //printf("Some other event happened: %d\n", event.id);
         assh_event_done(ssh->session, &event, ASSH_OK);
     }
     result = assh_event_get(ssh->session, &event, t);
@@ -238,16 +286,13 @@ int main(int argc, char **argv) {
   if (user == NULL)
     ERROR("Unspecified user name\n");
 
-  //int number_of_e7s = 1;
-  //char *e7s[] = {"192.168.35.15"};
-  int number_of_e7s = 119;
+  //int number_of_e7s = 119;
+  int number_of_e7s = 1;
   char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11", "192.168.38.12", "192.168.38.13", "192.168.38.14", "192.168.38.15", "192.168.38.16", "192.168.38.17", "192.168.38.18", "192.168.38.19", "192.168.38.20", "192.168.34.11", "192.168.34.12", "192.168.34.13", "192.168.34.14", "192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15", "192.168.33.11", "192.168.33.12", "192.168.33.13", "192.168.33.14", "192.168.36.11", "192.168.36.12", "192.168.36.13", "192.168.42.11", "192.168.42.12", "192.168.42.13", "192.168.42.14", "192.168.42.15", "192.168.42.16", "192.168.42.17", "192.168.42.18", "192.168.44.11", "192.168.44.12", "192.168.44.13", "192.168.44.14", "192.168.44.15", "192.168.44.16", "192.168.44.17", "192.168.44.18", "192.168.47.11", "192.168.47.12", "192.168.47.13", "192.168.47.14", "192.168.47.15", "192.168.51.11", "192.168.51.12", "192.168.51.13", "192.168.51.14", "192.168.51.15", "192.168.51.16", "192.168.51.17", "192.168.51.18", "192.168.49.11", "192.168.49.12", "192.168.46.11", "192.168.46.12", "192.168.46.13", "192.168.46.14", "192.168.46.15", "192.168.46.16", "192.168.46.17", "192.168.46.18", "192.168.45.11", "192.168.45.12", "192.168.45.13", "192.168.45.14", "192.168.48.11", "192.168.48.12", "192.168.48.13", "192.168.48.14", "192.168.48.15", "192.168.48.16", "192.168.50.11", "192.168.50.12", "192.168.50.13", "192.168.50.14", "192.168.50.15", "192.168.52.11", "192.168.52.12", "192.168.52.13", "192.168.53.11", "192.168.53.12", "192.168.53.13", "192.168.53.14", "192.168.53.15", "192.168.53.16", "192.168.54.11", "192.168.54.12", "192.168.54.13", "192.168.54.14", "192.168.54.15", "192.168.43.11", "192.168.43.12", "192.168.43.13", "192.168.43.14", "192.168.43.15"};
-  //int number_of_e7s = 20;
-  //char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11"};
 
   const char *command = argv[2];
-  //const char *port = "22";
-  const char *port = "830";
+  const char *port = "22";
+  //const char *port = "830";
 
   struct ev_loop *loop = EV_DEFAULT;
 
@@ -263,11 +308,11 @@ int main(int argc, char **argv) {
 
   signal(SIGPIPE, SIG_IGN);
 
-  printf("Starting loop\n");
+  //printf("Starting loop\n");
   int status;
 
   for (int i=0; i<number_of_e7s; i++) {
-    printf("Setting up socket\n");
+    //printf("Setting up socket\n");
     sock[i] = -1;
     if (!getaddrinfo(e7s[i], port, &hints, &(servinfo[i]))) {
       for (si[i] = servinfo[i]; si[i] != NULL; si[i] = si[i]->ai_next) {
@@ -294,7 +339,7 @@ int main(int argc, char **argv) {
       perror("calling fcntl");
     }
 
-    printf("Socket was opened for %s\n", e7s[i]);
+    //printf("Socket was opened for %s\n", e7s[i]);
 
     struct assh_context_s *context[number_of_e7s];
     context[i] = malloc(sizeof(struct assh_context_s));
@@ -305,7 +350,7 @@ int main(int argc, char **argv) {
         assh_algo_register_default(context[i], ASSH_SAFETY_WEAK))
       ERROR("Unable to create an assh context.\n");
 
-    printf("Finished assh_context_create for %s\n", e7s[i]);
+    //printf("Finished assh_context_create for %s\n", e7s[i]);
 
     struct assh_session_s *session[number_of_e7s];
     session[i] = malloc(sizeof(struct assh_session_s));
@@ -313,7 +358,7 @@ int main(int argc, char **argv) {
     if (assh_session_create(context[i], &session[i]))
       ERROR("Unable to create an assh session.\n");
 
-    printf("Finished assh_session_create for %s\n", e7s[i]);
+    //printf("Finished assh_session_create for %s\n", e7s[i]);
 
     enum assh_userauth_methods_e auth_methods =
       ASSH_USERAUTH_METHOD_PASSWORD;/* |
@@ -324,7 +369,7 @@ int main(int argc, char **argv) {
     inter[i] = malloc(sizeof(struct asshh_client_inter_session_s));
     asshh_client_init_inter_session(inter[i], command, NULL);
 
-    printf("Finished client_init_inter_session for %s\n", e7s[i]);
+    //printf("Finished client_init_inter_session for %s\n", e7s[i]);
 
     ssh[i].session = session[i];
     ssh[i].inter = inter[i];
@@ -332,7 +377,7 @@ int main(int argc, char **argv) {
     ssh[i].user = user;
     ssh[i].auth_methods = &auth_methods;
 
-    printf("Finished setting ssh for %s\n", e7s[i]);
+    //printf("Finished setting ssh for %s\n", e7s[i]);
 
     ev_io *socket_watcher[number_of_e7s*2];
     socket_watcher[i*2] = malloc(sizeof(ev_io));
@@ -353,7 +398,29 @@ int main(int argc, char **argv) {
 
   ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 10.);
   ev_timer_start (loop, &timeout_watcher);
-  printf("Set timer event\n");
+  //printf("Set timer event\n");
+
+  int efd;
+  efd = eventfd(0, EFD_NONBLOCK);
+  if (efd < 0) perror("eventfd");
+  setup_io_uring(efd);
+
+  ev_io *iou_watcher;
+  iou_watcher = malloc(sizeof(ev_io));
+  ev_io_init (iou_watcher, iou_cb, efd, EV_READ);
+  ev_io_start (loop, iou_watcher);
+
+  struct io_uring_sqe *sqe;
+
+  sqe = io_uring_get_sqe(&ring);
+  if (!sqe) {
+    fprintf(stderr, "Could not get SQE.\n");
+    return 1;
+  }
+
+  int fd = open("/etc/passwd", O_RDONLY);
+  io_uring_prep_read(sqe, fd, buff, BUFF_SZ, 0);
+  io_uring_submit(&ring);
 
   ev_run (loop, 0);
 
