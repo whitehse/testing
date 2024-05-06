@@ -439,10 +439,12 @@ void sodium_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   }
 
   if (read == 0) {
-    //if (errno == EAGAIN || errno == EWOULDBLOCK) {
-    //  return 0;
-    //}
-    return 0;
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      perror("Something weird happened");
+      return 0;
+    } else {
+      perror("Something bad happened");
+    }
   }
 
   if (crypto_secretstream_xchacha20poly1305_init_pull(&state, buffer, server_rx) != 0) {
@@ -539,6 +541,9 @@ void sodium_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   // Send message back to the client
   //send(watcher->fd, buffer, read, 0);
   //bzero(buffer, read);
+  ev_io_stop(loop, w);
+  close(w->fd);
+  free(w);
 }
 
 void sodium_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
