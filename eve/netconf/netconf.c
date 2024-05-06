@@ -439,9 +439,10 @@ void sodium_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   }
 
   if (read == 0) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      return 0;
-    }
+    //if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    //  return 0;
+    //}
+    return 0;
   }
 
   if (crypto_secretstream_xchacha20poly1305_init_pull(&state, buffer, server_rx) != 0) {
