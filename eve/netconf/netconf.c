@@ -1,9 +1,12 @@
+#define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+//#include <linux/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netdb.h>
@@ -574,6 +577,180 @@ void sodium_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) 
   ev_io_start(loop, w_client);
 }
 
+void unix_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
+  char buffer[BUFFER_SIZE];
+  //char buffer[1024];
+  ssize_t read;
+/*
+  unsigned char  header[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
+  crypto_secretstream_xchacha20poly1305_state state;
+*/
+  if(EV_ERROR & revents) {
+    perror("got invalid event");
+    return;
+  }
+
+  int len;
+  struct ucred ucred;
+
+  len = sizeof(struct ucred);
+  if (getsockopt(w->fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
+    perror("peercred couldn't be retrieved");
+
+  printf("Credentials from SO_PEERCRED: pid=%ld, euid=%ld, egid=%ld\n",
+        (long) ucred.pid, (long) ucred.uid, (long) ucred.gid);
+
+  memset(buffer, 0, sizeof(buffer));
+  //int size = read(w->fd, buffer, sizeof(buffer));
+  read = recv(w->fd, buffer, BUFFER_SIZE, 0);
+  if ( read < 0 ) {
+    perror("read error");
+    exit(5);
+  }
+
+  if (read == 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      perror("Something weird happened");
+      return 0;
+    } else {
+      perror("Something bad happened");
+    }
+  }
+
+/*
+  if (crypto_secretstream_xchacha20poly1305_init_pull(&state, buffer, server_rx) != 0) {
+    // incomplete header
+    return 1;
+  }
+*/
+
+  printf("received %d bytes from client\n", read);
+/*
+  // Length of cyphertext
+  printf("Length of HEADER is %d\n", crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  //uint8_t crypted_text_length = ntohs(*(uint8_t*)(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES));
+  //uint8_t crypted_text_length = (uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  //printf("The size of the crypted text is %hhu\n", crypted_text_length);
+  //uint8_t clear_text_length = ntohs(*(uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1));
+  uint8_t clear_text_length = (uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  uint8_t crypted_text_length = clear_text_length + crypto_secretstream_xchacha20poly1305_ABYTES;
+  printf("The size of the clear text is %hhu\n", clear_text_length);
+  printf("The size of the crypted text is %hhu\n", crypted_text_length);
+*/
+
+  hexDump("Received Data", buffer, read);
+
+  //int message_len = 19;
+  //int crypt_buf_len =  19 + crypto_secretstream_xchacha20poly1305_ABYTES;
+  //unsigned char crypt_buf[crypt_buf_len];
+/*
+  unsigned char crypt_buf[crypted_text_length];
+
+  unsigned char tag;
+  unsigned long long out_len;
+
+  if (crypto_secretstream_xchacha20poly1305_pull
+    (&state, crypt_buf, &out_len, &tag, buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1, crypted_text_length, NULL, 0) != 0) {
+    printf("tag = %d\n", tag);
+  }
+  //assert(tag == 0);
+*/
+
+  struct cbor_load_result result;
+
+  //cbor_item_t* item = cbor_load(crypt_buf, out_len, &result);
+  cbor_item_t* item = cbor_load(buffer, read, &result);
+  //free(buffer);
+
+  if (result.error.code != CBOR_ERR_NONE) {
+    printf(
+        "There was an error while reading the input near byte %zu (read %zu "
+        "bytes in total): ",
+        result.error.position, result.read);
+    switch (result.error.code) {
+      case CBOR_ERR_MALFORMATED: {
+        printf("Malformed data\n");
+        break;
+      }
+      case CBOR_ERR_MEMERROR: {
+        printf("Memory error -- perhaps the input is too large?\n");
+        break;
+      }
+      case CBOR_ERR_NODATA: {
+        printf("The input is empty\n");
+        break;
+      }
+      case CBOR_ERR_NOTENOUGHDATA: {
+        printf("Data seem to be missing -- is the input complete?\n");
+        break;
+      }
+      case CBOR_ERR_SYNTAXERROR: {
+        printf(
+            "Syntactically malformed data -- see "
+            "https://www.rfc-editor.org/info/std94\n");
+        break;
+      }
+      case CBOR_ERR_NONE: {
+        // GCC's cheap dataflow analysis gag
+        break;
+      }
+    }
+  } else {
+    printf("CBOR data was properly formatted\n");
+  }
+
+  cbor_describe(item, stdout);
+
+  cJSON* cjson_item = cbor_to_cjson(item);
+  char* json_string = cJSON_Print(cjson_item);
+  printf("%s\n", json_string);
+  free(json_string);
+
+  //printf("Message: %.19s\n", crypt_buf);
+  /*
+  printf("received %s from client\n", buffer);
+  if (write(clientFd, buffer, size) < 0) {
+    perror("write error");
+    exit(6);
+  }
+  */
+
+  // Send message back to the client
+  //send(watcher->fd, buffer, read, 0);
+  //bzero(buffer, read);
+  ev_io_stop(loop, w);
+  close(w->fd);
+  free(w);
+}
+
+void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
+  struct sockaddr_un client_addr;
+  //socklen_t client_len = sizeof(client_addr);
+  int client_sd;
+  struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+
+  if(EV_ERROR & revents) {
+    perror("got invalid event");
+    return;
+  }
+
+  // Accept client request
+  client_sd = accept(watcher->fd, NULL, NULL);
+
+  if (client_sd < 0) {
+    perror("accept error");
+    return;
+  }
+
+  //total_clients ++; // Increment total_clients count
+  printf("Successfully connected with client.\n");
+  //printf("%d client(s) connected.\n", total_clients);
+
+  // Initialize and start watcher to read client requests
+  ev_io_init(w_client, unix_read_cb, client_sd, EV_READ);
+  ev_io_start(loop, w_client);
+}
+
 #define BUFF_SZ   512
 char buff[BUFF_SZ + 1];
 struct io_uring ring;
@@ -1066,7 +1243,7 @@ int main(int argc, char **argv) {
     /* Suspicious server public key, bail out */
   }
 
-  int sodium_server_fd, clientFd;
+  int sodium_server_fd;
   struct sockaddr_in server, client;
   int len;
   int sodium_port = 1234;
@@ -1083,7 +1260,7 @@ int main(int argc, char **argv) {
     perror("Cannot bind sokcet");
     exit(2);
   }
-  if (listen(sodium_server_fd, 10) < 0) {
+  if (listen(sodium_server_fd, 100000) < 0) {
     perror("Listen error");
     exit(3);
   }
@@ -1091,6 +1268,39 @@ int main(int argc, char **argv) {
   struct ev_io w_accept;
   ev_io_init(&w_accept, sodium_accept_cb, sodium_server_fd, EV_READ);
   ev_io_start(loop, &w_accept);
+
+
+
+
+
+  int unix_server_fd;
+  struct sockaddr_un unix_server;
+  //int len;
+  //int sodium_port = 1234;
+  char *socket_file_name = "/tmp/unix_socket";
+
+  unix_server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if( unix_server_fd == -1 ) {
+    printf("Error on unix socket() call \n");
+    return 1;
+  }
+
+  unix_server.sun_family = AF_UNIX;
+  strcpy(unix_server.sun_path, socket_file_name);
+  unlink(unix_server.sun_path);
+  len = strlen(unix_server.sun_path) + sizeof(unix_server.sun_family);
+  if( bind(unix_server_fd, (struct sockaddr*)&unix_server, len) != 0) {
+    printf("Error on binding unix socket \n");
+    return 1;
+ }
+
+  if( listen(unix_server_fd, 10000) != 0 ) {
+    printf("Error on listen call \n");
+  }
+
+  struct ev_io unix_accept;
+  ev_io_init(&unix_accept, unix_accept_cb, unix_server_fd, EV_READ);
+  ev_io_start(loop, &unix_accept);
 
   //ev_run (g.loop, 0);
   ev_run (loop, 0);
