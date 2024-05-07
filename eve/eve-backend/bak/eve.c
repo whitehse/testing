@@ -333,6 +333,7 @@ main (void) {
     //read (child_stdout, temp_buffer, 10);
     //printf ("Buffer = %s", temp_buffer);
 
+/*
     cfg_opt_t system_opts[] = {
         CFG_STR("daemon_uid", "eve", CFGF_NONE), 
         CFG_STR("daemon_gid", "eve", CFGF_NONE), 
@@ -482,15 +483,16 @@ main (void) {
         CFG_SEC("alianza_api", alianza_api_opts, CFGF_NONE),
         CFG_END()
     };
+*/
 
 /*
   int repeat;
 */
 
-  cfg_t *cfg;
-  cfg = cfg_init(opts, CFGF_NONE);
-  if(cfg_parse(cfg, "../eve.conf") == CFG_PARSE_ERROR)
-    return 1;   
+  //cfg_t *cfg;
+  //cfg = cfg_init(opts, CFGF_NONE);
+  //if(cfg_parse(cfg, "../eve.conf") == CFG_PARSE_ERROR)
+  //  return 1;   
 
 /*
   printf("Hello");
@@ -500,7 +502,7 @@ main (void) {
   printf("!\n");
 */
 
-  cfg_free(cfg);
+  //cfg_free(cfg);
 
 /*
   rc = mdb_env_create(&env);

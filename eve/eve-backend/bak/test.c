@@ -49,8 +49,6 @@ signal_cb_ev(struct ev_loop *loop, struct ev_signal *watcher, int revents)
 static void
 foreign_event_loop_init_and_run_libev(void)
 {
-	/* we create and start our "foreign loop" */
-
 	loop_ev = EV_DEFAULT;
 
 	//ev_signal_init(&sighandler_ev, signal_cb_ev, SIGINT);
@@ -71,8 +69,6 @@ foreign_event_loop_stop_libev(void)
 static void
 foreign_event_loop_cleanup_libev(void)
 {
-	/* cleanup the foreign loop assets */
-
 	ev_timer_stop(loop_ev, &timer_outer_ev);
 	//ev_signal_stop(loop_ev, &sighandler_ev);
 

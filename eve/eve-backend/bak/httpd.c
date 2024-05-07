@@ -1,18 +1,3 @@
-/*
- * lws-minimal-http-server
- *
- * Written in 2010-2019 by Andy Green <andy@warmcat.com>
- *
- * This file is made available under the Creative Commons CC0 1.0
- * Universal Public Domain Dedication.
- *
- * This demonstrates the most minimal http server you can make with lws.
- *
- * To keep it simple, it serves stuff from the subdirectory
- * "./mount-origin" of the directory it was started in.
- * You can change that by changing mount.origin below.
- */
-
 #include <libwebsockets.h>
 #include <string.h>
 #include <signal.h>
