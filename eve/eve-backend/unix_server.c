@@ -243,8 +243,9 @@ void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
   ev_io_start(loop, w_client);
 }
 
-int unix_domain_init(unix_domain_t *unix_domain) {
-  struct ev_loop *loop = EV_DEFAULT;
+//int unix_domain_init(unix_domain_t *unix_domain) {
+int unix_domain_init(struct ev_loop *loop) {
+  //struct ev_loop *loop = EV_DEFAULT;
   int len;
   int unix_server_fd;
   struct sockaddr_un unix_server;
@@ -272,6 +273,4 @@ int unix_domain_init(unix_domain_t *unix_domain) {
   struct ev_io unix_accept;
   ev_io_init(&unix_accept, unix_accept_cb, unix_server_fd, EV_READ);
   ev_io_start(loop, &unix_accept);
-
-  ev_run (loop, 0);
 }
