@@ -23,8 +23,16 @@ struct _ssh {
 };
 typedef struct _ssh ssh_t;
 
-struct unix_domain {
+struct _unix_domain {
 };
-typedef struct unix_domain unix_domain_t;
+typedef struct _unix_domain unix_domain_t;
+
+int unix_domain_init(unix_domain_t *unix_domain);
+
+struct _eve_curl {
+};
+typedef struct _eve_curl eve_curl_t;
+ 
+int eve_curl_init(eve_curl_t *eve_curl);
 
 #endif // EVE_H

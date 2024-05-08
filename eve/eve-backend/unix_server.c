@@ -243,7 +243,7 @@ void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
   ev_io_start(loop, w_client);
 }
 
-int unix_domain_init(unix_domain_t unix_domain) {
+int unix_domain_init(unix_domain_t *unix_domain) {
   struct ev_loop *loop = EV_DEFAULT;
   int len;
   int unix_server_fd;
