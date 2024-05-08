@@ -10,7 +10,7 @@
 #define EVE_BAD_DATA        -5 // Invalid Packet
 */
 
-struct ssh {
+struct _ssh {
     struct assh_session_s *session;
     struct asshh_client_inter_session_s *inter;
     char *hostname;
@@ -21,6 +21,10 @@ struct ssh {
     ev_io *socket_watcher_writer;
     int writer_running;
 };
-typedef struct ssh ssh_t;
+typedef struct _ssh ssh_t;
+
+struct unix_domain {
+};
+typedef struct unix_domain unix_domain_t;
 
 #endif // EVE_H

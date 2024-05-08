@@ -577,180 +577,6 @@ void sodium_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) 
   ev_io_start(loop, w_client);
 }
 
-void unix_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
-  char buffer[BUFFER_SIZE];
-  //char buffer[1024];
-  ssize_t read;
-/*
-  unsigned char  header[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
-  crypto_secretstream_xchacha20poly1305_state state;
-*/
-  if(EV_ERROR & revents) {
-    perror("got invalid event");
-    return;
-  }
-
-  int len;
-  struct ucred ucred;
-
-  len = sizeof(struct ucred);
-  if (getsockopt(w->fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
-    perror("peercred couldn't be retrieved");
-
-  printf("Credentials from SO_PEERCRED: pid=%ld, euid=%ld, egid=%ld\n",
-        (long) ucred.pid, (long) ucred.uid, (long) ucred.gid);
-
-  memset(buffer, 0, sizeof(buffer));
-  //int size = read(w->fd, buffer, sizeof(buffer));
-  read = recv(w->fd, buffer, BUFFER_SIZE, 0);
-  if ( read < 0 ) {
-    perror("read error");
-    exit(5);
-  }
-
-  if (read == 0) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      perror("Something weird happened");
-      return 0;
-    } else {
-      perror("Something bad happened");
-    }
-  }
-
-/*
-  if (crypto_secretstream_xchacha20poly1305_init_pull(&state, buffer, server_rx) != 0) {
-    // incomplete header
-    return 1;
-  }
-*/
-
-  printf("received %d bytes from client\n", read);
-/*
-  // Length of cyphertext
-  printf("Length of HEADER is %d\n", crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-  //uint8_t crypted_text_length = ntohs(*(uint8_t*)(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES));
-  //uint8_t crypted_text_length = (uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-  //printf("The size of the crypted text is %hhu\n", crypted_text_length);
-  //uint8_t clear_text_length = ntohs(*(uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1));
-  uint8_t clear_text_length = (uint8_t*)*(buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-  uint8_t crypted_text_length = clear_text_length + crypto_secretstream_xchacha20poly1305_ABYTES;
-  printf("The size of the clear text is %hhu\n", clear_text_length);
-  printf("The size of the crypted text is %hhu\n", crypted_text_length);
-*/
-
-  hexDump("Received Data", buffer, read);
-
-  //int message_len = 19;
-  //int crypt_buf_len =  19 + crypto_secretstream_xchacha20poly1305_ABYTES;
-  //unsigned char crypt_buf[crypt_buf_len];
-/*
-  unsigned char crypt_buf[crypted_text_length];
-
-  unsigned char tag;
-  unsigned long long out_len;
-
-  if (crypto_secretstream_xchacha20poly1305_pull
-    (&state, crypt_buf, &out_len, &tag, buffer+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1, crypted_text_length, NULL, 0) != 0) {
-    printf("tag = %d\n", tag);
-  }
-  //assert(tag == 0);
-*/
-
-  struct cbor_load_result result;
-
-  //cbor_item_t* item = cbor_load(crypt_buf, out_len, &result);
-  cbor_item_t* item = cbor_load(buffer, read, &result);
-  //free(buffer);
-
-  if (result.error.code != CBOR_ERR_NONE) {
-    printf(
-        "There was an error while reading the input near byte %zu (read %zu "
-        "bytes in total): ",
-        result.error.position, result.read);
-    switch (result.error.code) {
-      case CBOR_ERR_MALFORMATED: {
-        printf("Malformed data\n");
-        break;
-      }
-      case CBOR_ERR_MEMERROR: {
-        printf("Memory error -- perhaps the input is too large?\n");
-        break;
-      }
-      case CBOR_ERR_NODATA: {
-        printf("The input is empty\n");
-        break;
-      }
-      case CBOR_ERR_NOTENOUGHDATA: {
-        printf("Data seem to be missing -- is the input complete?\n");
-        break;
-      }
-      case CBOR_ERR_SYNTAXERROR: {
-        printf(
-            "Syntactically malformed data -- see "
-            "https://www.rfc-editor.org/info/std94\n");
-        break;
-      }
-      case CBOR_ERR_NONE: {
-        // GCC's cheap dataflow analysis gag
-        break;
-      }
-    }
-  } else {
-    printf("CBOR data was properly formatted\n");
-  }
-
-  cbor_describe(item, stdout);
-
-  cJSON* cjson_item = cbor_to_cjson(item);
-  char* json_string = cJSON_Print(cjson_item);
-  printf("%s\n", json_string);
-  free(json_string);
-
-  //printf("Message: %.19s\n", crypt_buf);
-  /*
-  printf("received %s from client\n", buffer);
-  if (write(clientFd, buffer, size) < 0) {
-    perror("write error");
-    exit(6);
-  }
-  */
-
-  // Send message back to the client
-  //send(watcher->fd, buffer, read, 0);
-  //bzero(buffer, read);
-  ev_io_stop(loop, w);
-  close(w->fd);
-  free(w);
-}
-
-void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
-  struct sockaddr_un client_addr;
-  //socklen_t client_len = sizeof(client_addr);
-  int client_sd;
-  struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
-
-  if(EV_ERROR & revents) {
-    perror("got invalid event");
-    return;
-  }
-
-  // Accept client request
-  client_sd = accept(watcher->fd, NULL, NULL);
-
-  if (client_sd < 0) {
-    perror("accept error");
-    return;
-  }
-
-  //total_clients ++; // Increment total_clients count
-  printf("Successfully connected with client.\n");
-  //printf("%d client(s) connected.\n", total_clients);
-
-  // Initialize and start watcher to read client requests
-  ev_io_init(w_client, unix_read_cb, client_sd, EV_READ);
-  ev_io_start(loop, w_client);
-}
-
 #define BUFF_SZ   512
 char buff[BUFF_SZ + 1];
 struct io_uring ring;
@@ -781,14 +607,12 @@ static void iou_cb (struct ev_loop *loop, ev_io *w, int revents) {
   puts("iou_cb was called");
   struct io_uring_cqe *cqe;
   eventfd_t v;
-  //int ret = eventfd_read(efd, &v);
   int ret = eventfd_read(w->fd, &v);
   while(ret == 0) {
     int seq_ret = io_uring_wait_cqe(&ring, &cqe);
     if (seq_ret < 0) {
         fprintf(stderr, "Error waiting for completion: %s\n",
                 strerror(-ret));
-        //return NULL;
     }
     if (cqe->res < 0) {
       fprintf(stderr, "Error in async operation: %s\n", strerror(-cqe->res));
@@ -797,14 +621,8 @@ static void iou_cb (struct ev_loop *loop, ev_io *w, int revents) {
     io_uring_cqe_seen(&ring, cqe);
 
     printf("Contents read from file:\n%s\n", buff);
-    //return NULL;
     ret = eventfd_read(w->fd, &v);
   }
-  //if (errno == EAGAIN || errno == EWOULDBLOCK) {
-    //goto out;
-  //}
-  //if (ret < 0) perror("eventfd_read");
-//out:
 }
 
 static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
@@ -815,7 +633,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   ssize_t r;
   int looped = 0;
   int result = assh_event_get(ssh->session, &event, t);
-  //printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
   if (event.id < 0 || event.id > 100) {
     sleep(60);
   }
@@ -826,14 +643,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   }
 
   while (result) {
-    //printf("Loop %d, ", looped);
     looped = looped + 1;
     switch (event.id) {
       case ASSH_EVENT_READ:
-        //printf("EVENT Read Called, ");
         struct assh_event_transport_read_s *ter = &event.transport.read;
         if (revents & EV_WRITE && ssh->writer_running) {
-          //printf("Libev and libassh are out of sync. Start reader, stop writer\n");
           ev_io_stop(loop, ssh->socket_watcher_writer);
           ssh->writer_running = 0;
           ev_io_start(loop, ssh->socket_watcher_reader);
@@ -846,7 +660,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           case -1:
             r = 0;
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-              //break;
               assh_event_done(ssh->session, &event, err);
               goto out;
             }
@@ -854,20 +667,16 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           case 0:
             r = -1;
             err = ASSH_ERR_IO;
-            //ev_io_stop (loop, w);
           default:
             ter->transferred = r;
             break;
         }
-        //printf("Read %d bytes, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       case ASSH_EVENT_WRITE:
-        //printf("EVENT Write Called, ");
         struct assh_event_transport_write_s *tew = &event.transport.write;
         if (revents & EV_READ && ssh->reader_running) {
-          //printf("Libev and libassh are out of sync. Stop reader, start writer\n");
           ev_io_stop(loop, ssh->socket_watcher_reader);
           ssh->reader_running = 0;
           ev_io_start(loop, ssh->socket_watcher_writer);
@@ -880,7 +689,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           case -1:
             r = 0;
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-              //break;
               assh_event_done(ssh->session, &event, err);
               goto out;
             }
@@ -893,44 +701,33 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
             tew->transferred = r;
             break;
         }
-        //printf("Wrote %d bytes, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       case ASSH_EVENT_SESSION_ERROR:
         fprintf(stderr, "SSH error: %s\n", assh_error_str(event.session.error.code));
-        /* TODO This may not be the right thing to do */
-        //assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
-        //close(w->fd);
-        //w->data->
-        /* */
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
-        //printf("Host key lookup called, ", r);
         struct assh_event_kex_hostkey_lookup_s *ek = &event.kex.hostkey_lookup;
         ek->accept = 1;
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_BANNER:
-        //printf("Client Banner called, ", r);
         struct assh_event_userauth_client_banner_s *eb = &event.userauth_client.banner;
         assert(&event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_USER:
-        //printf("Client User called, ", r);
         struct assh_event_userauth_client_user_s *eu = &event.userauth_client.user;
-        //assh_buffer_strset(&eu->username, ssh->user);
         assh_buffer_strset(&eu->username, "sysadmin");
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_METHODS:
-        //printf("Client User methods called, ", r);
         struct assh_event_userauth_client_methods_s *ev = &event.userauth_client.methods;
         assh_buffer_strset(&ev->password, "sysadmin");
         ev->select = ASSH_USERAUTH_METHOD_PASSWORD;
@@ -938,32 +735,23 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
-        //printf("Client PWChange called, ", r);
         assh_event_done(ssh->session, &event, ASSH_OK);
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
-        //printf("Client Keyboard called, ", r);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_SERVICE_START:
-        //printf("Service Start called, ", r);
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
-        //printf("Channel Confirmation called, ", r);
       case ASSH_EVENT_CHANNEL_FAILURE:
-        //printf("Channel Failure called, ", r);
       case ASSH_EVENT_REQUEST_SUCCESS:
-        //printf("Request Success called, ", r);
       case ASSH_EVENT_REQUEST_FAILURE:
-        //printf("Request Failure called, ", r);
       case ASSH_EVENT_CHANNEL_CLOSE:
-        //printf("Channel Close called, ", r);
         asshh_client_event_inter_session(ssh->session, &event, ssh->inter);
         if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED)
           assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         break;
 
       case ASSH_EVENT_CHANNEL_DATA:
-        //printf("Channel Data called, ", r);
         struct assh_event_channel_data_s *ec = &event.connection.channel_data;
         assh_status_t err = ASSH_OK;
 
@@ -979,12 +767,10 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           default:
             ec->transferred = r;
         }
-        //printf("Wrote %d bytes to stdout, ", r);
         assh_event_done(ssh->session, &event, err);
         break;
 
       default:
-        //printf("Some other event happened: %d\n", event.id);
         assh_event_done(ssh->session, &event, ASSH_OK);
     }
     result = assh_event_get(ssh->session, &event, t);
@@ -1269,40 +1055,9 @@ int main(int argc, char **argv) {
   ev_io_init(&w_accept, sodium_accept_cb, sodium_server_fd, EV_READ);
   ev_io_start(loop, &w_accept);
 
+  unix_domain_t unix_domain; 
+  unix_domain_init(&unix_domain);
 
-
-
-
-  int unix_server_fd;
-  struct sockaddr_un unix_server;
-  //int len;
-  //int sodium_port = 1234;
-  char *socket_file_name = "/tmp/unix_socket";
-
-  unix_server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-  if( unix_server_fd == -1 ) {
-    printf("Error on unix socket() call \n");
-    return 1;
-  }
-
-  unix_server.sun_family = AF_UNIX;
-  strcpy(unix_server.sun_path, socket_file_name);
-  unlink(unix_server.sun_path);
-  len = strlen(unix_server.sun_path) + sizeof(unix_server.sun_family);
-  if( bind(unix_server_fd, (struct sockaddr*)&unix_server, len) != 0) {
-    printf("Error on binding unix socket \n");
-    return 1;
- }
-
-  if( listen(unix_server_fd, 10000) != 0 ) {
-    printf("Error on listen call \n");
-  }
-
-  struct ev_io unix_accept;
-  ev_io_init(&unix_accept, unix_accept_cb, unix_server_fd, EV_READ);
-  ev_io_start(loop, &unix_accept);
-
-  //ev_run (g.loop, 0);
   ev_run (loop, 0);
 
   abort();
