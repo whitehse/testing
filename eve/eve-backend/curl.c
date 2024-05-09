@@ -295,8 +295,8 @@ int eve_curl_init(struct ev_loop *loop) {
   //memset(g, 0, sizeof(global_info_t));
   g.loop = loop;
   g.multi = curl_multi_init();
-  ev_timer_init(g.timer_event, curl_timer_cb, 0., 0.);
-  g.timer_event.data = g;
+  ev_timer_init(&g.timer_event, curl_timer_cb, 0., 0.);
+  g.timer_event.data = &g;
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETFUNCTION, curl_sock_cb);
   curl_multi_setopt(g.multi, CURLMOPT_SOCKETDATA, &g);
   curl_multi_setopt(g.multi, CURLMOPT_TIMERFUNCTION, curl_multi_timer_cb);

@@ -376,7 +376,7 @@ int main(int argc, char **argv) {
   const char *port = "22";
   //const char *port = "830";
 
-  struct ev_loop *loop = EV_DEFAULT;
+  struct ev_loop *loop = ev_default_loop(0);
 
   struct addrinfo hints = {
     .ai_family = AF_UNSPEC,
@@ -553,11 +553,11 @@ int main(int argc, char **argv) {
 
   //unix_domain_t unix_domain; 
   //unix_domain_init(&unix_domain);
-  //unix_domain_init(loop);
+  unix_domain_init(loop);
 
   //eve_sodium_t eve_sodium; 
   //eve_sodium_init(&eve_sodium);
-  //eve_sodium_init(loop);
+  eve_sodium_init(loop);
 
 
   ev_run (loop, 0);

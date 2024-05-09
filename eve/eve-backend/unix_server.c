@@ -29,6 +29,7 @@
 
 #define BUFFER_SIZE 1024
 
+
 /*
 cJSON* cbor_to_cjson(cbor_item_t* item) {
   switch (cbor_typeof(item)) {
@@ -132,6 +133,7 @@ void unix_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   char buffer[BUFFER_SIZE];
   ssize_t read;
 
+  puts("Entered unix_read_cb");
   if(EV_ERROR & revents) {
     perror("got invalid event");
     return;
@@ -221,6 +223,7 @@ void unix_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 }
 
 void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
+  puts("Entered unix_accept_cb");
   struct sockaddr_un client_addr;
   int client_sd;
   struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
@@ -245,7 +248,8 @@ void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
 
 //int unix_domain_init(unix_domain_t *unix_domain) {
 int unix_domain_init(struct ev_loop *loop) {
-  //struct ev_loop *loop = EV_DEFAULT;
+  //struct ev_loop *loop = ev_default_loop(0);
+  puts("Entered unix_domain_init");
   int len;
   int unix_server_fd;
   struct sockaddr_un unix_server;
@@ -270,7 +274,7 @@ int unix_domain_init(struct ev_loop *loop) {
     printf("Error on listen call \n");
   }
 
-  struct ev_io unix_accept;
-  ev_io_init(&unix_accept, unix_accept_cb, unix_server_fd, EV_READ);
-  ev_io_start(loop, &unix_accept);
+  struct ev_io *unix_accept = (struct ev_io*) malloc (sizeof(struct ev_io));
+  ev_io_init(unix_accept, unix_accept_cb, unix_server_fd, EV_READ);
+  ev_io_start(loop, unix_accept);
 }

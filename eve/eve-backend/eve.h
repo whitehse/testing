@@ -28,14 +28,14 @@ struct _unix_domain {
 typedef struct _unix_domain unix_domain_t;
 
 //int unix_domain_init(unix_domain_t *unix_domain);
-int unix_domain_init(struct ev_loop *loop);
+//int unix_domain_init(struct ev_loop *loop);
 
 struct _eve_curl {
 };
 typedef struct _eve_curl eve_curl_t;
  
 //int eve_curl_init(eve_curl_t *eve_curl);
-int eve_curl_init(struct ev_loop *loop);
+//int eve_curl_init(struct ev_loop *loop);
 
 struct _eve_sodium {
 };

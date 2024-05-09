@@ -128,10 +128,10 @@ void sodium_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 
   cbor_describe(item, stdout);
 
-  cJSON* cjson_item = cbor_to_cjson(item);
-  char* json_string = cJSON_Print(cjson_item);
-  printf("%s\n", json_string);
-  free(json_string);
+  //cJSON* cjson_item = cbor_to_cjson(item);
+  //char* json_string = cJSON_Print(cjson_item);
+  //printf("%s\n", json_string);
+  //free(json_string);
 
   ev_io_stop(loop, w);
   close(w->fd);
@@ -164,7 +164,7 @@ void sodium_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) 
 
 //int eve_sodium_init(eve_sodium_t *eve_sodium) {
 int eve_sodium_init(struct ev_loop *loop) {
-  //struct ev_loop *loop = EV_DEFAULT;
+ // struct ev_loop *loop = EV_DEFAULT;
   FILE *fptr;
 
   if ((fptr = fopen("server.pk","rb")) == NULL){
@@ -219,7 +219,7 @@ int eve_sodium_init(struct ev_loop *loop) {
     exit(3);
   }
 
-  struct ev_io w_accept;
-  ev_io_init(&w_accept, sodium_accept_cb, sodium_server_fd, EV_READ);
-  ev_io_start(loop, &w_accept);
+  struct ev_io *w_accept = (struct ev_io*) malloc (sizeof(struct ev_io));
+  ev_io_init(w_accept, sodium_accept_cb, sodium_server_fd, EV_READ);
+  ev_io_start(loop, w_accept);
 }
