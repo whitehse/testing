@@ -33,8 +33,6 @@
 #include <assh/assh_algo.h>
 
 #include <ev.h>
-#include <libwebsockets.h>
-#include <sodium.h>
 #include <cbor.h>
 #include <cjson/cJSON.h>
 #include <eve.h>
@@ -156,14 +154,6 @@ void hexDump(char *desc, void *addr, int len) {
 }
 
 #define BUFF_SZ   512
-
-static const struct lws_http_mount mount = {
-        .mountpoint     = "/",        /* mountpoint URL */
-        .origin       = "./tmp/mount-origin", /* serve from dir */
-        .def        = "index.html",   /* default filename */
-        .origin_protocol    = LWSMPRO_FILE,     /* files in a dir */
-        .mountpoint_len     = 1,            /* char count */
-};
 
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   fprintf (stderr, "timeout\n");
@@ -447,62 +437,11 @@ int main(int argc, char **argv) {
   ev_timer timeout_watcher;
   ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 10.);
   ev_timer_start (loop, &timeout_watcher);
-  //printf("Set timer event\n");
 
-  struct lws_client_connect_info connect_info;
-  void *foreign_loops[1] = { loop };
-  int BUF_SIZE = 4096;
-
-  struct lws_context_creation_info info;
-  struct lws_context *context;
-  const char *p;
-  int n = 0, logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
-    /* for LLL_ verbosity above NOTICE to be built into lws,
-     * lws must have been configured and built with
-     * -DCMAKE_BUILD_TYPE=DEBUG instead of =RELEASE */
-    /* | LLL_INFO */ /* | LLL_PARSER */ /* | LLL_HEADER */
-    /* | LLL_EXT */ /* | LLL_CLIENT */ /* | LLL_LATENCY */
-    /* | LLL_DEBUG */;
-
-  //signal(SIGINT, sigint_handler);
-
-  //if ((p = lws_cmdline_option(argc, argv, "-d")))
-  //     logs = atoi(p);
-
-  lws_set_log_level(logs, NULL);
-  lwsl_user("LWS minimal http server | visit http://localhost:7681\n");
-
-  memset(&info, 0, sizeof info); /* otherwise uninitialized garbage */
-  info.port = 7681;
-  info.mounts = &mount;
-  info.error_document_404 = "/404.html";
-  info.options =
-    LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE | LWS_SERVER_OPTION_LIBEV;
-  info.foreign_loops = foreign_loops;
-  //info.uid = 1000;
-  //info.gid = 1000;
-
-  //if (lws_cmdline_option(argc, argv, "--h2-prior-knowledge"))
-  //    info.options |= LWS_SERVER_OPTION_H2_PRIOR_KNOWLEDGE;
-
-  context = lws_create_context(&info);
-  if (!context) {
-    lwsl_err("lws init failed\n");
-    return 1;
-  }
-
-  //eve_curl_t eve_curl; 
-  //eve_curl_init(&eve_curl);
+  eve_websockets_init(loop);
   eve_curl_init(loop);
-
-  //unix_domain_t unix_domain; 
-  //unix_domain_init(&unix_domain);
   unix_domain_init(loop);
-
-  //eve_sodium_t eve_sodium; 
-  //eve_sodium_init(&eve_sodium);
   eve_sodium_init(loop);
-
   eve_iou_init(loop);
 
   ev_run (loop, 0);
@@ -511,6 +450,5 @@ int main(int argc, char **argv) {
 
   printf("Connection closed\n");
 
-  lws_context_destroy(context);
   //assh_session_release(session);
 }

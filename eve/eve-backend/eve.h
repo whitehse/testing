@@ -51,4 +51,10 @@ typedef struct _eve_iou eve_iou_t;
 //int eve_iou_init(eve_iou_t *eve_iou);
 int eve_iou_init(struct ev_loop *loop);
 
+struct _eve_websockets {
+};
+typedef struct _eve_websockets eve_websockets_t;
+ 
+int eve_websockets_init(struct ev_loop *loop);
+
 #endif // EVE_H
