@@ -44,4 +44,11 @@ typedef struct _eve_sodium eve_sodium_t;
 //int eve_sodium_init(eve_sodium_t *eve_sodium);
 int eve_sodium_init(struct ev_loop *loop);
 
+struct _eve_iou {
+};
+typedef struct _eve_iou eve_iou_t;
+ 
+//int eve_iou_init(eve_iou_t *eve_iou);
+int eve_iou_init(struct ev_loop *loop);
+
 #endif // EVE_H
