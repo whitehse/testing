@@ -249,7 +249,6 @@ void unix_accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
 //int unix_domain_init(unix_domain_t *unix_domain) {
 int unix_domain_init(struct ev_loop *loop) {
   //struct ev_loop *loop = ev_default_loop(0);
-  puts("Entered unix_domain_init");
   int len;
   int unix_server_fd;
   struct sockaddr_un unix_server;

@@ -47,7 +47,8 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   struct assh_event_s event;
   assh_status_t err = ASSH_OK;
   ssize_t r;
-  int looped = 0;
+  //int looped = 0;
+
   int result = assh_event_get(ssh->session, &event, t);
   if (event.id < 0 || event.id > 100) {
     sleep(60);
@@ -59,7 +60,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   }
 
   while (result) {
-    looped = looped + 1;
+    //looped = looped + 1;
     switch (event.id) {
       case ASSH_EVENT_READ:
         struct assh_event_transport_read_s *ter = &event.transport.read;
@@ -163,8 +164,9 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
       case ASSH_EVENT_REQUEST_FAILURE:
       case ASSH_EVENT_CHANNEL_CLOSE:
         asshh_client_event_inter_session(ssh->session, &event, ssh->inter);
-        if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED)
+        if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED) {
           assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
+        }
         break;
 
       case ASSH_EVENT_CHANNEL_DATA:
@@ -208,8 +210,9 @@ int eve_assh_init(struct ev_loop *loop) {
   int number_of_e7s = 1;
   char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11", "192.168.38.12", "192.168.38.13", "192.168.38.14", "192.168.38.15", "192.168.38.16", "192.168.38.17", "192.168.38.18", "192.168.38.19", "192.168.38.20", "192.168.34.11", "192.168.34.12", "192.168.34.13", "192.168.34.14", "192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15", "192.168.33.11", "192.168.33.12", "192.168.33.13", "192.168.33.14", "192.168.36.11", "192.168.36.12", "192.168.36.13", "192.168.42.11", "192.168.42.12", "192.168.42.13", "192.168.42.14", "192.168.42.15", "192.168.42.16", "192.168.42.17", "192.168.42.18", "192.168.44.11", "192.168.44.12", "192.168.44.13", "192.168.44.14", "192.168.44.15", "192.168.44.16", "192.168.44.17", "192.168.44.18", "192.168.47.11", "192.168.47.12", "192.168.47.13", "192.168.47.14", "192.168.47.15", "192.168.51.11", "192.168.51.12", "192.168.51.13", "192.168.51.14", "192.168.51.15", "192.168.51.16", "192.168.51.17", "192.168.51.18", "192.168.49.11", "192.168.49.12", "192.168.46.11", "192.168.46.12", "192.168.46.13", "192.168.46.14", "192.168.46.15", "192.168.46.16", "192.168.46.17", "192.168.46.18", "192.168.45.11", "192.168.45.12", "192.168.45.13", "192.168.45.14", "192.168.48.11", "192.168.48.12", "192.168.48.13", "192.168.48.14", "192.168.48.15", "192.168.48.16", "192.168.50.11", "192.168.50.12", "192.168.50.13", "192.168.50.14", "192.168.50.15", "192.168.52.11", "192.168.52.12", "192.168.52.13", "192.168.53.11", "192.168.53.12", "192.168.53.13", "192.168.53.14", "192.168.53.15", "192.168.53.16", "192.168.54.11", "192.168.54.12", "192.168.54.13", "192.168.54.14", "192.168.54.15", "192.168.43.11", "192.168.43.12", "192.168.43.13", "192.168.43.14", "192.168.43.15"};
 
-  const char *command = 'show version';
-  const char *port = "22";
+  char *command = (char *)malloc(13*sizeof(char));
+  strcpy(command, "show version");
+  char *port = "22";
   //const char *port = "830";
 
   struct addrinfo hints = {
@@ -217,8 +220,8 @@ int eve_assh_init(struct ev_loop *loop) {
     .ai_socktype = SOCK_STREAM,
   };
 
-  ssh_t ssh[number_of_e7s];
-  int sock[number_of_e7s];
+  ssh_t *ssh[number_of_e7s];
+  int *sock[number_of_e7s];
   struct addrinfo *servinfo[number_of_e7s];
   struct addrinfo *si[number_of_e7s];
 
@@ -229,16 +232,17 @@ int eve_assh_init(struct ev_loop *loop) {
 
   for (int i=0; i<number_of_e7s; i++) {
     //printf("Setting up socket\n");
-    sock[i] = -1;
+    sock[i] = (int *)malloc(sizeof(int));
+    *sock[i] = -1;
     if (!getaddrinfo(e7s[i], port, &hints, &(servinfo[i]))) {
       for (si[i] = servinfo[i]; si[i] != NULL; si[i] = si[i]->ai_next) {
-        sock[i] = socket(si[i]->ai_family, si[i]->ai_socktype, si[i]->ai_protocol);
-        if (sock[i] < 0)
+        *sock[i] = socket(si[i]->ai_family, si[i]->ai_socktype, si[i]->ai_protocol);
+        if (*sock[i] < 0)
           continue;
 
-        if (connect(sock[i], si[i]->ai_addr, si[i]->ai_addrlen)) {
-          close(sock[i]);
-          sock[i] = -1;
+        if (connect(*sock[i], si[i]->ai_addr, si[i]->ai_addrlen)) {
+          close(*sock[i]);
+          *sock[i] = -1;
           continue;
         }
 
@@ -246,16 +250,14 @@ int eve_assh_init(struct ev_loop *loop) {
       }
       freeaddrinfo(servinfo[i]);
     }
-    if (sock[i] < 0)
+    if (*sock[i] < 0)
       ERROR("Unable to connect: %s\n", strerror(errno));
 
-    int status = fcntl(sock[i], F_SETFL, fcntl(sock[i], F_GETFL, 0) | O_NONBLOCK);
+    int status = fcntl(*sock[i], F_SETFL, fcntl(*sock[i], F_GETFL, 0) | O_NONBLOCK);
 
     if (status == -1) {
       perror("calling fcntl");
     }
-
-    //printf("Socket was opened for %s\n", e7s[i]);
 
     struct assh_context_s *context[number_of_e7s];
     context[i] = malloc(sizeof(struct assh_context_s));
@@ -266,15 +268,11 @@ int eve_assh_init(struct ev_loop *loop) {
         assh_algo_register_default(context[i], ASSH_SAFETY_WEAK))
       ERROR("Unable to create an assh context.\n");
 
-    //printf("Finished assh_context_create for %s\n", e7s[i]);
-
     struct assh_session_s *session[number_of_e7s];
     session[i] = malloc(sizeof(struct assh_session_s));
 
     if (assh_session_create(context[i], &session[i]))
       ERROR("Unable to create an assh session.\n");
-
-    //printf("Finished assh_session_create for %s\n", e7s[i]);
 
     enum assh_userauth_methods_e auth_methods =
       ASSH_USERAUTH_METHOD_PASSWORD;/* |
@@ -285,32 +283,28 @@ int eve_assh_init(struct ev_loop *loop) {
     inter[i] = malloc(sizeof(struct asshh_client_inter_session_s));
     asshh_client_init_inter_session(inter[i], command, NULL);
 
-    //printf("Finished client_init_inter_session for %s\n", e7s[i]);
-
-    ssh[i].session = session[i];
-    ssh[i].inter = inter[i];
-    ssh[i].hostname = e7s[i];
-    ssh[i].user = user;
-    ssh[i].auth_methods = &auth_methods;
-
-    //printf("Finished setting ssh for %s\n", e7s[i]);
+    ssh[i] = malloc(sizeof(ssh_t));
+    ssh[i]->session = session[i];
+    ssh[i]->inter = inter[i];
+    ssh[i]->hostname = e7s[i];
+    ssh[i]->user = user;
+    ssh[i]->auth_methods = &auth_methods;
 
     ev_io *socket_watcher[number_of_e7s*2];
     socket_watcher[i*2] = malloc(sizeof(ev_io));
     socket_watcher[i*2+1] = malloc(sizeof(ev_io));
 
-    ev_io_init (socket_watcher[i*2], socket_cb, sock[i], EV_READ);
-    ssh[i].socket_watcher_reader = socket_watcher[i*2];
-    ev_io_init (socket_watcher[i*2+1], socket_cb, sock[i], EV_WRITE);
-    ssh[i].socket_watcher_writer = socket_watcher[i*2+1];
+    ev_io_init (socket_watcher[i*2], socket_cb, *sock[i], EV_READ);
+    ssh[i]->socket_watcher_reader = socket_watcher[i*2];
+    ev_io_init (socket_watcher[i*2+1], socket_cb, *sock[i], EV_WRITE);
+    ssh[i]->socket_watcher_writer = socket_watcher[i*2+1];
 
-    socket_watcher[i*2]->data = &ssh[i];
-    socket_watcher[i*2+1]->data = &ssh[i];
-    ev_io_start (loop, ssh[i].socket_watcher_reader);
-    ssh[i].reader_running = 1;
-    ev_io_start (loop, ssh[i].socket_watcher_writer);
-    ssh[i].writer_running = 1;
+    socket_watcher[i*2]->data = ssh[i];
+    socket_watcher[i*2+1]->data = ssh[i];
+    ev_io_start (loop, ssh[i]->socket_watcher_reader);
+    ssh[i]->reader_running = 1;
+    ev_io_start (loop, ssh[i]->socket_watcher_writer);
+    ssh[i]->writer_running = 1;
   }
-
   //assh_session_release(session);
 }

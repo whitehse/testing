@@ -17,6 +17,7 @@
 #include <sys/eventfd.h>
 #include <liburing.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include <ev.h>
 #include <eve.h>

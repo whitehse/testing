@@ -17,16 +17,28 @@
 #include <sys/eventfd.h>
 #include <liburing.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include <ev.h>
 #include <libwebsockets.h>
 
+#include "protocol_lws_minimal.c"
+
+#define LWS_PLUGIN_STATIC
+
+static struct lws_protocols protocols[] = {
+        { "http", lws_callback_http_dummy, 0, 0, 0, NULL, 0},
+        LWS_PLUGIN_PROTOCOL_MINIMAL,
+        LWS_PROTOCOL_LIST_TERM
+};
+        //LWS_PLUGIN_PROTOCOL_MINIMAL,
+
 static const struct lws_http_mount mount = {
-        .mountpoint     = "/",        /* mountpoint URL */
-        .origin       = "./tmp/mount-origin", /* serve from dir */
-        .def        = "index.html",   /* default filename */
-        .origin_protocol    = LWSMPRO_FILE,     /* files in a dir */
-        .mountpoint_len     = 1,            /* char count */
+        .mountpoint     = "/", 
+        .origin       = "./tmp/mount-origin", 
+        .def        = "index.html",
+        .origin_protocol    = LWSMPRO_FILE,
+        .mountpoint_len     = 1,
 };
 
 int eve_websockets_init(struct ev_loop *loop) {
@@ -47,8 +59,8 @@ int eve_websockets_init(struct ev_loop *loop) {
   info->port = 7681;
   info->mounts = &mount;
   info->error_document_404 = "/404.html";
-  info->options =
-    LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE | LWS_SERVER_OPTION_LIBEV;
+  info->protocols = protocols;
+  info->options = LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE | LWS_SERVER_OPTION_LIBEV;
   info->foreign_loops = foreign_loops;
 
   context = lws_create_context(info);
