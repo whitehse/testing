@@ -57,4 +57,10 @@ typedef struct _eve_websockets eve_websockets_t;
  
 int eve_websockets_init(struct ev_loop *loop);
 
+struct _eve_assh {
+};
+typedef struct _eve_assh eve_assh_t;
+ 
+int eve_assh_init(struct ev_loop *loop);
+
 #endif // EVE_H
