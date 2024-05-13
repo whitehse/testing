@@ -1,0 +1,22 @@
+:root {
+  --main-bg-color: brown;
+}
+
+@property --logo-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #c0ffee;
+}
+
+details {
+  background-color: var(--main-bg-color);
+}
+
+h1 {
+  & ~ p { /* this is parsed by the browser as h1 ~ p */
+    font-weight: bold;
+    background-color: #333;
+    color: #fff;
+    padding: .5em;
+  }
+}
