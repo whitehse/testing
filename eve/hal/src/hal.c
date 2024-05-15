@@ -258,7 +258,8 @@ int main(void) {
   block_size = frame_size * RING_FRAMES;
   
   //listen_on_interface("wlp4s0");
-  listen_on_interface("wlp0s12f0");
+  //listen_on_interface("wlp0s12f0");
+  listen_on_interface("wlp146s0");
   //listen_on_interface("wlo1");
   //listen_on_interface("ath0");
   //listen_on_interface("ath01");
@@ -350,8 +351,12 @@ int main(void) {
   uint8_t cipher_text[12];              /* Encrypted message */
   getrandom(key, 32, 0);
   getrandom(nonce, 24, 0);
-  crypto_lock(mac, cipher_text, key, nonce, plain_text,
-        sizeof(plain_text));
+
+  crypto_aead_lock(cipher_text, mac,
+    key, nonce,
+    NULL, 0,
+    plain_text, sizeof(plain_text));
+
   /* Wipe secrets if they are no longer needed */
   crypto_wipe(plain_text, 12);
   crypto_wipe(key, 32);

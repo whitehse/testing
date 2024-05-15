@@ -7,6 +7,9 @@ project(
 
 set(CMAKE_C_STANDARD 99)
 
+# apt install gcc-12-arm-linux-gnueabihf
+# Try:
+#   cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc-12 -DARM=1 ..
 option(ARM "Whether to cross compile for ARM" OFF)
 option(ENABLE_WARNINGS "Enable to add warnings to a target." ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Enable to treat warnings as errors." OFF)
@@ -24,7 +27,8 @@ option(ENABLE_LTO "Enable to add Link Time Optimization." ON)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
 if (ARM)
-  set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+  #set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc-12)
+  set(CMAKE_C_COMPILER /usr/bin/arm-linux-gnueabihf-gcc-12)
 else()
 endif()
 

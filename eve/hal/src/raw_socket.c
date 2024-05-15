@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
         if ((int64_t)n > maximum_read_size) {
             maximum_read_size = (int64_t)n;
         }
-        if (packet_count % 1000 == 0) {
+        if (packet_count % 10 == 0) {
             printf("Saw %llu frames and %llu bytes, %llu bits. Maximum read size = %llu - ", packet_count, total_bytes, total_bytes*8, maximum_read_size);
             ethhead = buffer;
             printf("%.2x:%.2x:%.2x:%.2x:%.2x:%.2x ",

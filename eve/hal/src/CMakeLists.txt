@@ -23,14 +23,13 @@ target_include_directories(hal PUBLIC
     "${PROJECT_SOURCE_DIR}/third_party/include/"
     "${PROJECT_SOURCE_DIR}/third_party/include/hashmap"
     "${PROJECT_SOURCE_DIR}/third_party/include/libnl-tiny/"
-    "${PROJECT_SOURCE_DIR}/third_party/libev-4.33/"
+    "${PROJECT_SOURCE_DIR}/third_party/libev/"
+    "${PROJECT_SOURCE_DIR}/third_party/monocypher/src/"
     "${CMAKE_BINARY_DIR}/configured_files/include/"
     ".")
 
     #/usr/src/git/github/sabotage-linux/libnl-tiny/include/
     #/usr/include/google
-
-target_link_libraries(hal protobuf-c)
 
 if (ARM)
   target_link_libraries(hal "${PROJECT_SOURCE_DIR}/lib/armhf/libnl-tiny.a" -static)
