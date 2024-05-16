@@ -28,24 +28,34 @@ void pq_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   char buffer[BUFFER_SIZE];
   ssize_t read;
 
-  int r = PQconsumeInput(PGconn *conn);
-/*
-  read = recv(w->fd, buffer, BUFFER_SIZE, 0);
+  PGconn* conn = (PGconn*)w->data;
 
-  if ( read < 0 ) {
-    perror("read error");
-    exit(5);
+  int r = PQconsumeInput(conn);
+  if (r == 0) {
+    fprintf(stderr, "%s", PQerrorMessage(conn));
+    goto cb_out;
   }
 
-  if (read == 0) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
-      perror("Something weird happened");
-      //return 0;
-    } else {
-      perror("Something bad happened");
-    }
+  r = PQisBusy(conn);
+
+  if (r == 1) goto cb_out;
+
+  PGresult *res;
+  int nFields;
+
+  while(res = PQgetResult(conn)) {
+    /* print out the attribute names */
+    nFields = PQnfields(res);
+    for (int i = 0; i < nFields; i++)
+      printf("%-15s", PQfname(res, i));
+    printf("\n\n");
+
+    /* print out the row */
+    for (int j = 0; j < nFields; j++)
+      printf("%-15s", PQgetvalue(res, 0, j));
+    printf("\n");
   }
-*/
+cb_out:
 }
 
 int main(int argc, char *argv[]) {
@@ -71,8 +81,6 @@ int main(int argc, char *argv[]) {
     perror("There is something wrong with the postgres client file descriptor");
   }
 
-/*
-*/
   struct ev_io *w_pq = (struct ev_io*) malloc (sizeof(struct ev_io));
   w_pq->data = conn;
   ev_io_init(w_pq, pq_read_cb, pq_fd, EV_READ | EV_WRITE);
