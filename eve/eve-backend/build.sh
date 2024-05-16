@@ -12,4 +12,5 @@ gcc -I /usr/local/include -o unix-echo-client unix-echo-client.c -L /usr/local/l
 gcc -o create_keys create-keys.c -l sodium
 gcc -o tui_client tui-client.c -lcurses -lev
 
+gcc -o pqsql pqsql.c -I /usr/include/postgresql/ -lpq -lev
 #gcc -o eve eve.c unix_server.o sodium.o curl.o -I. -lcurl -lev -lassh -lsodium -lcbor -lcjson -lwebsockets -luring
