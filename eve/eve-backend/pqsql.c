@@ -25,9 +25,6 @@
 #define BUFFER_SIZE 1024
 
 void pq_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  unsigned long start_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
   char buffer[BUFFER_SIZE];
   ssize_t read;
 
@@ -62,10 +59,6 @@ void pq_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   ev_io_start(loop, w);
   ev_break (loop, EVBREAK_ALL);
 cb_out:
-  struct timeval tv_end;
-  gettimeofday(&tv_end,NULL);
-  unsigned long end_in_micros = 1000000 * tv_end.tv_sec + tv_end.tv_usec;
-  printf("The callback took %d microseconds\n", end_in_micros - start_in_micros);
 }
 
 int main(int argc, char *argv[]) {
