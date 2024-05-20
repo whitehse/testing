@@ -116,16 +116,29 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
                 if (vhd->amsg.payload)
                         __minimal_destroy_message(&vhd->amsg);
 
-                vhd->amsg.len = len;
-                /* notice we over-allocate by LWS_PRE */
-                vhd->amsg.payload = malloc(LWS_PRE + len);
-                if (!vhd->amsg.payload) {
-                        lwsl_user("OOM: dropping\n");
-                        break;
+                printf("Msg = %.*s\n", len, in);
+                if (strncmp("TEST", in, 4) == 0) {
+                  puts("String matches. Sending special string");
+                  vhd->amsg.len = 10;
+                  vhd->amsg.payload = malloc(LWS_PRE + 10);
+                  if (!vhd->amsg.payload) {
+                      lwsl_user("OOM: dropping\n");
+                      break;
+                  }
+                  memcpy((char *)vhd->amsg.payload + LWS_PRE, "It Worked!", 10);
+                  vhd->current++;
+                } else {
+                  vhd->amsg.len = len;
+                  /* notice we over-allocate by LWS_PRE */
+                  vhd->amsg.payload = malloc(LWS_PRE + len);
+                  if (!vhd->amsg.payload) {
+                      lwsl_user("OOM: dropping\n");
+                      break;
+                  }
+                  memcpy((char *)vhd->amsg.payload + LWS_PRE, in, len);
+                  vhd->current++;
                 }
 
-                memcpy((char *)vhd->amsg.payload + LWS_PRE, in, len);
-                vhd->current++;
 
                 /*
                  * let everybody know we want to write something on them

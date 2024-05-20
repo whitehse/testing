@@ -14,3 +14,5 @@ gcc -o tui_client tui-client.c -lcurses -lev
 
 gcc -o pqsql pqsql.c -I /usr/include/postgresql/ -lpq -lev
 #gcc -o eve eve.c unix_server.o sodium.o curl.o -I. -lcurl -lev -lassh -lsodium -lcbor -lcjson -lwebsockets -luring
+
+gcc -o eve_db eve_db.c -I. -lev -luring -lcbor -lcjson
