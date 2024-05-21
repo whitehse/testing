@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
+//#include <stdint.h>
 #include <poll.h>
 #include <string.h>
 #include <sys/types.h>
@@ -69,115 +70,17 @@ struct _eve_point_two_second_header {
 };
 typedef struct _eve_point_two_second_header eve_point_two_second_header_t;
 
-cJSON* cbor_to_cjson(cbor_item_t* item) {
-  switch (cbor_typeof(item)) {
-    case CBOR_TYPE_UINT:
-      return cJSON_CreateNumber(cbor_get_int(item));
-    case CBOR_TYPE_NEGINT:
-      return cJSON_CreateNumber(-1 - cbor_get_int(item));
-    case CBOR_TYPE_BYTESTRING:
-      // cJSON only handles null-terminated string -- binary data would have to
-      // be escaped
-      return cJSON_CreateString("Unsupported CBOR item: Bytestring");
-    case CBOR_TYPE_STRING:
-      if (cbor_string_is_definite(item)) {
-        // cJSON only handles null-terminated string
-        char* null_terminated_string = malloc(cbor_string_length(item) + 1);
-        memcpy(null_terminated_string, cbor_string_handle(item),
-               cbor_string_length(item));
-        null_terminated_string[cbor_string_length(item)] = 0;
-        cJSON* result = cJSON_CreateString(null_terminated_string);
-        free(null_terminated_string);
-        return result;
-      }
-      return cJSON_CreateString("Unsupported CBOR item: Chunked string");
-    case CBOR_TYPE_ARRAY: {
-      cJSON* result = cJSON_CreateArray();
-      for (size_t i = 0; i < cbor_array_size(item); i++) {
-        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_array_get(item, i)));
-      }
-      return result;
-    }
-    case CBOR_TYPE_MAP: {
-      cJSON* result = cJSON_CreateObject();
-      for (size_t i = 0; i < cbor_map_size(item); i++) {
-        char* key = malloc(128);
-        snprintf(key, 128, "Surrogate key %zu", i);
-        // JSON only support string keys
-        if (cbor_isa_string(cbor_map_handle(item)[i].key) &&
-            cbor_string_is_definite(cbor_map_handle(item)[i].key)) {
-          size_t key_length = cbor_string_length(cbor_map_handle(item)[i].key);
-          if (key_length > 127) key_length = 127;
-          // Null-terminated madness
-          memcpy(key, cbor_string_handle(cbor_map_handle(item)[i].key),
-                 key_length);
-          key[key_length] = 0;
-        }
+enum object_type {
+  tcp_stream_stats = 1
+};
 
-        cJSON_AddItemToObject(result, key,
-                              cbor_to_cjson(cbor_map_handle(item)[i].value));
-        free(key);
-      }
-      return result;
-    }
-    case CBOR_TYPE_TAG:
-      return cJSON_CreateString("Unsupported CBOR item: Tag");
-    case CBOR_TYPE_FLOAT_CTRL:
-      if (cbor_float_ctrl_is_ctrl(item)) {
-        if (cbor_is_bool(item)) return cJSON_CreateBool(cbor_get_bool(item));
-        if (cbor_is_null(item)) return cJSON_CreateNull();
-        return cJSON_CreateString("Unsupported CBOR item: Control value");
-      }
-      return cJSON_CreateNumber(cbor_float_get_float(item));
-  }
-
-  return cJSON_CreateNull();
-}
-
-void hexDump(char *desc, void *addr, int len) {
-    int i;
-    unsigned char buff[17];
-    unsigned char *pc = (unsigned char*)addr;
-
-    // Output description if given.
-    if (desc != NULL)
-        printf ("%s:\n", desc);
-
-    // Process every byte in the data.
-    for (i = 0; i < len; i++) {
-        // Multiple of 16 means new line (with line offset).
-
-        if ((i % 16) == 0) {
-            // Just don't print ASCII for the zeroth line.
-            if (i != 0)
-                printf("  %s\n", buff);
-
-            // Output the offset.
-            printf("  %04x ", i);
-        }
-
-        // Now the hex code for the specific character.
-        printf(" %02x", pc[i]);
-
-        // And store a printable ASCII character for later.
-        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
-            buff[i % 16] = '.';
-        } else {
-            buff[i % 16] = pc[i];
-        }
-
-        buff[(i % 16) + 1] = '\0';
-    }
-
-    // Pad out last line if not exactly 16 characters.
-    while ((i % 16) != 0) {
-        printf("   ");
-        i++;
-    }
-
-    // And print the final ASCII bit.
-    printf("  %s\n", buff);
-}
+struct tcp_stream_stats {
+  enum object_type object_type;
+  uint32_t egress_window_size;
+  uint32_t ingress_window_size;
+  uint64_t ingress_bytes;
+  uint64_t egress_bytes;
+};
 
 #define BUFF_SZ   512
 
