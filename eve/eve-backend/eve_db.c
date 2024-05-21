@@ -42,7 +42,8 @@ struct _eve_db_header {
   uint8_t version;
   // zero or one
   uint8_t active_database;
-  uint64_t first_minute;
+  time_t first_minute;
+  time_t next_roll_over_minute;
 };
 typedef struct _eve_db_header eve_db_header_t;
 
@@ -61,6 +62,7 @@ typedef struct _eve_db_header eve_db_header_t;
 //   Bytes 167936+: CBOR data
 #define DB_A_OFFSET 4096
 #define DB_B_OFFSET 86016
+#define CBOR_OFFSET 167936
 
 struct _eve_point_two_second_header {
   uint64_t header_array[10080];
@@ -250,8 +252,11 @@ int main(int argc, char **argv) {
   //header->version = htonl(EVE_DATA_VERSION);
   header->version = EVE_DATA_VERSION;
   header->active_database = 0;
-  header->first_minute = 1;
+  header->first_minute = time(NULL) / 60 * 60;
+  header->next_roll_over_minute = header->first_minute + 10080;
 
+  printf("Now, as seconds, rounded down to the nearest full minute is %ju\n", (uintmax_t)header->first_minute);
+  printf("The time to close the file, in seconds, is %ju\n", (uintmax_t)header->next_roll_over_minute);
   int fd;
 
   // Open a file in writing mode
@@ -285,6 +290,35 @@ int main(int argc, char **argv) {
     close(fd);  // Close the file before returning on error
     exit(1);
   }
+
+  /* Preallocate the map structure */
+  cbor_item_t* root = cbor_new_definite_map(2);
+  /* Add the content */
+  bool success = cbor_map_add(
+      root, (struct cbor_pair){
+                .key = cbor_move(cbor_build_string("Is CBOR awesome?")),
+                .value = cbor_move(cbor_build_bool(true))});
+  success &= cbor_map_add(
+      root, (struct cbor_pair){
+                .key = cbor_move(cbor_build_uint8(42)),
+                .value = cbor_move(cbor_build_string("Is the answer"))});
+  if (!success) return 1;
+  /* Output: `length` bytes of data in the `buffer` */
+  unsigned char* buffer;
+  size_t buffer_size;
+  cbor_serialize_alloc(root, &buffer, &buffer_size);
+
+  bytes_written = pwrite(fd, buffer, buffer_size, CBOR_OFFSET);
+  if (bytes_written == -1) {
+    perror("Error writing to file");
+    close(fd);  // Close the file before returning on error
+    exit(1);
+  }
+  //fwrite(buffer, 1, buffer_size, stdout);
+  free(buffer);
+
+  //fflush(stdout);
+  cbor_decref(&root);
 
   // Close the file
   if (close(fd) == -1) {
