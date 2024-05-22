@@ -20,7 +20,7 @@
 #include <fcntl.h>
 
 #include <ev.h>
-#include <cbor.h>
+//#include <cbor.h>
 #include <cjson/cJSON.h>
 #include <eve.h>
 
@@ -83,10 +83,6 @@ struct tcp_stream_stats {
 };
 
 #define BUFF_SZ   512
-
-static void timeout_cb (EV_P_ ev_timer *w, int revents) {
-  fprintf (stderr, "timeout\n");
-}
 
 int setup_io_uring(int efd, struct io_uring *ring) {
   int ret = io_uring_queue_init(8, ring, 0);
@@ -193,35 +189,6 @@ int main(int argc, char **argv) {
     close(fd);  // Close the file before returning on error
     exit(1);
   }
-
-  /* Preallocate the map structure */
-  cbor_item_t* root = cbor_new_definite_map(2);
-  /* Add the content */
-  bool success = cbor_map_add(
-      root, (struct cbor_pair){
-                .key = cbor_move(cbor_build_string("Is CBOR awesome?")),
-                .value = cbor_move(cbor_build_bool(true))});
-  success &= cbor_map_add(
-      root, (struct cbor_pair){
-                .key = cbor_move(cbor_build_uint8(42)),
-                .value = cbor_move(cbor_build_string("Is the answer"))});
-  if (!success) return 1;
-  /* Output: `length` bytes of data in the `buffer` */
-  unsigned char* buffer;
-  size_t buffer_size;
-  cbor_serialize_alloc(root, &buffer, &buffer_size);
-
-  bytes_written = pwrite(fd, buffer, buffer_size, CBOR_OFFSET);
-  if (bytes_written == -1) {
-    perror("Error writing to file");
-    close(fd);  // Close the file before returning on error
-    exit(1);
-  }
-  //fwrite(buffer, 1, buffer_size, stdout);
-  free(buffer);
-
-  //fflush(stdout);
-  cbor_decref(&root);
 
   // Close the file
   if (close(fd) == -1) {
