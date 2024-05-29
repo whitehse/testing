@@ -40,21 +40,20 @@ struct ucred {
 /* openssl non-blocking helper */
 /* https://github.com/darrenjs/openssl_examples */
 //*#include <darrenjs/common.h>
-//#include <sodium.h>
-#include <monocypher.h>
+//#include <monocypher.h>
+#include <sodium.h>
 #include <sys/random.h>
 
 /* libev header */
 //#include "ev.h"
 #define EV_STANDALONE 1
 #include "ev.c"
+
+#include <cbor.h>
+#include <cjson/cJSON.h>
  
 /* https://github.com/DavidLeeds/hashmap */
 #include <hashmap.h>
-
-/* Custom protobuf headers */
-//#include <axos.pb-c.h>
-//#include <objects.pb-c.h>
 
 #define RING_FRAMES     256
 #define PKT_OFFSET      (TPACKET_ALIGN(sizeof(struct tpacket2_hdr)) + \
@@ -258,8 +257,8 @@ int main(void) {
   block_size = frame_size * RING_FRAMES;
   
   //listen_on_interface("wlp4s0");
-  //listen_on_interface("wlp0s12f0");
-  listen_on_interface("wlp146s0");
+  listen_on_interface("wlp0s12f0");
+  //listen_on_interface("wlp146s0");
   //listen_on_interface("wlo1");
   //listen_on_interface("ath0");
   //listen_on_interface("ath01");
@@ -320,46 +319,129 @@ int main(void) {
   nl_cb_put(cb);
   nl_socket_free(wifi.nls);
 
-/*
-  int tlsfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (tlsfd < 0) {
-    perror("tlssocket");
-    abort();
+  FILE *fptr;
+
+  unsigned char client_pk[crypto_kx_PUBLICKEYBYTES], client_sk[crypto_kx_SECRETKEYBYTES];
+  unsigned char server_pk[crypto_kx_PUBLICKEYBYTES];
+  unsigned char len_key[crypto_kx_SESSIONKEYBYTES], client_tx[crypto_kx_SESSIONKEYBYTES];
+
+  // client public key
+  if ((fptr = fopen("client.pk","rb")) == NULL){
+    printf("Error! opening file");
+
+    exit(1);
   }
 
-  char* host_ip = "127.0.0.1";
-  struct sockaddr_in tlsaddr;
-  memset(&tlsaddr, 0, sizeof(tlsaddr));
-  tlsaddr.sin_family = AF_INET;
-  tlsaddr.sin_port = htons(55555);
+  fread(&client_pk, crypto_kx_PUBLICKEYBYTES, 1, fptr);
+  fclose(fptr); 
 
-  if (inet_pton(AF_INET, host_ip, &(tlsaddr.sin_addr)) <= 0) {
-    die("inet_pton()");
+  // client secret key
+  if ((fptr = fopen("client.sk","rb")) == NULL){
+    printf("Error! opening file");
+
+    exit(1);
   }
 
-  if (connect(tlsfd, (struct sockaddr*) &tlsaddr, sizeof(tlsaddr)) < 0) {
-    die("connect()");
+  fread(&client_sk, crypto_kx_SECRETKEYBYTES, 1, fptr);
+  fclose(fptr); 
+
+  // server public key
+  if ((fptr = fopen("server.pk","rb")) == NULL){
+    printf("Error! opening file");
+
+    exit(1);
   }
-  printf("tls socket connected\n");
-  ssl_init(0,0);
-*/
 
-  uint8_t key        [32];    /* Random, secret session key  */
-  uint8_t nonce      [24];    /* Use only once per key       */
-  uint8_t plain_text [12] = "Lorem ipsum"; /* Secret message */
-  uint8_t mac        [16];    /* Message authentication code */
-  uint8_t cipher_text[12];              /* Encrypted message */
-  getrandom(key, 32, 0);
-  getrandom(nonce, 24, 0);
+  fread(&server_pk, crypto_kx_PUBLICKEYBYTES, 1, fptr);
+  fclose(fptr); 
 
-  crypto_aead_lock(cipher_text, mac,
-    key, nonce,
-    NULL, 0,
-    plain_text, sizeof(plain_text));
+  if (crypto_kx_client_session_keys(client_rx, client_tx,
+                                  client_pk, client_sk, server_pk) != 0) {
+    /* Suspicious server public key, bail out */
+    return 1;
+  }
 
-  /* Wipe secrets if they are no longer needed */
-  crypto_wipe(plain_text, 12);
-  crypto_wipe(key, 32);
+  int r;
+
+  crypto_secretstream_xchacha20poly1305_state state;
+  unsigned char header[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
+
+  r = crypto_secretstream_xchacha20poly1305_init_push(&state, header, client_tx);
+
+  int serverFd;
+  struct sockaddr_in server;
+  int len;
+  int port = 1234;
+  char *server_ip = "127.0.0.1";
+  char *buffer = "hello server";
+
+  serverFd = socket(AF_INET, SOCK_STREAM, 0);
+  if (serverFd < 0) {
+    perror("Cannot create socket");
+    exit(1);
+  }
+  server.sin_family = AF_INET;
+  server.sin_addr.s_addr = inet_addr(server_ip);
+  server.sin_port = htons(port);
+  len = sizeof(server);
+  if (connect(serverFd, (struct sockaddr *)&server, len) < 0) {
+    perror("Cannot connect to server");
+    exit(2);
+  }
+
+  cbor_item_t* root = cbor_new_definite_map(2);
+  /* Add the content */
+  bool success = cbor_map_add(
+      root, (struct cbor_pair){
+                .key = cbor_move(cbor_build_string("Is CBOR awesome?")),
+                .value = cbor_move(cbor_build_bool(true))});
+  success &= cbor_map_add(
+      root, (struct cbor_pair){
+                .key = cbor_move(cbor_build_uint8(42)),
+                .value = cbor_move(cbor_build_string("Is the answer"))});
+  if (!success) return 1;
+  /* Output: `length` bytes of data in the `buffer` */
+  unsigned char* cbuffer;
+  size_t cbuffer_size;
+  cbor_serialize_alloc(root, &cbuffer, &cbuffer_size);
+  uint8_t cbuffer_len = (uint8_t)cbuffer_size;
+
+  int tag = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+  uint8_t crypt_buf_len =  cbuffer_size + crypto_secretstream_xchacha20poly1305_ABYTES;
+  unsigned char crypt_buf[crypt_buf_len];
+
+  crypto_secretstream_xchacha20poly1305_push(&state, crypt_buf, NULL, cbuffer, cbuffer_len,
+                                                   NULL, 0, tag);
+
+  char buf[100];
+  memcpy(buf, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  memcpy(buf+crypto_secretstream_xchacha20poly1305_HEADERBYTES, &cbuffer_len, 1);
+  memcpy(buf+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1, crypt_buf, crypt_buf_len);
+  int write_length = crypto_secretstream_xchacha20poly1305_HEADERBYTES+1+crypt_buf_len;
+  printf("buffer size is %d\n", write_length);
+  if (write(serverFd, buf, write_length) < 0) {
+    perror("Cannot write");
+    exit(3);
+  }
+
+  crypto_secretstream_xchacha20poly1305_push(&state, crypt_buf, NULL, cbuffer, cbuffer_len,
+                                                   NULL, 0, tag);
+
+  //char buf[100];
+  memcpy(buf, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  memcpy(buf+crypto_secretstream_xchacha20poly1305_HEADERBYTES, &cbuffer_len, 1);
+  memcpy(buf+crypto_secretstream_xchacha20poly1305_HEADERBYTES+1, crypt_buf, crypt_buf_len);
+  write_length = crypto_secretstream_xchacha20poly1305_HEADERBYTES+1+crypt_buf_len;
+  printf("buffer size is %d\n", write_length);
+  if (write(serverFd, buf, write_length) < 0) {
+    perror("Cannot write");
+    exit(3);
+  }
+
+  free(cbuffer);
+  cbor_decref(&root);
+
+  close(serverFd);
 
   ev_timer_init (&timeout_watcher, timeout_cb, 5.5, 10);
   ev_timer_start (loop, &timeout_watcher);

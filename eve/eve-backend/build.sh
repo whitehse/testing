@@ -16,3 +16,6 @@ gcc -o pqsql pqsql.c -I /usr/include/postgresql/ -lpq -lev
 #gcc -o eve eve.c unix_server.o sodium.o curl.o -I. -lcurl -lev -lassh -lsodium -lcbor -lcjson -lwebsockets -luring
 
 gcc -o eve_db eve_db.c -I. -lev -luring -lcbor -lcjson
+
+gcc -o echo_client_monocypher third_party/monocypher/src/monocypher.c echo_client_monocypher.c -Ithird_party/monocypher/src -I. -lev
+#x86_64-w64-mingw32-gcc -o echo_client_monocypher.exe third_party/monocypher/src/monocypher.c echo_client_monocypher.c -Ithird_party/monocypher/src -I. -I/tmp/libev -lws2_32 -lrt
