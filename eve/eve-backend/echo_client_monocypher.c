@@ -10,6 +10,51 @@
 #include <monocypher.h>
 #include <cfgpath.h>
 
+void hex_dump(char *desc, void *addr, int len) {
+    int i;
+    unsigned char buff[17];
+    unsigned char *pc = (unsigned char*)addr;
+
+    // Output description if given.
+    if (desc != NULL)
+        printf ("%s:\n", desc);
+
+    // Process every byte in the data.
+    for (i = 0; i < len; i++) {
+        // Multiple of 16 means new line (with line offset).
+
+        if ((i % 16) == 0) {
+            // Just don't print ASCII for the zeroth line.
+            if (i != 0)
+                printf("  %s\n", buff);
+
+            // Output the offset.
+            printf("  %04x ", i);
+        }
+
+        // Now the hex code for the specific character.
+        printf(" %02x", pc[i]);
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+            buff[i % 16] = '.';
+        } else {
+            buff[i % 16] = pc[i];
+        }
+
+        buff[(i % 16) + 1] = '\0';
+    }
+
+    // Pad out last line if not exactly 16 characters.
+    while ((i % 16) != 0) {
+        printf("   ");
+        i++;
+    }
+
+    // And print the final ASCII bit.
+    printf("  %s\n", buff);
+}
+
 void stdin_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   //char buffer[BUFFER_SIZE];
   ssize_t read;
@@ -60,12 +105,14 @@ int main(int argc, char const *argv[]) {
   crypto_blake2b_update(&ctx, your_pk      , 32);
   crypto_blake2b_update(&ctx, their_pk     , 32);
   crypto_blake2b_final (&ctx, shared_keys);
-  const uint8_t *k2 = shared_keys;      /* Shared key 1 */
-  const uint8_t *k1 = shared_keys + 32; /* Shared key 2 */
+  hex_dump(NULL, shared_keys, 64);
+  const uint8_t *client_initial_key = shared_keys;      /* Shared key 1 */
+  const uint8_t *server_initial_key = shared_keys + 32; /* Shared key 2 */
 
   // First order of business is to create session keys. The first segment of
   // data (PDU) sent to the server will contain:
-  //   uint64_t - unique client identifier (in clear text)
+  //   uint64_t    - unique client identifier (in clear text)
+  //   uint8_t[24] - Nonce, in clear text
   //   uint8_t[32] - k1, the future chacha20 client session key used to encrypt
   //                 the 4 byte length of successive PDUs
   //   uint8_t[32] - k2, the future client session key used in conjuction with
@@ -74,7 +121,7 @@ int main(int argc, char const *argv[]) {
   //   uint8_t[16] - message authentication code
   //
   // The total length of the initial PDU, including the client identifier, is
-  // 122 bytes, by protocol, and does not use a length field.
+  // 144 bytes, by protocol, and does not use a length field. The appended MAC
   //
   // After authentication, the server will generate its own, separate, k1 and k2
   //
@@ -117,15 +164,29 @@ int main(int argc, char const *argv[]) {
   // reused for those keys each time a connection is established, leading to
   // doom.
 
-  uint8_t initial_nonce [24]; /* randomly generated */
+  //uint8_t initial_nonce [24]; /* randomly generated */
   uint8_t nonce         [24]; /* Use once per key, equal to bytes transferred */
-  uint8_t mac           [16]; /* Message authentication code */  
+  //uint8_t mac           [16]; /* Message authentication code */  
+  uint8_t k1            [32];
+  uint8_t k2            [32];
+  uint8_t cookie        [32];
 
-  // Generate random nonce for initial key rotation
-  getrandom(initial_nonce, 24, 0);
+  // Generate new session keys from random data
+  getrandom(k1, 32, 0);
+  getrandom(k2, 32, 0);
+
+  uint8_t buffer_initial [144];
+  memset(buffer_initial, 0, 144);
+
+  // Generate random nonce for initial PDU to server, which rotates the key(s)
+  getrandom(buffer_initial+8, 24, 0);
+  //memset(initial_nonce, 0, 24);
  
   // Zero out the nonce
   memset(nonce, 0, 24);
+
+  // Zero out cookie 
+  memset(cookie, 0, 32);
 
   // Create a 64-bit counter that points to the first 8 bytes of the nonce.
   // The last 16 bytes will always be zero.
@@ -133,17 +194,43 @@ int main(int argc, char const *argv[]) {
   uint64_t *nonce_counter = (uint64_t *)&nonce;
 
   // To later be converted to network byte order, using htobe64();
-  uint64_t client_id = 42;
+  uint64_t client_id = htobe64(42);
 
-  int serverFd;
+  memcpy(buffer_initial, &client_id, 8);
+  memcpy(buffer_initial+32, k1, 32);
+  memcpy(buffer_initial+64, k2, 32);
+  memcpy(buffer_initial+96, cookie, 32);
+
+  // Encrypt the payload and add a MAC
+  crypto_aead_lock(buffer_initial+32, buffer_initial+128,
+                 client_initial_key, buffer_initial+8,
+                 buffer_initial, 8,
+                 buffer_initial+32, 96);
+
+  //memcpy(buffer_initial+104, &mac, 16);
+
+  printf("client id: %ju\n\n", client_id);
+/*
+  hex_dump(NULL, (void *) &buffer_initial, 144);
+  puts("");
+  hex_dump(NULL, (void *) &k1, 32);
+  puts("");
+  hex_dump(NULL, (void *) &k2, 32);
+  puts("");
+  hex_dump(NULL, (void *) &initial_nonce, 24);
+
+  hex_dump(NULL, client_initial_key, 32);
+*/
+
+  int server_fd;
   struct sockaddr_in server;
   int len;
-  int port = 1234;
+  int port = 1235;
   char *server_ip = "127.0.0.1";
-  char *buffer = "hello server";
+  //char *buffer = "hello server";
 
-  serverFd = socket(AF_INET, SOCK_STREAM, 0);
-  if (serverFd < 0) {
+  server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_fd < 0) {
     perror("Cannot create socket");
     exit(1);
   }
@@ -151,12 +238,17 @@ int main(int argc, char const *argv[]) {
   server.sin_addr.s_addr = inet_addr(server_ip);
   server.sin_port = htons(port);
   len = sizeof(server);
-  if (connect(serverFd, (struct sockaddr *)&server, len) < 0) {
+  if (connect(server_fd, (struct sockaddr *)&server, len) < 0) {
     perror("Cannot connect to server");
     exit(2);
   }
 
-  close(serverFd);
+  int ret = write(server_fd, buffer_initial, 144);
+  if (ret == -1) {
+    perror("write error");
+  }
+        
+  close(server_fd);
 
   /* Wipe secrets if they are no longer needed */
   crypto_wipe(shared_secret, 32);
