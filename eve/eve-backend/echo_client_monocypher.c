@@ -175,6 +175,9 @@ int main(int argc, char const *argv[]) {
   getrandom(k1, 32, 0);
   getrandom(k2, 32, 0);
 
+  hex_dump("k1", k1, 32);
+  hex_dump("k2", k2, 32);
+
   uint8_t buffer_initial [144];
   memset(buffer_initial, 0, 144);
 
@@ -247,7 +250,20 @@ int main(int argc, char const *argv[]) {
   if (ret == -1) {
     perror("write error");
   }
-        
+
+  #define BUFFER_SIZE 1024
+  char buffer[BUFFER_SIZE];
+  ssize_t read;
+  memset(buffer, 0, sizeof(buffer));
+  //int size = read(w->fd, buffer, sizeof(buffer));
+  read = recv(server_fd, buffer, BUFFER_SIZE, 0);
+  if ( read <= 0 ) {
+    perror("read error");
+    exit(5);
+  }
+  
+  hex_dump("Return from server", buffer, read);
+
   close(server_fd);
 
   /* Wipe secrets if they are no longer needed */
