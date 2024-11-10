@@ -28,47 +28,31 @@
 
 %%
 
-/*
-exp:
+tags:
+  tags
+  tag
+;
+tags: %empty;
+
+content_opt:
+  CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); };
+content_opt: %empty;
+
+tag: 
   TAGBEGIN       { printf("%*c<%s", xml_depth*2, ' ', $1); xml_depth += 1; }
-| TAGEND         { printf(">\n"); }
-| TAGCLOSE       { printf("%*c</%s>\n", xml_depth*2-2, ' ', $1); xml_depth -= 1; }
-| ATTRIBUTENAME  { printf(" ATTR:%s=", $1); }
-| ATTRIBUTEVALUE { printf("%s", $1); }
-| CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); }
-| exp exp
-;
-*/
+  attributes_opt
+  TAGEND         { printf(">\n"); }
+  content_opt
+  tags
+  TAGCLOSE       { printf("%*c</%s>\n", xml_depth*2-2, ' ', $1); xml_depth -= 1; };
 
-/*syntax error, unexpected ATTRIBUTENAME, expecting CONTENT*/
+attributepair:
+  ATTRIBUTENAME  { printf(" ATTR:%s=", $1); }
+  ATTRIBUTEVALUE { printf("%s", $1); };
 
-tags: tags tag;
-tags: tag;
-
-tag: TAGBEGIN attributes_opt CONTENT TAGEND;
-tag: TAGBEGIN CONTENT TAGEND;
-
-attributepair: ATTRIBUTENAME ATTRIBUTEVALUE;
-attribute_opt: attributepair;
-attributes_opt: attribute_opt attributepair;
-
-
-
-
-/*attribute_opt: %empty;*/
-
-/*attributes_opt: %empty;*/
-
-/*
-exp: TAGBEGIN       { printf("%*c<%s", xml_depth*2, ' ', $1); xml_depth += 1; }
-exp: TAGEND         { printf(">\n"); }
-exp: TAGCLOSE       { printf("%*c</%s>\n", xml_depth*2-2, ' ', $1); xml_depth -= 1; }
-exp: ATTRIBUTENAME  { printf(" ATTR:%s=", $1); }
-exp: ATTRIBUTEVALUE { printf("%s", $1); }
-exp: CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); }
-exp: exp exp
-;
-*/
+attributes_opt: attributepair;
+attributes_opt: attributes_opt attributepair;
+attributes_opt: %empty;
 
 %%
 //#include <stdio.h>
@@ -105,8 +89,6 @@ static void XMLCALL startElement(void *userData, const XML_Char *name, const XML
   (void)atts;
 
   for (i = 0; i < *depthPtr; i++) {
-    //putchar('\t');
-    //printf("%s\n", name);
     *depthPtr += 1;
   }
 
@@ -131,15 +113,6 @@ static void XMLCALL startElement(void *userData, const XML_Char *name, const XML
   token = malloc(sizeof(*token));
   token->token_id = TAGEND;
   TAILQ_INSERT_TAIL(token_head, token, tokens);
-/*
-%token TAGBEGIN
-%token TAGEND
-%token TAGCLOSE
-%token TAGENDANDCLOSE
-%token ATTRIBUTENAME
-%token EQUALSIGN
-%token ATTRIBUTEVALUE
-*/
 
 }
 
@@ -224,7 +197,7 @@ int yylex (void) {
 
 int main (void) {
   #ifdef YYDEBUG
-    yydebug = 1;
+    yydebug = 0;
   #endif
 
   token_head = malloc(sizeof(*token_head));
