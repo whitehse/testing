@@ -24,8 +24,11 @@
 %token <charval> ATTRIBUTEVALUE
 %token <charval> CONTENT
 
+%define parse.error verbose
+
 %%
 
+/*
 exp:
   TAGBEGIN       { printf("%*c<%s", xml_depth*2, ' ', $1); xml_depth += 1; }
 | TAGEND         { printf(">\n"); }
@@ -35,9 +38,39 @@ exp:
 | CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); }
 | exp exp
 ;
+*/
+
+/*syntax error, unexpected ATTRIBUTENAME, expecting CONTENT*/
+
+tags: tags tag;
+tags: tag;
+
+tag: TAGBEGIN attributes_opt CONTENT TAGEND;
+tag: TAGBEGIN CONTENT TAGEND;
+
+attributepair: ATTRIBUTENAME ATTRIBUTEVALUE;
+attribute_opt: attributepair;
+attributes_opt: attribute_opt attributepair;
+
+
+
+
+/*attribute_opt: %empty;*/
+
+/*attributes_opt: %empty;*/
+
+/*
+exp: TAGBEGIN       { printf("%*c<%s", xml_depth*2, ' ', $1); xml_depth += 1; }
+exp: TAGEND         { printf(">\n"); }
+exp: TAGCLOSE       { printf("%*c</%s>\n", xml_depth*2-2, ' ', $1); xml_depth -= 1; }
+exp: ATTRIBUTENAME  { printf(" ATTR:%s=", $1); }
+exp: ATTRIBUTEVALUE { printf("%s", $1); }
+exp: CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); }
+exp: exp exp
+;
+*/
 
 %%
-
 //#include <stdio.h>
 #include <string.h>
 #include <sys/queue.h>
@@ -71,10 +104,11 @@ static void XMLCALL startElement(void *userData, const XML_Char *name, const XML
   int *const depthPtr = (int *)userData;
   (void)atts;
 
-  for (i = 0; i < *depthPtr; i++)
+  for (i = 0; i < *depthPtr; i++) {
     //putchar('\t');
-  //printf("%s\n", name);
-  *depthPtr += 1;
+    //printf("%s\n", name);
+    *depthPtr += 1;
+  }
 
   struct token_tailq *token = malloc(sizeof(*token));
   token->token_id = TAGBEGIN;
@@ -189,6 +223,10 @@ int yylex (void) {
 }
 
 int main (void) {
+  #ifdef YYDEBUG
+    yydebug = 1;
+  #endif
+
   token_head = malloc(sizeof(*token_head));
   TAILQ_INIT(token_head);
 

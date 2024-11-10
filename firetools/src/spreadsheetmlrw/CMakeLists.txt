@@ -64,7 +64,7 @@ find_package(BISON 3.0 REQUIRED)
 set(WORKSHEET_OUT "worksheet.c")
 
 #flex_target(LEXER "lexer.l" "${LEXER_OUT}" DEFINES_FILE "${CMAKE_CURRENT_BINARY_DIR}/lexer.h")
-bison_target(worksheet "worksheet.y" "${WORKSHEET_OUT}" DEFINES_FILE "${CMAKE_CURRENT_BINARY_DIR}/worksheet.h")
+bison_target(worksheet "worksheet.y" "${WORKSHEET_OUT}" DEFINES_FILE "${CMAKE_CURRENT_BINARY_DIR}/worksheet.h" COMPILE_FLAGS "--debug --graph")
 #add_flex_bison_dependency(LEXER PARSER)
 
 add_executable(worksheet
