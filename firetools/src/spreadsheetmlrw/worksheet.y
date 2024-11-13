@@ -28,31 +28,29 @@
 
 %%
 
-tags:
-  tags
-  tag
-;
 tags: %empty;
+tags: tags tag;
 
 content_opt:
   CONTENT        { printf("%*cCONTENT:%s\n", xml_depth*2, ' ', $1); };
-content_opt: %empty;
+
+content_opts: %empty;
+content_opts: content_opts content_opt;
+
+attributepair:
+  ATTRIBUTENAME  
+  ATTRIBUTEVALUE { printf(" ATTR:%s=%s", $1, $2); };
+
+attribute_opts: %empty;
+attribute_opts: attribute_opts attributepair;
 
 tag: 
   TAGBEGIN       { printf("%*c<%s", xml_depth*2, ' ', $1); xml_depth += 1; }
-  attributes_opt
+  attribute_opts
   TAGEND         { printf(">\n"); }
-  content_opt
+  content_opts
   tags
   TAGCLOSE       { printf("%*c</%s>\n", xml_depth*2-2, ' ', $1); xml_depth -= 1; };
-
-attributepair:
-  ATTRIBUTENAME  { printf(" ATTR:%s=", $1); }
-  ATTRIBUTEVALUE { printf("%s", $1); };
-
-attributes_opt: attributepair;
-attributes_opt: attributes_opt attributepair;
-attributes_opt: %empty;
 
 %%
 //#include <stdio.h>
@@ -156,10 +154,12 @@ int doit(void *data, int length) {
 
   mz_zip_file *file_info;
   //ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
-  //ret = mz_zip_locate_entry(zip_handle, "xl/worksheets/sheet1.xml", 0);
-  ret = mz_zip_locate_entry(zip_handle, "xl/workbook.xml", 0);
+  ret = mz_zip_locate_entry(zip_handle, "xl/worksheets/sheet1.xml", 0);
+  //ret = mz_zip_locate_entry(zip_handle, "xl/workbook.xml", 0);
   ret = mz_zip_entry_read_open(zip_handle, 0, NULL);
   if (ret != MZ_OK) {
+    // Abort. We may not have an implemented abort() in the wasm wasi posix
+    // glue. If not, we'll need to implement one first.
   }
 
   XML_Parser parser = XML_ParserCreate(NULL);
@@ -189,16 +189,16 @@ int yylex (void) {
   if (token_item != NULL) {
     yylval.charval = token_item->charval;
     ret = token_item->token_id;
-		TAILQ_REMOVE(token_head, token_item, tokens);
-		free(token_item);
+    TAILQ_REMOVE(token_head, token_item, tokens);
+    free(token_item);
   }
   return ret;
 }
 
 int main (void) {
-  #ifdef YYDEBUG
-    yydebug = 0;
-  #endif
+#ifdef YYDEBUG
+  yydebug = 0;
+#endif
 
   token_head = malloc(sizeof(*token_head));
   TAILQ_INIT(token_head);
