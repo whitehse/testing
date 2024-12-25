@@ -45,6 +45,16 @@ target_link_libraries(ssmlexe csv)
 #gperf -D -s 10 -t spreadsheetml_types.gperf > spreadsheetml_types.c
 #gcc -I. -o test spreadsheetml_types.c main.c
 
+set(ODS_SOURCES
+  "write_ods.c"
+)
+
+add_executable(write_ods
+  "${ODS_SOURCES}"
+)
+
+target_link_libraries(write_ods minizip)
+
 if (WASM)
   #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--export=test")
   set_target_properties(ssmlexe PROPERTIES LINK_FLAGS

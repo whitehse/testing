@@ -342,13 +342,16 @@ in_word_set_ml_type (register const char *str, register size_t len)
 #line 95 "spreadsheetml_types.gperf"
 
 
+/*
 struct ml_type_parse {
   char* name;
   ML_Type ml_type;
 };
+*/
 
-typedef enum {POINTER, STRING, INT, FLOAT} DataType;
+//typedef enum {POINTER, STRING, INT, FLOAT} DataType;
 
+/*
 typedef struct node
 {
     DataType t;
@@ -361,6 +364,7 @@ typedef struct node
     struct node *left,
                 *right;
 } Node;
+*/
 
 /*
 struct mlrw_string {
@@ -375,6 +379,7 @@ struct SpreadSheet {
 
 static unsigned int
 hash_ml_type (register const char *str, register size_t len);
+
 
 struct ml_type_parse *
 in_word_set_ml_type (register const char *str, register size_t len);

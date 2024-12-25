@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <sys/queue.h>
-#include <spreadsheetmlrw.h>
+//#include <spreadsheetmlrw.h>
 
 #include <mz.h>
 #include "mz_strm.h"
