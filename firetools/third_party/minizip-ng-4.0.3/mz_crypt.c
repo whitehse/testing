@@ -27,9 +27,9 @@
 /***************************************************************************/
 
 #if defined(MZ_ZIP_NO_CRYPTO)
-int32_t mz_crypt_rand(uint8_t *buf, int32_t size) {
-    return mz_os_rand(buf, size);
-}
+//int32_t mz_crypt_rand(uint8_t *buf, int32_t size) {
+//    return mz_os_rand(buf, size);
+//}
 #endif
 
 uint32_t mz_crypt_crc32_update(uint32_t value, const uint8_t *buf, int32_t size) {

@@ -105,7 +105,7 @@ set(MINIZIP_LFG)
 
 # Initial source files
 set(MINIZIP_SRC
-    #mz_crypt.c
+    mz_crypt.c
     mz_os.c
     mz_strm.c
     mz_strm_buf.c
@@ -118,7 +118,7 @@ set(MINIZIP_SRC
 set(MINIZIP_HDR
     mz.h
     mz_os.h
-    #mz_crypt.h
+    mz_crypt.h
     mz_strm.h
     mz_strm_buf.h
     mz_strm_mem.h
