@@ -8,6 +8,77 @@
 #include <mz_strm_mem.h>
 #include "mz_zip.h"
 
+const char *content_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-content xmlns:presentation=\"urn:oasis:names:tc:opendocument:xmlns:presentation:1.0\" xmlns:css3t=\"http://www.w3.org/TR/css3-text/\" xmlns:grddl=\"http://www.w3.org/2003/g/data-view#\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xforms=\"http://www.w3.org/2002/xforms\" xmlns:dom=\"http://www.w3.org/2001/xml-events\" xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\" xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\" xmlns:math=\"http://www.w3.org/1998/Math/MathML\" xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" xmlns:ooow=\"http://openoffice.org/2004/writer\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:drawooo=\"http://openoffice.org/2010/draw\" xmlns:oooc=\"http://openoffice.org/2004/calc\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:calcext=\"urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0\" xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" xmlns:of=\"urn:oasis:names:tc:opendocument:xmlns:of:1.2\" xmlns:tableooo=\"http://openoffice.org/2009/table\" xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\" xmlns:rpt=\"http://openoffice.org/2005/report\" xmlns:formx=\"urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0\" xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\" xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\" xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:loext=\"urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0\" xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\" xmlns:field=\"urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0\" office:version=\"1.3\"><office:scripts/><office:font-face-decls><style:font-face style:name=\"Liberation Sans\" svg:font-family=\"&apos;Liberation Sans&apos;\" style:font-family-generic=\"swiss\" style:font-pitch=\"variable\"/><style:font-face style:name=\"Noto Sans CJK SC\" svg:font-family=\"&apos;Noto Sans CJK SC&apos;\" style:font-family-generic=\"system\" style:font-pitch=\"variable\"/><style:font-face style:name=\"Noto Sans Devanagari\" svg:font-family=\"&apos;Noto Sans Devanagari&apos;\" style:font-family-generic=\"system\" style:font-pitch=\"variable\"/></office:font-face-decls><office:automatic-styles><style:style style:name=\"co1\" style:family=\"table-column\"><style:table-column-properties fo:break-before=\"auto\" style:column-width=\"0.889in\"/></style:style><style:style style:name=\"ro1\" style:family=\"table-row\"><style:table-row-properties style:row-height=\"0.178in\" fo:break-before=\"auto\" style:use-optimal-row-height=\"true\"/></style:style><style:style style:name=\"ta1\" style:family=\"table\" style:master-page-name=\"Default\"><style:table-properties table:display=\"true\" style:writing-mode=\"lr-tb\"/></style:style></office:automatic-styles><office:body><office:spreadsheet><table:calculation-settings table:automatic-find-labels=\"false\" table:use-regular-expressions=\"false\" table:use-wildcards=\"true\"/><table:table table:name=\"Sheet1\" table:style-name=\"ta1\"><table:table-column table:style-name=\"co1\" table:default-cell-style-name=\"Default\"/><table:table-row table:style-name=\"ro1\"><table:table-cell office:value-type=\"string\" calcext:value-type=\"string\"><text:p>A</text:p></table:table-cell></table:table-row></table:table><table:table table:name=\"Sheet2\" table:style-name=\"ta1\"><table:table-column table:style-name=\"co1\" table:default-cell-style-name=\"Default\"/><table:table-row table:style-name=\"ro1\"><table:table-cell office:value-type=\"string\" calcext:value-type=\"string\"><text:p>B</text:p></table:table-cell></table:table-row></table:table><table:named-expressions/></office:spreadsheet></office:body></office:document-content>";
+
+const char *meta_inf_manifest_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.3\" xmlns:loext=\"urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0\"><manifest:file-entry manifest:full-path=\"/\" manifest:version=\"1.3\" manifest:media-type=\"application/vnd.oasis.opendocument.spreadsheet\"/><manifest:file-entry manifest:full-path=\"Configurations2/\" manifest:media-type=\"application/vnd.sun.xml.ui.configuration\"/><manifest:file-entry manifest:full-path=\"manifest.rdf\" manifest:media-type=\"application/rdf+xml\"/><manifest:file-entry manifest:full-path=\"meta.xml\" manifest:media-type=\"text/xml\"/><manifest:file-entry manifest:full-path=\"styles.xml\" manifest:media-type=\"text/xml\"/><manifest:file-entry manifest:full-path=\"content.xml\" manifest:media-type=\"text/xml\"/><manifest:file-entry manifest:full-path=\"settings.xml\" manifest:media-type=\"text/xml\"/><manifest:file-entry manifest:full-path=\"Thumbnails/thumbnail.png\" manifest:media-type=\"image/png\"/></manifest:manifest>";
+
+const char *manifest_rdf = "<?xml version=\"1.0\" encoding=\"utf-8\"?><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><rdf:Description rdf:about=\"styles.xml\"><rdf:type rdf:resource=\"http://docs.oasis-open.org/ns/office/1.2/meta/odf#StylesFile\"/></rdf:Description><rdf:Description rdf:about=\"\"><ns0:hasPart xmlns:ns0=\"http://docs.oasis-open.org/ns/office/1.2/meta/pkg#\" rdf:resource=\"styles.xml\"/></rdf:Description><rdf:Description rdf:about=\"content.xml\"><rdf:type rdf:resource=\"http://docs.oasis-open.org/ns/office/1.2/meta/odf#ContentFile\"/></rdf:Description><rdf:Description rdf:about=\"\"><ns0:hasPart xmlns:ns0=\"http://docs.oasis-open.org/ns/office/1.2/meta/pkg#\" rdf:resource=\"content.xml\"/></rdf:Description><rdf:Description rdf:about=\"\"><rdf:type rdf:resource=\"http://docs.oasis-open.org/ns/office/1.2/meta/pkg#Document\"/></rdf:Description></rdf:RDF>";
+
+const char *meta_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-meta xmlns:grddl=\"http://www.w3.org/2003/g/data-view#\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" office:version=\"1.3\"><office:meta><meta:creation-date>2024-12-24T18:58:49.104157740</meta:creation-date><dc:date>2024-12-24T19:14:05.376624527</dc:date><meta:editing-duration>PT1M3S</meta:editing-duration><meta:editing-cycles>2</meta:editing-cycles><meta:generator>LibreOffice/7.4.7.2$Linux_X86_64 LibreOffice_project/40$Build-2</meta:generator><meta:document-statistic meta:table-count=\"2\" meta:cell-count=\"2\" meta:object-count=\"0\"/></office:meta></office:document-meta>";
+
+const char *mimetype = "application/vnd.oasis.opendocument.spreadsheet";
+
+const char *settings_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-settings xmlns:config=\"urn:oasis:names:tc:opendocument:xmlns:config:1.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" office:version=\"1.3\"><office:settings><config:config-item-set config:name=\"ooo:view-settings\"><config:config-item config:name=\"VisibleAreaTop\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"VisibleAreaLeft\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"VisibleAreaWidth\" config:type=\"int\">2258</config:config-item><config:config-item config:name=\"VisibleAreaHeight\" config:type=\"int\">452</config:config-item><config:config-item-map-indexed config:name=\"Views\"><config:config-item-map-entry><config:config-item config:name=\"ViewId\" config:type=\"string\">view1</config:config-item><config:config-item-map-named config:name=\"Tables\"><config:config-item-map-entry config:name=\"Sheet1\"><config:config-item config:name=\"CursorPositionX\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"CursorPositionY\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"ActiveSplitRange\" config:type=\"short\">2</config:config-item><config:config-item config:name=\"PositionLeft\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionRight\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionTop\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionBottom\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"ZoomType\" config:type=\"short\">0</config:config-item><config:config-item config:name=\"ZoomValue\" config:type=\"int\">100</config:config-item><config:config-item config:name=\"PageViewZoomValue\" config:type=\"int\">60</config:config-item><config:config-item config:name=\"ShowGrid\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"AnchoredTextOverflowLegacy\" config:type=\"boolean\">false</config:config-item></config:config-item-map-entry><config:config-item-map-entry config:name=\"Sheet2\"><config:config-item config:name=\"CursorPositionX\" config:type=\"int\">2</config:config-item><config:config-item config:name=\"CursorPositionY\" config:type=\"int\">18</config:config-item><config:config-item config:name=\"ActiveSplitRange\" config:type=\"short\">2</config:config-item><config:config-item config:name=\"PositionLeft\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionRight\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionTop\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"PositionBottom\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"ZoomType\" config:type=\"short\">0</config:config-item><config:config-item config:name=\"ZoomValue\" config:type=\"int\">100</config:config-item><config:config-item config:name=\"PageViewZoomValue\" config:type=\"int\">60</config:config-item><config:config-item config:name=\"ShowGrid\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"AnchoredTextOverflowLegacy\" config:type=\"boolean\">false</config:config-item></config:config-item-map-entry></config:config-item-map-named><config:config-item config:name=\"ActiveTable\" config:type=\"string\">Sheet1</config:config-item><config:config-item config:name=\"HorizontalScrollbarWidth\" config:type=\"int\">1305</config:config-item><config:config-item config:name=\"ZoomType\" config:type=\"short\">0</config:config-item><config:config-item config:name=\"ZoomValue\" config:type=\"int\">100</config:config-item><config:config-item config:name=\"PageViewZoomValue\" config:type=\"int\">60</config:config-item><config:config-item config:name=\"ShowPageBreakPreview\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"ShowZeroValues\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ShowNotes\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ShowGrid\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"GridColor\" config:type=\"int\">12632256</config:config-item><config:config-item config:name=\"ShowPageBreaks\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"HasColumnRowHeaders\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"FormulaBarHeight\" config:type=\"short\">1</config:config-item><config:config-item config:name=\"IsOutlineSymbolsSet\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"IsValueHighlightingEnabled\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"IsSnapToRaster\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"RasterIsVisible\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"RasterResolutionX\" config:type=\"int\">1270</config:config-item><config:config-item config:name=\"RasterResolutionY\" config:type=\"int\">1270</config:config-item><config:config-item config:name=\"RasterSubdivisionX\" config:type=\"int\">1</config:config-item><config:config-item config:name=\"RasterSubdivisionY\" config:type=\"int\">1</config:config-item><config:config-item config:name=\"IsRasterAxisSynchronized\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"AnchoredTextOverflowLegacy\" config:type=\"boolean\">false</config:config-item></config:config-item-map-entry></config:config-item-map-indexed></config:config-item-set><config:config-item-set config:name=\"ooo:configuration-settings\"><config:config-item config:name=\"AllowPrintJobCancel\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ApplyUserData\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"AutoCalculate\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"CharacterCompressionType\" config:type=\"short\">0</config:config-item><config:config-item config:name=\"EmbedAsianScriptFonts\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"EmbedComplexScriptFonts\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"EmbedFonts\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"EmbedLatinScriptFonts\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"EmbedOnlyUsedFonts\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"GridColor\" config:type=\"int\">12632256</config:config-item><config:config-item config:name=\"HasColumnRowHeaders\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"HasSheetTabs\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ImagePreferredDPI\" config:type=\"int\">0</config:config-item><config:config-item config:name=\"IsDocumentShared\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"IsKernAsianPunctuation\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"IsOutlineSymbolsSet\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"IsRasterAxisSynchronized\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"IsSnapToRaster\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"LinkUpdateMode\" config:type=\"short\">3</config:config-item><config:config-item config:name=\"LoadReadonly\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"PrinterName\" config:type=\"string\">Generic Printer</config:config-item><config:config-item config:name=\"PrinterPaperFromSetup\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"PrinterSetup\" config:type=\"base64Binary\">mAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAuQAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCmNvbGxhdGU9ZmFsc2UKbWFyZ2luYWRqdXN0bWVudD0wLDAsMCwwCmNvbG9yZGVwdGg9MjQKcHNsZXZlbD0wCnBkZmRldmljZT0xCmNvbG9yZGV2aWNlPTAKUFBEQ29udGV4dERhdGEKUGFnZVNpemU6TGV0dGVyAAASAENPTVBBVF9EVVBMRVhfTU9ERQ8ARHVwbGV4TW9kZTo6T2Zm</config:config-item><config:config-item config:name=\"RasterIsVisible\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"RasterResolutionX\" config:type=\"int\">1270</config:config-item><config:config-item config:name=\"RasterResolutionY\" config:type=\"int\">1270</config:config-item><config:config-item config:name=\"RasterSubdivisionX\" config:type=\"int\">1</config:config-item><config:config-item config:name=\"RasterSubdivisionY\" config:type=\"int\">1</config:config-item><config:config-item config:name=\"SaveThumbnail\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"SaveVersionOnClose\" config:type=\"boolean\">false</config:config-item><config:config-item config:name=\"ShowGrid\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ShowNotes\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ShowPageBreaks\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"ShowZeroValues\" config:type=\"boolean\">true</config:config-item><config:config-item config:name=\"SyntaxStringRef\" config:type=\"short\">7</config:config-item><config:config-item config:name=\"UpdateFromTemplate\" config:type=\"boolean\">true</config:config-item><config:config-item-map-named config:name=\"ScriptConfiguration\"><config:config-item-map-entry config:name=\"Sheet1\"><config:config-item config:name=\"CodeName\" config:type=\"string\">Sheet1</config:config-item></config:config-item-map-entry><config:config-item-map-entry config:name=\"Sheet2\"><config:config-item config:name=\"CodeName\" config:type=\"string\">Sheet2</config:config-item></config:config-item-map-entry></config:config-item-map-named></config:config-item-set></office:settings></office:document-settings>";
+
+const char* styles_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:document-styles xmlns:presentation=\"urn:oasis:names:tc:opendocument:xmlns:presentation:1.0\" xmlns:css3t=\"http://www.w3.org/TR/css3-text/\" xmlns:grddl=\"http://www.w3.org/2003/g/data-view#\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" xmlns:dom=\"http://www.w3.org/2001/xml-events\" xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\" xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\" xmlns:math=\"http://www.w3.org/1998/Math/MathML\" xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" xmlns:ooow=\"http://openoffice.org/2004/writer\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:drawooo=\"http://openoffice.org/2010/draw\" xmlns:oooc=\"http://openoffice.org/2004/calc\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:calcext=\"urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0\" xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" xmlns:of=\"urn:oasis:names:tc:opendocument:xmlns:of:1.2\" xmlns:tableooo=\"http://openoffice.org/2009/table\" xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\" xmlns:rpt=\"http://openoffice.org/2005/report\" xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\" xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\" xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:loext=\"urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0\" xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\" xmlns:field=\"urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0\" office:version=\"1.3\"><office:font-face-decls><style:font-face style:name=\"Liberation Sans\" svg:font-family=\"&apos;Liberation Sans&apos;\" style:font-family-generic=\"swiss\" style:font-pitch=\"variable\"/><style:font-face style:name=\"Noto Sans CJK SC\" svg:font-family=\"&apos;Noto Sans CJK SC&apos;\" style:font-family-generic=\"system\" style:font-pitch=\"variable\"/><style:font-face style:name=\"Noto Sans Devanagari\" svg:font-family=\"&apos;Noto Sans Devanagari&apos;\" style:font-family-generic=\"system\" style:font-pitch=\"variable\"/></office:font-face-decls><office:styles><style:default-style style:family=\"table-cell\"><style:paragraph-properties style:tab-stop-distance=\"0.5in\"/><style:text-properties style:font-name=\"Liberation Sans\" fo:font-size=\"10pt\" fo:language=\"en\" fo:country=\"US\" style:font-name-asian=\"Noto Sans CJK SC\" style:font-size-asian=\"10pt\" style:language-asian=\"zh\" style:country-asian=\"CN\" style:font-name-complex=\"Noto Sans Devanagari\" style:font-size-complex=\"10pt\" style:language-complex=\"hi\" style:country-complex=\"IN\"/></style:default-style><number:number-style style:name=\"N0\"><number:number number:min-integer-digits=\"1\"/></number:number-style><style:style style:name=\"Default\" style:family=\"table-cell\"/><style:style style:name=\"Heading\" style:family=\"table-cell\" style:parent-style-name=\"Default\"><style:text-properties fo:color=\"#000000\" fo:font-size=\"24pt\" fo:font-style=\"normal\" fo:font-weight=\"bold\" style:font-size-asian=\"24pt\" style:font-style-asian=\"normal\" style:font-weight-asian=\"bold\" style:font-size-complex=\"24pt\" style:font-style-complex=\"normal\" style:font-weight-complex=\"bold\"/></style:style><style:style style:name=\"Heading_20_1\" style:display-name=\"Heading 1\" style:family=\"table-cell\" style:parent-style-name=\"Heading\"><style:text-properties fo:font-size=\"18pt\" style:font-size-asian=\"18pt\" style:font-size-complex=\"18pt\"/></style:style><style:style style:name=\"Heading_20_2\" style:display-name=\"Heading 2\" style:family=\"table-cell\" style:parent-style-name=\"Heading\"><style:text-properties fo:font-size=\"12pt\" style:font-size-asian=\"12pt\" style:font-size-complex=\"12pt\"/></style:style><style:style style:name=\"Text\" style:family=\"table-cell\" style:parent-style-name=\"Default\"/><style:style style:name=\"Note\" style:family=\"table-cell\" style:parent-style-name=\"Text\"><style:table-cell-properties fo:background-color=\"#ffffcc\" style:diagonal-bl-tr=\"none\" style:diagonal-tl-br=\"none\" fo:border=\"0.74pt solid #808080\"/><style:text-properties fo:color=\"#333333\"/></style:style><style:style style:name=\"Footnote\" style:family=\"table-cell\" style:parent-style-name=\"Text\"><style:text-properties fo:color=\"#808080\" fo:font-style=\"italic\" style:font-style-asian=\"italic\" style:font-style-complex=\"italic\"/></style:style><style:style style:name=\"Hyperlink\" style:family=\"table-cell\" style:parent-style-name=\"Text\"><style:text-properties fo:color=\"#0000ee\" style:text-underline-style=\"solid\" style:text-underline-width=\"auto\" style:text-underline-color=\"#0000ee\"/></style:style><style:style style:name=\"Status\" style:family=\"table-cell\" style:parent-style-name=\"Default\"/><style:style style:name=\"Good\" style:family=\"table-cell\" style:parent-style-name=\"Status\"><style:table-cell-properties fo:background-color=\"#ccffcc\"/><style:text-properties fo:color=\"#006600\"/></style:style><style:style style:name=\"Neutral\" style:family=\"table-cell\" style:parent-style-name=\"Status\"><style:table-cell-properties fo:background-color=\"#ffffcc\"/><style:text-properties fo:color=\"#996600\"/></style:style><style:style style:name=\"Bad\" style:family=\"table-cell\" style:parent-style-name=\"Status\"><style:table-cell-properties fo:background-color=\"#ffcccc\"/><style:text-properties fo:color=\"#cc0000\"/></style:style><style:style style:name=\"Warning\" style:family=\"table-cell\" style:parent-style-name=\"Status\"><style:text-properties fo:color=\"#cc0000\"/></style:style><style:style style:name=\"Error\" style:family=\"table-cell\" style:parent-style-name=\"Status\"><style:table-cell-properties fo:background-color=\"#cc0000\"/><style:text-properties fo:color=\"#ffffff\" fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/></style:style><style:style style:name=\"Accent\" style:family=\"table-cell\" style:parent-style-name=\"Default\"><style:text-properties fo:font-weight=\"bold\" style:font-weight-asian=\"bold\" style:font-weight-complex=\"bold\"/></style:style><style:style style:name=\"Accent_20_1\" style:display-name=\"Accent 1\" style:family=\"table-cell\" style:parent-style-name=\"Accent\"><style:table-cell-properties fo:background-color=\"#000000\"/><style:text-properties fo:color=\"#ffffff\"/></style:style><style:style style:name=\"Accent_20_2\" style:display-name=\"Accent 2\" style:family=\"table-cell\" style:parent-style-name=\"Accent\"><style:table-cell-properties fo:background-color=\"#808080\"/><style:text-properties fo:color=\"#ffffff\"/></style:style><style:style style:name=\"Accent_20_3\" style:display-name=\"Accent 3\" style:family=\"table-cell\" style:parent-style-name=\"Accent\"><style:table-cell-properties fo:background-color=\"#dddddd\"/></style:style><style:style style:name=\"Result\" style:family=\"table-cell\" style:parent-style-name=\"Default\"><style:text-properties fo:font-style=\"italic\" style:text-underline-style=\"solid\" style:text-underline-width=\"auto\" style:text-underline-color=\"font-color\" fo:font-weight=\"bold\" style:font-style-asian=\"italic\" style:font-weight-asian=\"bold\" style:font-style-complex=\"italic\" style:font-weight-complex=\"bold\"/></style:style></office:styles><office:automatic-styles><style:page-layout style:name=\"Mpm1\"><style:page-layout-properties style:writing-mode=\"lr-tb\"/><style:header-style><style:header-footer-properties fo:min-height=\"0.2953in\" fo:margin-left=\"0in\" fo:margin-right=\"0in\" fo:margin-bottom=\"0.0984in\"/></style:header-style><style:footer-style><style:header-footer-properties fo:min-height=\"0.2953in\" fo:margin-left=\"0in\" fo:margin-right=\"0in\" fo:margin-top=\"0.0984in\"/></style:footer-style></style:page-layout></office:automatic-styles><office:master-styles><style:master-page style:name=\"Default\" style:page-layout-name=\"Mpm1\"><style:header><text:p><text:sheet-name>???</text:sheet-name></text:p></style:header><style:header-left style:display=\"false\"/><style:header-first style:display=\"false\"/><style:footer><text:p>Page <text:page-number>1</text:page-number></text:p></style:footer><style:footer-left style:display=\"false\"/><style:footer-first style:display=\"false\"/></style:master-page></office:master-styles></office:document-styles>";
+
+int add_zip_directory(void *zip_handle, char *filename) {
+  //void *zip_handle = NULL;
+  int err;
+
+  //zip_handle = mz_zip_create();
+  //err = mz_zip_open(zip_handle, mem_stream, MZ_OPEN_MODE_WRITE);
+
+  mz_zip_file *info = calloc(1, sizeof(mz_zip_file));
+  info->version_madeby = MZ_HOST_SYSTEM_UNIX;
+  info->compression_method = MZ_COMPRESS_METHOD_DEFLATE;
+  info->filename = filename;
+  //info->external_fa = FILE_ATTRIBUTE_DIRECTORY;
+
+  err = mz_zip_entry_write_open(zip_handle, info, MZ_COMPRESS_LEVEL_DEFAULT, 0, NULL);
+  if (!err) mz_zip_entry_close(zip_handle);
+
+  free(info);
+  return err;
+}
+
+int add_zip_file(void *zip_handle, char *filename, const char *content) {
+  //void *zip_handle = NULL;
+  int err;
+
+  //zip_handle = mz_zip_create();
+  //err = mz_zip_open(zip_handle, mem_stream, MZ_OPEN_MODE_WRITE);
+
+  mz_zip_file *info = calloc(1, sizeof(mz_zip_file));
+  info->version_madeby = MZ_HOST_SYSTEM_UNIX;
+  info->compression_method = MZ_COMPRESS_METHOD_DEFLATE;
+  info->filename = filename;
+
+  err = mz_zip_entry_write_open(zip_handle, info, MZ_COMPRESS_LEVEL_DEFAULT, 0, NULL);
+  if (err) {
+    printf("mz_zip_entry_write_open failed with code %d\n", err);
+    goto add_zip_file_out;
+  }
+  err = mz_zip_entry_write(zip_handle, content, strlen(content));
+  if (err < 0) {
+    printf("mz_zip_entry_write failed with code %d\n", err);
+    goto add_zip_file_out;
+  } else {
+    //printf("Wrote %d byte(s)\n", err);
+  }
+  long crc32_val = 0;
+  err = mz_zip_entry_write_close(zip_handle, crc32_val, -1, -1);
+  if (err) {
+    printf("mz_zip_entry_write_close failed with code %d\n", err);
+    goto add_zip_file_out;
+  }
+
+add_zip_file_out:
+  //mz_zip_close(zip_handle);
+  free(info);
+  return err;
+}
+
 int main(int argc, char* argv[]) {
   void *mem_stream = NULL;
   void *zip_handle = NULL;
@@ -20,71 +91,46 @@ int main(int argc, char* argv[]) {
   zip_handle = mz_zip_create();
   err = mz_zip_open(zip_handle, mem_stream, MZ_OPEN_MODE_WRITE);
 
-  /* TODO: unzip operations.. */
-
-  //mz_zip_file *file_info;
-  ////ret = mz_zip_locate_entry(zip_handle, "[Content_Types].xml", 0);
-  //ret = mz_zip_locate_entry(zip_handle, "xl/worksheets/sheet1.xml", 0);
-  ////ret = mz_zip_locate_entry(zip_handle, "xl/workbook.xml", 0);
-  //ret = mz_zip_entry_read_open(zip_handle, 0, NULL);
-  //if (ret != MZ_OK) {
-  //  // Abort. We may not have an implemented abort() in the wasm wasi posix
-  //  // glue. If not, we'll need to implement one first.
-  //}
-
-  puts("Action");
-  mz_zip_file *info = calloc(1, sizeof(mz_zip_file));
-  info->version_madeby = MZ_HOST_SYSTEM_UNIX;
-  info->compression_method = MZ_COMPRESS_METHOD_DEFLATE;
-  info->filename = "test.txt";
-  err = mz_zip_entry_write_open(zip_handle, info, MZ_COMPRESS_LEVEL_DEFAULT, 0, NULL);
-  if (err) {
-    printf("mz_zip_entry_write_open failed with code %d\n", err);
-    goto out;
-  }
-  err = mz_zip_entry_write(zip_handle, "5\n", 2);
-  if (err < 0) {
-    printf("mz_zip_entry_write failed with code %d\n", err);
-    goto out;
-  } else {
-    printf("Wrote %d byte(s)\n", err);
-  }
-  err = mz_zip_entry_close(zip_handle);
-  if (err) {
-    puts("There was an error calling mz_zip_entry_close");
-    goto out;
-  }
+  add_zip_directory(zip_handle, "Configurations2/");
+  add_zip_directory(zip_handle, "Configurations2/accelerator/");
+  add_zip_directory(zip_handle, "Configurations2/floater/");
+  add_zip_directory(zip_handle, "Configurations2/images/");
+  add_zip_directory(zip_handle, "Configurations2/images/Bitmaps/");
+  add_zip_directory(zip_handle, "Configurations2/images/menubar/");
+  add_zip_directory(zip_handle, "Configurations2/images/popupmenu/");
+  add_zip_directory(zip_handle, "Configurations2/images/progressbar/");
+  add_zip_directory(zip_handle, "Configurations2/images/statusbar/");
+  add_zip_directory(zip_handle, "Configurations2/images/toolbar/");
+  add_zip_directory(zip_handle, "Configurations2/images/toolpanel/");
+  add_zip_directory(zip_handle, "Thumbnailes/");
+  add_zip_directory(zip_handle, "META-INF/");
+  add_zip_file(zip_handle, "content.xml", content_xml);
+  add_zip_file(zip_handle, "META-INF/manifest.xml", meta_inf_manifest_xml);
+  add_zip_file(zip_handle, "manifest.rdf", manifest_rdf);
+  add_zip_file(zip_handle, "meta.xml", meta_xml);
+  add_zip_file(zip_handle, "mimetype", mimetype);
+  add_zip_file(zip_handle, "settings.xml", settings_xml);
+  add_zip_file(zip_handle, "styles.xml", styles_xml);
 
   mz_zip_close(zip_handle);
 
+  int32_t buffer_length;
+  mz_stream_mem_get_buffer_length(mem_stream, &buffer_length);
+  //printf("The buffer length is %d\n", buffer_length);
+  void* buffer = malloc(buffer_length);
+  mz_stream_mem_get_buffer(mem_stream, &buffer);
+
   FILE *fp;
-  fp = fopen("/tmp/output.zip", "w");
+  fp = fopen("/tmp/output.ods", "w");
   if (fp == NULL) {
-    perror("Error opening file: /tmp/output.zip");
+    perror("Error opening file: /tmp/ods.zip");
     return 1;
   }
 
-  int32_t buffer_length;
-  puts("Calling mz_stream_mem_get_buffer_length");
-  mz_stream_mem_get_buffer_length(mem_stream, &buffer_length);
-  puts("Called mz_stream_mem_get_buffer_length");
-  printf("The buffer length is %d\n", buffer_length);
-  void* buffer = malloc(buffer_length);
-  puts("Calling mz_stream_mem_get_buffer");
-  mz_stream_mem_get_buffer(mem_stream, &buffer);
-  puts("Called mz_stream_mem_get_buffer");
-  puts("Calling fwrite");
   size_t bytes_written = fwrite(buffer, sizeof(char), buffer_length, fp);
-  puts("Called fwrite");
-
   fclose(fp);
 
 out:
-  free(info);
-  //mz_zip_close(zip_handle);
-  //mz_zip_delete(&zip_handle);
-
   mz_stream_close(mem_stream);
   mz_stream_mem_delete(&mem_stream);
-
 }
