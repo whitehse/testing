@@ -209,11 +209,15 @@ int eve_assh_init(struct ev_loop *loop) {
   //int number_of_e7s = 119;
   int number_of_e7s = 1;
   char *e7s[] = {"192.168.41.11", "192.168.41.12", "192.168.41.13", "192.168.41.14", "192.168.41.15", "192.168.41.16", "192.168.39.11", "192.168.39.12", "192.168.39.13", "192.168.39.14", "192.168.39.15", "192.168.40.11", "192.168.37.12", "192.168.37.13", "192.168.37.14", "192.168.37.15", "192.168.37.11", "192.168.37.16", "192.168.37.17", "192.168.37.18", "192.168.38.11", "192.168.38.12", "192.168.38.13", "192.168.38.14", "192.168.38.15", "192.168.38.16", "192.168.38.17", "192.168.38.18", "192.168.38.19", "192.168.38.20", "192.168.34.11", "192.168.34.12", "192.168.34.13", "192.168.34.14", "192.168.35.11", "192.168.35.12", "192.168.35.13", "192.168.35.14", "192.168.35.15", "192.168.33.11", "192.168.33.12", "192.168.33.13", "192.168.33.14", "192.168.36.11", "192.168.36.12", "192.168.36.13", "192.168.42.11", "192.168.42.12", "192.168.42.13", "192.168.42.14", "192.168.42.15", "192.168.42.16", "192.168.42.17", "192.168.42.18", "192.168.44.11", "192.168.44.12", "192.168.44.13", "192.168.44.14", "192.168.44.15", "192.168.44.16", "192.168.44.17", "192.168.44.18", "192.168.47.11", "192.168.47.12", "192.168.47.13", "192.168.47.14", "192.168.47.15", "192.168.51.11", "192.168.51.12", "192.168.51.13", "192.168.51.14", "192.168.51.15", "192.168.51.16", "192.168.51.17", "192.168.51.18", "192.168.49.11", "192.168.49.12", "192.168.46.11", "192.168.46.12", "192.168.46.13", "192.168.46.14", "192.168.46.15", "192.168.46.16", "192.168.46.17", "192.168.46.18", "192.168.45.11", "192.168.45.12", "192.168.45.13", "192.168.45.14", "192.168.48.11", "192.168.48.12", "192.168.48.13", "192.168.48.14", "192.168.48.15", "192.168.48.16", "192.168.50.11", "192.168.50.12", "192.168.50.13", "192.168.50.14", "192.168.50.15", "192.168.52.11", "192.168.52.12", "192.168.52.13", "192.168.53.11", "192.168.53.12", "192.168.53.13", "192.168.53.14", "192.168.53.15", "192.168.53.16", "192.168.54.11", "192.168.54.12", "192.168.54.13", "192.168.54.14", "192.168.54.15", "192.168.43.11", "192.168.43.12", "192.168.43.13", "192.168.43.14", "192.168.43.15"};
+  //char *e7s[] = {"64.226.42.61"};
 
   char *command = (char *)malloc(13*sizeof(char));
   strcpy(command, "show version");
   char *port = "22";
   //const char *port = "830";
+  //char *command = (char *)malloc(9*sizeof(char));
+  //strcpy(command, "uname -a");
+  //char *port = "30007";
 
   struct addrinfo hints = {
     .ai_family = AF_UNSPEC,
@@ -229,6 +233,15 @@ int eve_assh_init(struct ev_loop *loop) {
 
   //printf("Starting loop\n");
   int status;
+
+  ev_io *socket_watcher[number_of_e7s*2];
+
+  printf("socket size = %lu\n", sizeof(int));
+  printf("struct assh_context_s size = %lu\n", sizeof(struct assh_context_s));
+  printf("struct assh_session_s size = %lu\n", sizeof(struct assh_session_s));
+  printf("struct asshh_client_inter_session_s size = %lu\n", sizeof(struct asshh_client_inter_session_s));
+  printf("ssh_t size = %lu\n", sizeof(ssh_t));
+  printf("ev_io size (two of these per socket) = %lu\n", sizeof(ev_io));
 
   for (int i=0; i<number_of_e7s; i++) {
     //printf("Setting up socket\n");
@@ -276,8 +289,8 @@ int eve_assh_init(struct ev_loop *loop) {
 
     enum assh_userauth_methods_e auth_methods =
       ASSH_USERAUTH_METHOD_PASSWORD;/* |
-    ASSH_USERAUTH_METHOD_PUBKEY |
-    ASSH_USERAUTH_METHOD_KEYBOARD;*/
+      ASSH_USERAUTH_METHOD_PUBKEY |
+      ASSH_USERAUTH_METHOD_KEYBOARD;*/
 
     struct asshh_client_inter_session_s *inter[number_of_e7s];
     inter[i] = malloc(sizeof(struct asshh_client_inter_session_s));
@@ -290,7 +303,6 @@ int eve_assh_init(struct ev_loop *loop) {
     ssh[i]->user = user;
     ssh[i]->auth_methods = &auth_methods;
 
-    ev_io *socket_watcher[number_of_e7s*2];
     socket_watcher[i*2] = malloc(sizeof(ev_io));
     socket_watcher[i*2+1] = malloc(sizeof(ev_io));
 
