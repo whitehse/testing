@@ -190,7 +190,7 @@ int tcp_parser(struct hal_ipv4 *ipv4) {
 	  // maximum segment size
 	  case 2:
 	    if (counter + 4 > option_len) { // Don't read beyond the header into the payload
-              printf("Switch case 2. Option overlaps payload.\n");
+              printf("Switch case 2. Option overlaps payload. option_len=%d\n", option_len);
               bad_segments += 1;
               return HAL_TCP_BADPARAM;
 	    }
