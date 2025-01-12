@@ -1,0 +1,24 @@
+{
+  "configurations": {
+    "Launch": {
+      "adapter": "vscode-cpptools",
+      "configuration": {
+        "type":    "cppdbg",
+        "request": "launch",
+        "program": "./test",
+        "args": [
+        ],
+        "cwd": "${workspaceRoot}",
+        "environment": [
+          { "name": "VIMRUNTIME", "value": "${workspaceRoot}" }
+        ],
+        "externalConsole": true,
+        "stopAtEntry": true,
+        "MIMode": "gdb",
+        "logging": {
+          "engineLogging": false
+        }
+      }
+    }
+  }
+}
