@@ -13,18 +13,24 @@
 #include <fcntl.h>
 
 void parse_key(struct ev_loop *loop, struct ev_io *w, int revents){
-  int c = getch();
-  printw("%s", c);
+  int c;
+  c = getch();
+  while (c != ERR) {
+    printw("%c", c);
+    c = getch();
+  }
 }
 
 int main(int argc, char *argv[]) {
 
   struct ev_loop *loop = EV_DEFAULT;
+  WINDOW *win;
 
   setlocale(LC_ALL, "");
   printf("\033[?1003h\n");
  
-  initscr();
+  win = initscr();
+  nodelay(win, TRUE);   
   keypad(stdscr, TRUE);
   noecho();
   //raw();
