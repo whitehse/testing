@@ -1,4 +1,3 @@
-//#include <ev.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,44 +10,12 @@
 #include <sys/unistd.h>
 #include <locale.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/resource.h>
+#include <bpf/libbpf.h>
 
 #define EV_STANDALONE 1
 #include "ev.c"
-
-//#include <float.h>
-//
-///* a floor() replacement function, should be independent of ev_tstamp type */
-//static ev_tstamp noinline ev_floor (ev_tstamp v) {
-//  /* the choice of shift factor is not terribly important */
-//#if FLT_RADIX != 2 /* assume FLT_RADIX == 10 */
-//  const ev_tstamp shift = sizeof (unsigned long) >= 8 ? 10000000000000000000. : 1000000000.;
-//#else
-//  const ev_tstamp shift = sizeof (unsigned long) >= 8 ? 18446744073709551616. : 4294967296.;
-//#endif
-//
-//  /* argument too large for an unsigned long? */
-//  if (expect_false (v >= shift))
-//    {
-//      ev_tstamp f;
-//
-//      if (v == v - 1.)
-//        return v; /* very large number */
-//
-//      f = shift * ev_floor (v * (1. / shift));
-//      return f + ev_floor (v - f);
-//    }
-//
-//  /* special treatment for negative args? */
-//  if (expect_false (v < 0.))
-//    {
-//      ev_tstamp f = -ev_floor (-v);
-//
-//      return f - (f == v ? 0 : 1);
-//    }
-//
-//  /* fits into an unsigned long */
-//  return (unsigned long)v;
-//}
 
 WINDOW *create_window(int y, int x, int width, int height, int color_id){
     WINDOW* win;
@@ -93,8 +60,7 @@ void parse_key(struct ev_loop *loop, struct ev_io *w, int revents){
   }
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char **argv) {
   struct ev_loop *loop = EV_DEFAULT;
   WINDOW *win;
 
