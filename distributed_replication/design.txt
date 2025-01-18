@@ -1,0 +1,15 @@
+A single node acts as the leader; all data updates flow only through the leader.
+
+For any given epoch, only one leader is guaranteed to exist.
+
+Every data item is associated with the epoch in which it was appended and its index in the log.
+
+A node will not vote for a candidate if it has more up-to-date data than the candidate.
+
+...a majority vote is required to win the election.
+
+CTRL divides the recovery responsibility between two components: the local storage layer and the distributed recovery protocol;
+
+the distributed protocol recovers the data from redundant copies.
+
+
