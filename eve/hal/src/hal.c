@@ -157,6 +157,7 @@ cJSON* cbor_to_cjson(cbor_item_t* item) {
 static void stdin_cb (EV_P_ ev_io *w, int revents) {
   char buffer[1024];
   ssize_t r;
+  sleep(1);
   if(EV_ERROR & revents) {
     perror("got invalid event");
     return;
@@ -165,7 +166,7 @@ static void stdin_cb (EV_P_ ev_io *w, int revents) {
   // Read a line from stdin
   r = read(STDIN_FILENO, buffer, 1024);
 
-  if (r = -1) {
+  if (r == -1) {
     puts("r = -1");
     return 0;
   }
@@ -248,9 +249,22 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
   size_t cbuffer_size;
   cbor_serialize_alloc(root, &cbuffer, &cbuffer_size);
   uint8_t cbuffer_len = (uint8_t)cbuffer_size;
-
   fwrite(cbuffer, 1, cbuffer_size, stdout);
 
+  FILE *file = fopen("cbor.dat", "w");
+  if (file == NULL) {
+    perror("Error opening file");
+    return 1;
+  }
+
+  size_t bytes_written = fwrite(cbuffer, sizeof(char), cbuffer_size, file);
+  if (bytes_written != cbuffer_size) {
+    perror("Error writing to file");
+    fclose(file);
+    return 1;
+  }
+
+  fclose(file);
 }
 
 // Ethernet data structure, to be filled out by the ethernet
@@ -409,6 +423,9 @@ static int finish_handler(struct nl_msg *msg, void *arg) {
 int main(void) {
   loop = EV_DEFAULT;
 
+  printf("stdin = %u\n", STDIN_FILENO);
+  printf("stdout = %u\n", STDOUT_FILENO);
+
   setvbuf(stdout, NULL, _IONBF, 0);
 
   struct termios stored_settings;
@@ -417,13 +434,10 @@ int main(void) {
   // copy existing setting flags
   struct termios new_settings = stored_settings;
 
-  // modify flags
-  // first, disable canonical mode
-  // (canonical mode is the typical line-oriented input method)
+  // Disable terminal line buffering, and echo
   new_settings.c_lflag &= (~ICANON);
   new_settings.c_lflag &= (~ECHO); // don't echo the character
   //new_settings.c_lflag &= (~ISIG); // don't automatically handle control-C
-  //new_settings.c_cc[VTIME] = 1; // timeout (tenths of a second)
   new_settings.c_cc[VTIME] = 1; // timeout (tenths of a second)
   new_settings.c_cc[VMIN] = 0; // minimum number of characters
 
@@ -507,7 +521,7 @@ int main(void) {
 
   ev_io *stdin_watcher;
   stdin_watcher = malloc(sizeof(ev_io));
-  ev_io_init (stdin_watcher, stdin_cb, /*STDIN_FILENO*/ 0, EV_READ);
+  ev_io_init (stdin_watcher, stdin_cb, STDIN_FILENO, EV_READ);
   ev_io_start (loop, stdin_watcher);
 
   ev_timer_init (&timeout_watcher, timeout_cb, 1., 10.);
