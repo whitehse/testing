@@ -19,7 +19,7 @@ int my_hal_ipv4_listener(struct hal_ipv4 *ipv4) {
     static int bad_segments = 0;
 
     if (udp_init == 0) {
-        printf("udp is null\n");
+        //printf("udp is null\n");
         hashmap_init(&udp_hash, hashmap_hash_string, strcmp);
         hashmap_put(&udp_hash, "42", 43);
 	udp_init = 1;

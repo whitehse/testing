@@ -5,10 +5,10 @@ set(EXE_SOURCES
   udp.c
   tcp.c
   hashmap.c
-  monocypher.c
 )
   #axos.pb-c.c
   #objects.pb-c.c)
+  #monocypher.c
 
 #set(EXE_HEADERS
 #)
@@ -24,9 +24,9 @@ target_include_directories(hal PUBLIC
     "${PROJECT_SOURCE_DIR}/third_party/include/hashmap"
     "${PROJECT_SOURCE_DIR}/third_party/include/libnl-tiny/"
     "${PROJECT_SOURCE_DIR}/third_party/libev/"
-    "${PROJECT_SOURCE_DIR}/third_party/monocypher/src/"
     "${CMAKE_BINARY_DIR}/configured_files/include/"
     ".")
+    #"${PROJECT_SOURCE_DIR}/third_party/monocypher/src/"
 
     #/usr/src/git/github/sabotage-linux/libnl-tiny/include/
     #/usr/include/google
@@ -40,6 +40,7 @@ else()
 endif()
 
 #target_link_libraries(hal sodium -static)
-#target_link_libraries(hal cbor -static)
+target_link_libraries(hal cbor -static)
+target_link_libraries(hal cjson -static)
 target_link_libraries(hal -static)
 set_target_properties(hal PROPERTIES LINK_FLAGS_RELEASE -s)

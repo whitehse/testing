@@ -33,7 +33,7 @@ else()
 endif()
 
 include(CPM)
-cpmaddpackage("gh:ThrowTheSwitch/Unity#v2.5.2")
+#cpmaddpackage("gh:ThrowTheSwitch/Unity#v2.5.2")
 cpmaddpackage("gh:cofyc/argparse@1.1.0")
 
 if(ENABLE_WARNINGS)
@@ -41,11 +41,12 @@ if(ENABLE_WARNINGS)
 endif()
 
 set(LIBRARY_NAME "hal")
-set(UNIT_TEST_NAME "unit_tests")
+#set(UNIT_TEST_NAME "unit_tests")
 
 add_subdirectory(configured)
+add_subdirectory(third_party)
 add_subdirectory(src)
-add_subdirectory(tests)
+#add_subdirectory(tests)
 
 #set(CMAKE_C_FLAGS "-Wall -Wextra")
 #set(CMAKE_C_FLAGS_DEBUG "-g")

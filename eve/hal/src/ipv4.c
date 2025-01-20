@@ -38,7 +38,7 @@ int my_hal_ethernet_listener(struct hal_ethernet *frame) {
     int flags;
 
     if (ipv4_init == 0) {
-        printf("First time ethernet listener was called\n");
+        //printf("First time ethernet listener was called\n");
 	ipv4_init = 1;
     }
 
@@ -130,13 +130,13 @@ int my_hal_ethernet_listener(struct hal_ethernet *frame) {
                 break;
             default: /* It's assumed all other options include their own length */
                 if (offset+1 > ipv4.header_length) {
-                    printf("IPv4: Bad Option.\n");
+                    //printf("IPv4: Bad Option.\n");
                     return HAL_IPV4_BADPARAM;
                 }
                 ipv4.header_options[i].length = *(uint8_t *)(buf+offset+1);
                 offset += 1;
                 if (offset+1+(ipv4.header_options[i].length-2) > ipv4.header_length) {
-                    printf("IPv4: Bad Option.\n");
+                    //printf("IPv4: Bad Option.\n");
                     return HAL_IPV4_BADPARAM;
                 }
                 ipv4.header_options[i].data_pointer = buf+offset+1;

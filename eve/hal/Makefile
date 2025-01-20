@@ -14,8 +14,8 @@ build_fresh:
 build_fresh_arm:
 	rm -rf build
 	mkdir build
-	( cd build && cmake -DCMAKE_BUILD_TYPE=Release -DARM=ON .. && cmake --build . )
-	#( cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc-12 .. && cmake --build . )
+	#( cd build && cmake -DCMAKE_BUILD_TYPE=Release -DARM=ON .. && cmake --build . )
+	( cd build && cmake -DCMAKE_BUILD_TYPE=Release -DARM=ON -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc-12 .. && cmake --build . )
 
 clean:
 	cd build && make clean

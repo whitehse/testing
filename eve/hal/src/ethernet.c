@@ -182,7 +182,7 @@ int hal_eth_parse(char** ethernet_ptr, const char* buf, unsigned n) {
 //    }
 
     if (*ethernet_ptr == NULL) {
-        printf("ethernet is null\n");
+        //printf("ethernet is null\n");
 	*ethernet_ptr = malloc(10*sizeof(char));
     }
 
@@ -424,7 +424,7 @@ int hal_eth_parse(char** ethernet_ptr, const char* buf, unsigned n) {
             default:
                 /* Other ethertype, or unrecognized format */
                 if (possible_ethertype > 1500) {
-                    printf("Other ethertype (ethertype > 1500). Can't process yet.\n");
+                    //printf("Other ethertype (ethertype > 1500). Can't process yet.\n");
                     return HAL_ETH_BAD_FRAME;
                 }
 
@@ -434,7 +434,7 @@ int hal_eth_parse(char** ethernet_ptr, const char* buf, unsigned n) {
                 offset += 2;
 
                 if (offset+4 > n) {
-                    printf("Bad Frame.\n");
+                    //printf("Bad Frame.\n");
                     return HAL_ETH_BAD_FRAME;
                 }
 
@@ -471,7 +471,7 @@ int hal_eth_parse(char** ethernet_ptr, const char* buf, unsigned n) {
                 }
 
                 if (offset+5 > n) {
-                    printf("Bad Frame.\n");
+                    //printf("Bad Frame.\n");
                     return HAL_ETH_BAD_FRAME;
                 }
                 /* Is SNAP service requested? */
@@ -498,7 +498,7 @@ int hal_eth_parse(char** ethernet_ptr, const char* buf, unsigned n) {
                             goto out;
                             break;
                         default: /* unregocnized SAP */
-                            printf("Unrecognized SAP. Can't process yet.\n");
+                            //printf("Unrecognized SAP. Can't process yet.\n");
                             return HAL_ETH_BAD_FRAME;
                             break;
                     }

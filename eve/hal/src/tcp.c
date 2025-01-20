@@ -112,7 +112,7 @@ tcp_hash_t tcp_map;
 static void syn_cb (EV_P_ ev_timer *w, int revents) {
   struct tcp_connection *connection = w->data;
   struct tcp_socket *socket = connection->socket;
-  puts("====syn_cb called===");
+  //puts("====syn_cb called===");
   ev_timer_stop(loop, &(connection->timeout_watcher));
   struct tcp_connection *val = hashmap_remove(&tcp_map, socket);
   if (val == NULL) {
@@ -136,7 +136,7 @@ int tcp_parser(struct hal_ipv4 *ipv4) {
     static uint64_t connections_found=0;
 
     if (tcp_init == 0) {
-        printf("tcp is null\n");
+        //printf("tcp is null\n");
         hashmap_init(&tcp_map, hashmap_tcp_socket, compare_tcp_sockets);
 	//hashmap_set_key_alloc_funcs(&tcp_map, dup_tcp_socket, free_tcp_socket);
 	//#define hashmap_set_key_alloc_funcs(h, key_dup_func, key_free_func) do {
@@ -495,24 +495,25 @@ int tcp_parser(struct hal_ipv4 *ipv4) {
 	  //printf("Socket not found in the hashmap.\n");
 	} else {
 	  //printf("The connection state of the retrieved socket is %d.\n", connection->state);
-          if (connection->peer_a_bytes > 25000 || connection->peer_b_bytes > 25000) {
-	    printf("Connection closed. socket=%s-%s:%u-%u, peer a bytes=%llu, peer b bytes=%llu. Connections found=%llu, not found=%llu.\n",
-              ipv4_source_ip_in_decimal (ipv4),
-              ipv4_destination_ip_in_decimal (ipv4),
-	      socket.peer_a_port,
-	      socket.peer_b_port,
-              connection->peer_a_bytes,
-	      connection->peer_b_bytes,
-	      connections_found,
-	      connections_not_found
-	    );
-	    int i=0;
-	    HASHMAP_ITER(tcp_map) it;
-	    for (it = hashmap_iter(&tcp_map); hashmap_iter_valid(&it); hashmap_iter_next(&it)) {
-	      i++;
-	    }
-	    printf("There are %d entries in the hashtable.\n", i);
-	  }
+//    if (connection->peer_a_bytes > 25000 || connection->peer_b_bytes > 25000) {
+//      printf("Connection closed. socket=%s-%s:%u-%u, peer a bytes=%llu, peer b bytes=%llu. Connections found=%llu, not found=%llu.\n",
+//        ipv4_source_ip_in_decimal (ipv4),
+//        ipv4_destination_ip_in_decimal (ipv4),
+//	      socket.peer_a_port,
+//	      socket.peer_b_port,
+//        connection->peer_a_bytes,
+//	      connection->peer_b_bytes,
+//	      connections_found,
+//	      connections_not_found
+//	    );
+//	    int i=0;
+//	    HASHMAP_ITER(tcp_map) it;
+//	    for (it = hashmap_iter(&tcp_map); hashmap_iter_valid(&it); hashmap_iter_next(&it)) {
+//	      i++;
+//	    }
+//	    printf("There are %d entries in the hashtable.\n", i);
+//	  }
+
 	  ev_timer_stop(loop, &(connection->timeout_watcher));
 	  struct tcp_connection *val = hashmap_remove(&tcp_map, &socket);
 	  free(val);
