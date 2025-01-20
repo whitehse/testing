@@ -161,3 +161,29 @@ storage and performance overhead. However, storing the identifier near the item
 is less useful; a misdirected write can corrupt both the item and its
 identifier. Hence, identifiers are physically separated from the items they
 identify.
+
+The <epoch, index> pair serves as the identifier for a log entry and is stored
+separately at the head of the log, as shown above.
+
+The offset of an entry is also stored as part of the identifier to enable
+traversal of subsequent entries on a fault
+
+The identifier of a log entry also conveniently serves as its persist record.
+Similarly, for a snapshot chunk, the <snap-index, chunk#> pair serves as the
+identifier; the snap-index and the snapshot size are stored in a separate file
+than the snapshot file. The identifiers have a nominal storage overhead (32
+bytes for log entries and 12 bytes for snapshots), can be atomically written,
+and are also protected by a checksum.
+
+It is highly unlikely an item and its identifier will both be faulty since they
+are physically separated. In such unlikely and unfortunate cases, CLSTORE
+crashes the node to preserve safety.
+
+CTRL Distributed Log Recovery
+
+The local storage layer detects faulty data items and
+passes on their identifiers to the Distributed Recovery
+Layer using RSM-specific knowledge.
+
+Any node that has a more up-to-date log can now be elected the leader even if
+it has faulty entries.
