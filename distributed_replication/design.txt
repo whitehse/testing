@@ -8,8 +8,156 @@ A node will not vote for a candidate if it has more up-to-date data than the can
 
 ...a majority vote is required to win the election.
 
-CTRL divides the recovery responsibility between two components: the local storage layer and the distributed recovery protocol;
+CTRL divides the recovery responsibility between two components: the local
+storage layer (CLSTORE) and the distributed recovery protocol (Log Recovery
+Protocol, and Distributed Snapshot Recovery).
 
 the distributed protocol recovers the data from redundant copies.
 
+Fault Model scenarios
+* nodes could crash at any time and recover later
+* nodes could be unreachable due to network failures
+* corrupted data - i.e. misdirected and lost writes in ext
+* inaccessible data - i.e. LSE, corruptions in ZFS and btrfs
+* missing files/directories - i.e. directory entry corrupted, fsck may remove a faulty inode
+* unopenable files/directories - i.e. sanity check failes after inode corruption, permission bits corrupted
+* files with more or fewer bytes - i.e. i_size field in the inode corrupted
+* files system read-only - i.e. journal corruped; fsck not run
+* file system unmountable - i.e. superblock corrupted; fsck not run
 
+CTRL guarantees that if there exists at least one correct copy of a committed
+data item, it will be recovered or the system will wait for that item to be
+fixed; committed data will never be lost. In unlikely cases where all copies of
+a committed item are faulty, the system will correctly remain unavailable. CTRL
+also guarantees that the system will make a decision about an uncommitted
+faulty item as early as possible, ensuring high availability
+
+The storage layer (CLSTORE) needs to satisfy three key requirements:
+* CLSTORE must be able to reliably detect a storage fault
+* CLSTORE must correctly distinguish crashes from corruptions
+* CLSTORE must identify which pieces of data are faulty
+
+Replicated State Machine (RSM) systems maintain three persistent structures:
+the log, the snapshots, and the metainfo.
+
+CLSTORE uses RSM-specific knowledge of how these structures are used and
+updated, to perform its functions.  For example, CLSTORE detects faults at a
+different granularity depending on the RSM data structure: faults in the log
+are detected at the granularity of individual entries, while faults in the
+snapshot are detected at the granularity of chunks. Similarly, CLSTORE uses the
+RSM-specific knowledge that a log entry is uniquely qualified by its hepoch,
+indexi pair to identify faulty log entries.
+
+Log
+
+The log is a set of files containing a sequence of entries. CLSTORE uses the following format:
+
+id₁, id₂ ... e₁, e₂
+
+where
+
+* eᵢ is the iᵗʰ log entry
+* idᵢ is the identifier of entry eᵢ
+* idᵢ = <index(eᵢ), epoch(eᵢ), offset(eᵢ), cksum>
+* idᵢ also serves as persistent record for eᵢ
+
+On update:
+
+* pwrite(log, eᵢ)
+* pwrite(log, idᵢ)
+* fsync(log)
+
+A corrupted log is recovered at the granularity of individual entries, hence
+protocol aware.
+
+Snapshots
+
+The in-memory state machine is periodically written to a snapshot. Since
+snapshots can be huge, CLSTORE splits them into chunks; a faulty snapshot is
+recovered at the granularity of individual chunks.
+
+Metainfo
+
+Faulty metainfo cannot be recovered from other nodes.
+
+The metainfo contains information unique to a node (e.g., its current epoch).
+
+CLSTORE maintains two copies of the metainfo locally; if one copy is faulty,
+the other copy is used. The metainfo is only a few tens of bytes in size and is
+updated infrequently; therefore, maintaining two copies does not incur
+significant overheads.
+
+CLSTORE uses well-known techniques for detection: inaccessible data is detected
+by catching return codes (e.g., EIO) and corrupted data is detected by a
+checksum mismatch. CLSTORE assumes that if an item and its checksum agree, then
+the item is not faulty.
+
+In the log, each entry is protected by a checksum; similarly, each chunk in a
+snapshot and the entire metainfo are checksummed.
+
+In most cases of file-system metadata faults, CLSTORE crashes the nodes.
+
+Disentangling Crashes and Corruption in Log
+
+A checksum mismatch for a log entry could occur due to two different
+situations. First, the system could have crashed in the middle of an update; in
+this case, the entry would be partially written and hence cause a mismatch.
+Second, the entry could be safely persisted but corrupted at a later point.
+
+If the mismatch was due to a crash, it is safe to discard the partially written
+entry. If an entry is corrupted, the entry cannot be simply discarded since it
+could be globally committed. Further, if a mismatch can be correctly attributed
+to a crash, the faulty entry can be quickly discarded locally, avoiding the
+distributed recovery. Hence, it is important for the local storage layer to
+distinguish the two cases.
+
+Note: I presume pᵢ is idᵢ in the following.
+
+CLSTORE writes a persist record, pᵢ, after writing an entry eᵢ.
+
+For now, assume that ei is ordered before pᵢ, i.e., the sequence of steps to
+append an entry eiᵢ is write(eᵢ), fsync(), write(pᵢ), fsync().
+
+On a checksum mismatch for eᵢ, if pᵢ is not present, we can conclude that the
+system crashed during the update. Conversely, if pᵢ is present, we can conclude
+that the mismatch was caused due to a corruption and not due to a crash. pᵢ is
+checksummed and is very small; it can be atomically written and thus cannot be
+“corrupted” due to a crash. If pᵢ is corrupted in addition to eᵢ, we can
+conclude that it is a corruption and not a crash.
+
+However, such ordering requires an (additional) expensive fsync in the critical
+path, affecting log-update performance. For this reason, CLSTORE does not order
+eᵢ before pᵢ; thus, the append protocol is t1:write(eᵢ), t2:write(pᵢ),
+t3:fsync(). Given this update sequence, assume a checksum mismatch occurs for
+eᵢ. If pᵢ is not present, CLSTORE can conclude that it is a crash (before t2)
+and discard eᵢ. Contrarily, if pᵢ is present, there are two possibilities:
+either eᵢ could be affected by a corruption after t3 or a crash could have
+occurred between t2 and t3 in which pᵢ hit the disk while eᵢ was only partially
+written. The second case is possible because file systems can reorder writes
+between two fsync operations and eᵢ could span multiple sectors. CLSTORE can
+still conclude that it is a corruption if eᵢ+1 or pᵢ+1 is present. However, if
+eᵢ is the last entry, then we cannot determine whether it was a crash or a
+corruption.
+
+Even if crashes and corruptions can be disentangled, there is little a
+single machine system can do to recover the corrupted data.  However, in a
+distributed system, redundant copies can be used to recover. Thus, when the
+last entry cannot be disentangled, CLSTORE safely marks the entry as corrupted
+and leaves it to the distributed recovery to fix or discard the entry based on
+the global commitment.
+
+The entanglement problem does not arise for snapshots or metainfo. These files
+are first written to a temporary file and then atomically renamed. If a crash
+happens before the rename, the partially written temporary file is discarded.
+Thus, the system will never see a corrupted snapshot or metainfo due to a
+crash; if these structures are corrupted, it is because of a storage
+corruption.
+
+Identifying Faulty Data
+
+CLSTORE redundantly stores an identifier of an item apart from the item itself;
+duplicating only the identifier instead of the whole item obviates the (2×)
+storage and performance overhead. However, storing the identifier near the item
+is less useful; a misdirected write can corrupt both the item and its
+identifier. Hence, identifiers are physically separated from the items they
+identify.
