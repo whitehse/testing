@@ -24,6 +24,7 @@ target_include_directories(hal PUBLIC
     "${PROJECT_SOURCE_DIR}/third_party/include/hashmap"
     "${PROJECT_SOURCE_DIR}/third_party/include/libnl-tiny/"
     "${PROJECT_SOURCE_DIR}/third_party/libev/"
+    "${PROJECT_SOURCE_DIR}/third_party/cJSON/"
     "${CMAKE_BINARY_DIR}/configured_files/include/"
     ".")
     #"${PROJECT_SOURCE_DIR}/third_party/monocypher/src/"
@@ -41,6 +42,6 @@ endif()
 
 #target_link_libraries(hal sodium -static)
 target_link_libraries(hal cbor -static)
-target_link_libraries(hal cjson -static)
+target_link_libraries(hal ${CMAKE_BINARY_DIR}/third_party/cJSON/libcjson.a -static)
 target_link_libraries(hal -static)
 set_target_properties(hal PROPERTIES LINK_FLAGS_RELEASE -s)

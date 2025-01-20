@@ -49,7 +49,8 @@ struct ucred {
 #include "ev.c"
 
 #include <cbor.h>
-#include <cjson/cJSON.h>
+//#include <cjson/cJSON.h>
+#include <cJSON.h>
 #include <termios.h>
  
 /* https://github.com/DavidLeeds/hashmap */
