@@ -185,5 +185,35 @@ The local storage layer detects faulty data items and
 passes on their identifiers to the Distributed Recovery
 Layer using RSM-specific knowledge.
 
-Any node that has a more up-to-date log can now be elected the leader even if
+Any node that has a more up-to-date logs can now be elected the leader even if
 it has faulty entries.
+
+To accept a new command, the leader has to append the command to its log,
+replicate it, and apply it to the state machine. However, before applying the
+new command, all previous commands must be applied. Specifically, faulty
+commands cannot be skipped and later applied when they are fixed; such
+out-of-order application would violate safety. Hence, it is required for the
+leader to fix its faulty entries before it can accept new commands. Thus, for
+improved availability, the leader needs to fix its faulty entries as early as
+possible.
+
+In simple cases, the leader S1 could fix its faulty entry <epoch:1, index:1>
+using the correct entries from the followers and proceed to normal operation.
+However, in several scenarios, the leader cannot immediately recover its faulty
+entries; for example, none of the reachable followers might have any knowledge
+of the entry to be recovered or the entry to be recovered could also be faulty
+on the followers.
+
+Determining Commitment
+
+The main insight to fix the leader’s faulty log safely and quickly is to
+distinguish uncommitted entries from possibly committed ones; while recovering
+the committed entries is necessary for safety, uncommitted entries can be
+safely discarded. Further, discarding uncommitted faulty entries immediately is
+crucial for availability. For instance, the faulty entry on S1 cannot be fixed
+since there are no copies of it; waiting to fix that entry results in
+indefinite unavailability. Sometimes, an entry could be partially replicated
+but remain uncommitted; for example, in case (c)(ii), the faulty entry on S1 is
+partially replicated but is not committed. Although there is a possibility of
+recovering this entry from the other node (S2), this is not necessary for
+safety; it is completely safe for the leader to discard this uncommitted entry.
