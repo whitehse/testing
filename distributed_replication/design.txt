@@ -217,3 +217,134 @@ but remain uncommitted; for example, in case (c)(ii), the faulty entry on S1 is
 partially replicated but is not committed. Although there is a possibility of
 recovering this entry from the other node (S2), this is not necessary for
 safety; it is completely safe for the leader to discard this uncommitted entry.
+
+To determine the commitment of a faulty entry, the leader queries the
+followers. If a majority of the followers respond that they do not have the
+entry (negative acknowledgment), then the leader concludes that the entry is
+uncommitted. In this case, the leader safely discards that and all subsequent
+entries; it is safe to discard the subsequent entries because entries are
+committed in order. Conversely, if the entry were committed, at least one node
+in this majority would have that entry and inform the leader of it; in this
+case, the leader can fix its faulty entry using that response.
+
+Waiting to Determine Commitment
+
+Sometimes, it may be impossible for the leader to quickly determine commitment.
+For instance, consider the cases in Figure 4(d) in which S4 and S5 are down or
+slow. S1 queries the followers to recover its entry hepoch:1, index:3i. S2 and
+S3 respond that they do not have such an entry (negative acknowledgment). S4
+and S5 do not respond because they are down or slow. The leader, in this case,
+has to wait for either S4 or S5 to respond; discarding the entry without
+waiting for S4 or S5 could violate safety.  However, once S4 or S5 responds,
+the leader will make a decision immediately. In (d)(i), S4 or S5 would respond
+with the correct entry, fixing the leader. In (d)(ii), S4 or S5 would respond
+that it does not have the entry, accumulating three (a majority out of five)
+negative acknowledgments; hence, the leader can conclude that the entry is
+uncommitted, discard it, and continue to normal operation. In (d)(iii), S4
+would respond that it has the entry but is faulty in its log too. In this case,
+the leader has to wait for the response from S5 to determine commitment.  In
+the unfortunate and unlikely case where all copies of an entry are faulty, the
+system will remain unavailable.
+
+The Complete Log Recovery Protocol
+
+The leader queries the followers to recover its entry hepoch:e, index:ii. Three
+types of responses are possible:
+
+* Response 1: have – a follower could respond that it has
+the entry hepoch:e, index:ii and is not faulty in its log.
+* Response 2: dontHave – a follower could respond that it
+does not have the entry hepoch:e, index:ii.
+* Response 3: haveFaulty – a follower could respond that <epoch:e, index:i> but is faulty in its log too. 
+
+Once the leader collects these responses from the followers, it takes the following possible actions:
+
+* Case 1: if it gets a have response from at least one follower, it fixes the entry in its log
+* Case 2: if it gets a dontHave response from a majority
+of followers, it confirms that the entry is uncommitted,
+discards that entry and all subsequent entries
+* Case 3: if it gets a haveFaulty response from a follower,
+it waits for either Case 1 or Case 2 to happen
+
+Case 1 and Case 2 can happen in any order; both orderings are safe.
+Specifically, if the leader decides to discard the faulty entry (after
+collecting a majority dontHave responses), it is safe since the entry was
+uncommitted anyways. Conversely, there is no harm in accepting a correct entry
+(at least one have response) and replicating it. The it has first to happen out
+of these two cases will take precedence over the other.
+
+The leader proceeds to normal operation only after its faulty data is discarded
+or recovered. However, CTRL discards uncommitted data as early as possible and
+minimizes the recovery latency by recovering faulty data at a fine granularity
+(as we show in §5.2), ensuring that the leader proceeds to normal operation
+quickly. 
+
+The leader could crash or be partitioned while recovering its log. On
+a leader failure, the followers will elect a new leader and make progress. The
+partial repair done by the failed leader is harmless: it could have either
+fixed committed faulty entries or discarded uncommitted ones, both of which are
+safe.
+
+CTRL Distributed Snapshot Recovery
+
+Because the logs can grow indefinitely, periodically, the in-memory state
+machine is written to disk and the logs are garbage collected. CTRL aims to
+recover faulty snapshots from redundant copies. Snapshot recovery is different
+from log recovery in that all data in a snapshot is committed and already
+applied to the state machine; hence, faulty snapshots cannot be discarded in
+any case (unlike uncommitted log entries which can be discarded safely).
+
+Leader-Initiated Identical Snapshots
+
+In CTRL, tThe leader initiates the snapshot procedure by first deciding the
+index at which a snapshot will be taken and informing the followers of the
+index. Once a majority agree on the index, all nodes independently take a
+snapshot at the index.  When the leader learns that a majority (including
+itself) have taken a snapshot at an index i, it garbage collects its log up to
+i and instructs the followers to do the same.
+
+When the leader decides to take a snapshot, it inserts a special marker called
+snap into the log. When the snap marker commits, and thus when a node applies
+the marker to the state machine, it takes a snapshot (i.e., the snapshot
+corresponds to the state where commands exactly up to the marker have been
+applied).
+
+Within each node, we allow new commands (log entries?) to be applied while a
+snapshot is in progress. When the leader learns that a majority of nodes
+(including itself) have taken a snapshot at an index i, it appends another
+marker called gc for i; when the gc marker is committed and applied, the nodes
+garbage collect their log entries up to i.
+
+Recovering Snapshot Chunks
+
+Once a faulty snapshot is detected, the local storage layer provides the
+distributed protocol the snapshot index and the chunk that is faulty. The
+distributed protocol recovers the faulty chunk from other nodes. First, the
+leader recovers its faulty chunks from the followers and then fixes the faulty
+snapshots on followers. Three cases arise during snapshot recovery.
+
+First, the log entries for a faulty snapshot may not be garbage collected yet;
+in this case, the snapshot is recovered locally from the log (after fixing the
+log if needed).
+
+Second, if the log is garbage collected, then a faulty snapshot has to be
+recovered from other nodes. However, if the log entries for a snapshot are
+garbage collected, then at least a majority of the nodes must have taken the
+same snapshot. This is true because the gc marker is inserted only after a
+majority of nodes have taken the snapshot. Thus, faulty garbage-collected
+snapshots are recovered from those redundant copies.
+
+Third, sometimes, the leader may not know a snapshot that a follower is
+querying for (for example, if a follower took a snapshot and went offline for a
+long time and the leader replaced that snapshot with an advanced one); in this
+case, the leader supplies the full advanced snapshot.
+
+CTRL Summary
+
+The storage layer detects and identifies faulty data. Atop the storage layer,
+the distributed protocol recovers the faulty items from redundant copies. Both
+the layers exploit RSM-specific knowledge to correctly perform their functions.
+A summary of CTRL’s local storage and distributed recovery techniques is shown
+in Table 3.
+
+
