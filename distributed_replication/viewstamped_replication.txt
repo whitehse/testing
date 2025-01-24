@@ -1,0 +1,28 @@
+https://pmg.csail.mit.edu/papers/vr-revisited.pdf
+
+VR is intended to work in an asynchronous network, like the Internet, in which
+the non-arrival of a message indicates nothing about the state of its sender.
+Messages might be lost, delivered late or out of order, and delivered more than
+once; however, we assume that if sent repeatedly a message will eventually be
+delivered.
+
+VR ensures reliability and availability when no more than a threshold of f
+replicas are faulty. It does this by using replica groups of size 2f + 1. Each
+step of the protocol must be processed by f + 1 replicas. These f + 1 together
+with the f that may not respond give us the smallest group size of 2f + 1.
+
+A group of f + 1 replicas is often referred to as a quorum and correctness of
+the protocol depends on the quorum intersection property: the quorum of
+replicas that processes a particular step of the protocol must have a non-empty
+intersection with the group of replicas available to handle the next step,
+since this way we can ensure that at each next step at least one participant
+knows what happened in the previous step. In a group of 2f + 1 replicas, f + 1
+is the smallest quorum size that will work.  In general a group need not be
+exactly of size 2f + 1; if it isn’t, the threshold is the largest f such that
+2f + 1 is less than or equal to the group size, K, and a quorum is of size K −
+f. However, for a particular threshold f there is no benefit in having a group
+of size larger than 2f + 1: a larger group requires larger quorums to ensure
+intersection, but does not tolerate more failures. Therefore in the protocol
+descriptions in this paper we assume the group size is exactly 2f + 1.
+
+
