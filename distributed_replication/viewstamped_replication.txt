@@ -574,3 +574,68 @@ primary”) it does not provide external consistency. The first approach provide
 causality even in a setting where there are many storage repositories. In this
 setting, the second approach requires a different way of capturing causality,
 e.g., with vector timestamps [12] or Lamport clocks [4].
+
+Reconfiguration
+
+This section describes a reconfiguration protocol that allows the members of
+the group of replicas to change over time. Reconfiguration is needed to replace
+failed nodes that cannot be recovered, as well as for other reasons, e.g., to
+use more powerful computers as replicas, or to position the replicas in
+different data centers.
+
+The reconfiguration protocol can also be used to change the threshold, f, the
+number of failures the group is intended to handle: the new group can be bigger
+or smaller than the old one. Changing the threshold is useful to allow the
+system to adapt to changing circumstances, e.g., if experience indicates that
+more or fewer failures are happening than expected.
+
+The approach to handling reconfigurations is as follows. A reconfiguration is
+triggered by a special client request. This request is run through the normal
+case protocol by the old group. When the request commits, the system moves to a
+new epoch, in which responsibility for processing client requests shifts to the
+new group. However, the new group cannot process client requests until its
+replicas are up to date: the new replicas must know all operations that
+committed in the previous epoch. To get up to date they transfer state from the
+old replicas, which do not shut down until the state transfer is complete.
+
+Reconfiguration Details
+
+To handle reconfigurations we add some information to the replica state, as
+shown in Figure 4. In addition there is another status, transitioning. A
+replica sets its status to transitioning at the beginning of the next epoch.
+New replicas use the old-configuration for state transfer at the start of an
+epoch; this way new nodes know where to get the state. Replicas that are
+members of the replica group for the new epoch change their status to normal
+when they have received the complete log up to the start of the epoch; replicas
+that are being replaced shut down once they know their state has been
+transferred to the new group.
+
+Every message now contains an epoch-number. Replicas only process messages
+(from either clients or other replicas) that match the epoch they are in. If
+they receive a message with a later epoch number they move to that epoch as
+discussed below. If they receive a message with an earlier epoch number they
+discard the message but inform the sender about the later epoch.
+
+Reconfigurations are requested by a client, c, e.g., the administrator’s node,
+which sends a <RECONFIGURATION e, c, s, new-config> message to the current
+primary. Here e is the current epoch-number known to c, s is c's
+request-number, and new-config provides the IP addresses of all members of the
+new group. The primary will accept the request only if s is large enough (based
+on the client-table) and e is the current epoch-number. Additionally the
+primary discards the request if new-config contains fewer than 3 IP addresses
+(since this is the minimum group size needed for VR). The new threshold is
+determined by the size of new-config: it is the largest value f' such that 2f'
++ 1 is less than or equal to the size of new-config.  If the primary accepts
+the request, it processes it in the usual way, by carrying out the normal case
+protocol, but with two differences: First, the primary immediately stops
+accepting other client requests; the reconfiguration request is the last
+request processed in the current epoch. Second, executing the request does not
+cause an up-call to the service code; instead, a reconfiguration affects only
+the VR state.
+
+* RECONFIGURATION operation
+* e - epoch-number
+* c - 
+
+The procesing of the request happens as follows:
+
