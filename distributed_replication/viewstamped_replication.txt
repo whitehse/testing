@@ -1,10 +1,12 @@
 https://pmg.csail.mit.edu/papers/vr-revisited.pdf
 
-VR is intended to work in an asynchronous network, like the Internet, in which
-the non-arrival of a message indicates nothing about the state of its sender.
-Messages might be lost, delivered late or out of order, and delivered more than
-once; however, we assume that if sent repeatedly a message will eventually be
-delivered.
+Viewstamped Replication (VR) is intended to work in an asynchronous network,
+like the Internet, in which the non-arrival of a message indicates nothing
+about the state of its sender.  Messages might be lost, delivered late or out
+of order, and delivered more than once; however, we assume that if sent
+repeatedly a message will eventually be delivered.
+
+Replica Groups
 
 VR ensures reliability and availability when no more than a threshold of f
 replicas are faulty. It does this by using replica groups of size 2f + 1. Each
@@ -25,4 +27,550 @@ of size larger than 2f + 1: a larger group requires larger quorums to ensure
 intersection, but does not tolerate more failures. Therefore in the protocol
 descriptions in this paper we assume the group size is exactly 2f + 1.
 
+Architecture
 
+Client machines run user code on top of a VR proxy which can run on the same
+host. The user code communicates with VR by making operation calls to the
+proxy. The proxy then communicates with the replicas to cause the operation to
+be carried out and returns the result to the client when the operation has
+completed.
+
+The replicas run code for the service that is being replicated using VR, e.g.,
+a file system. The replicas also run the VR code. The VR code accepts requests
+from client proxies, carries out the protocol, and when the request is ready to
+be executed, causes this to happen by making an up-call to the service code at
+the replica. The service code executes the call and returns the result to the
+VR code, which sends it in a message to the client proxy that made the request.
+
+Of the 2f + 1 replicas, only f + 1 need to run the service code.
+
+Overview
+
+State machine replication requires that replicas start in the same initial
+state, and that operations be deterministic. Given these assumptions, it is
+easy to see that replicas will end up in the same state if they execute the
+same sequence of operations. The challenge for the replication protocol is to
+ensure that operations execute in the same order at all replicas in spite of
+concurrent requests from clients and in spite of failures.
+
+VR uses a primary replica to order client requests; the other replicas are
+backups that simply accept the order selected by the primary. In the case that
+the primary failes, a backup replica becomes the primary replica.
+
+The system moves through a sequence of views. In each view one of the replicas
+is selected to be the primary. The backups monitor the primary, and if it
+appears to be faulty, they carry out a view change protocol to select a new
+primary.
+
+To work correctly across a view change the state of the system in the next view
+must reflect all client operations that were executed in earlier views, in the
+previously selected order. We support this requirement by having the primary
+wait until at least f + 1 replicas (including itself) know about a client
+request before executing it, and by initializing the state of a new view by
+consulting at least f + 1 replicas. Thus each request is known to a quorum and
+the new view starts from a quorum.
+
+VR also provides a way for replicas that have failed to recover and then
+continue processing. This is important since otherwise the number of failed
+replicas would eventually exceed the threshold. Correct recovery requires that
+the recovering replica rejoin the protocol only after it knows a state at least
+as recent as its state when it failed, so that it can respond correctly if it
+is needed for a quorum. Clearly this requirement could be satisfied by having
+each replica record what it knows on disk prior to each communication. However
+we do not require the use of disk for this purpose.
+
+VR uses three sub-protocols that work together to ensure correctness:
+
+* Normal case processing of user requests.
+* View changes to select a new primary.
+* Recovery of a failed replica so that it can rejoin the
+group.
+
+The VR Protocol
+
+The state of the VR at a replica is:
+
+* The configuration. This is a sorted array containing the IP addresses of each
+of the 2f + 1 replicas.
+
+* The replica number. This is the index into the configuration where this
+replica’s IP address is stored.
+
+* The current view-number, initially 0.
+
+* The current status, either normal, view-change, or recovering.
+
+* The op-number assigned to the most recently received request, initially 0.
+
+* The log. This is an array containing op-number entries. The entries contain
+the requests that have been received so far in their assigned order.
+
+* The commit-number is the op-number of the most recently committed operation.
+
+* The client-table. This records for each client the number of its most recent
+request, plus, if the request has been executed, the result sent for that
+request.
+
+The identity of the primary isn’t recorded in the state but rather is computed
+from the view-number and the configuration. The replicas are numbered based on
+their IP addresses: the replica with the smallest IP address is replica 1. The
+primary is chosen round-robin, starting with replica 1, as the system moves to
+new views. The status indicates what sub-protocol the replica is engaged in.
+
+The client-side proxy also has state. It records the configuration and what it
+believes is the current viewnumber, which allows it to know which replica is
+currently the primary. Each message sent to the client informs it of the
+current view-number; this allows the client to track the primary.
+
+In addition the client records its own client-id and a current request-number.
+A client is allowed to have just one outstanding request at a time. Each
+request is given a number by the client and later requests must have larger
+numbers than earlier ones. The request number is used by the replicas to avoid
+running requests more than once; it is also used by the client to discard
+duplicate responses to its requests.
+
+Normal Operation
+
+Replicas participate in processing of client requests only when their status is
+normal. The protocol description assumes all participating replicas are in the
+same view. Every message sent from one replica to another contains the sender’s
+current viewnumber. Replicas only process normal protocol messages containing a
+view-number that matches the viewnumber they know. If the sender is behind, the
+receiver drops the message. If the sender is ahead, the replica performs a
+state transfer: it requests information it is missing from the other replicas
+and uses this information to bring itself up to date before processing the
+message.
+
+The request processing protocol works as follows. The description ignores a
+number of minor details, such as re-sending protocol messages that haven’t
+received responses.
+
+1. The client sends a <REQUEST op, c, s> message to the primary, where op is
+the operation (with its arguments) the client wants to run, c is the client-id,
+and s is the request-number assigned to the request.
+
+* REQUEST operation
+* op - operation/message
+* c - client-id
+* s - request-number generated by the client
+
+**Note: Remove the client-id in the request, from the client, since the client
+will be authenticated via the key exchange protocol or via a unix domain peer
+call. The client-id will be derived and forwarded to other replicas.
+
+2. When the primary receives the request, it compares the request-number in the
+request with the information in the client table. If the request-number s isn’t
+bigger than the information in the table it drops the request, but it will
+re-send the response if the request is the most recent one from this client and
+it has already been executed.
+
+**Note: Since reliable transport protocols are used, it should be rare that a
+duplicate response will need to be sent by the application. Severe network loss
+combined with a client response timer timeout might be one case, or perhaps the
+connection was closed between sending the request and receiving the result.
+
+3. The primary advances op-number, adds the request to the end of the log, and
+updates the information for this client in the client-table to contain the new
+request number, s. Then it sends a <PREPARE v, m, n, k> message to the other
+replicas, where v is the current view-number, m is the message it received from
+the client, n is the op-number it assigned to the request, and k is the
+commit-number.
+
+**NOTE: Add the client-id to the PREPARE message, i.e.:
+* PREPARE operation
+* v - the view-number
+* m - The client message, the client op and the client generated request
+number
+* c - The client-id
+* n - The generated op-number
+* k - The current commit-number
+
+4. Backups process PREPARE messages in order: a backup won’t accept a prepare
+with op-number n until it has entries for all earlier requests in its log.
+When a backup i receives a PREPARE message, it waits until it has entries in
+its log for all earlier requests (doing state transfer if necessary to get the
+missing information). Then it increments its op-number, adds the request to the
+end of its log, updates the client’s information in the client-table, and sends
+a <PREPAREOK v, n, i> message to the primary to indicate that this operation
+and all earlier ones have prepared locally.
+
+* PREPAREOK operation
+* v - the view-number
+* n - the op-number
+* i - the replica index number
+
+**NOTE: Remove the index number. It will be derived from the underlying
+key-exchange or unix domain peer authentication step with that replica
+
+5. The primary waits for f PREPAREOK messages from different backups; at this
+point it considers the operation (and all earlier ones) to be committed. Then,
+after it has executed all earlier operations (those assigned smaller
+op-numbers), the primary executes the operation by making an up-call to the
+service code, and increments its commit-number.  Then it sends a <REPLY v, s,
+x> message to the client; here v is the view-number, s is the number the client
+provided in the request, and x is the result of the up-call. The primary also
+updates the client’s entry in the client-table to contain the result.
+
+* REPLY operation
+* v - the view-number
+* s - request-number generated by the client
+* x - the result of the client request/operation
+
+6. Normally the primary informs backups about the commit when it sends the next
+PREPARE message; this is the purpose of the commit-number in the PREPARE
+message. However, if the primary does not receive a new client request in a
+timely way, it instead informs the backups of the latest commit by sending them
+a <COMMIT v, k> message, where k is commit-number (note that in this case
+commitnumber = op-number).
+
+* COMMIT operations
+* v - the view-number
+* k - commit-number (commit-number must equal op-number)
+
+7. When a backup learns of a commit, it waits until it has the request in its
+log (which may require state transfer) and until it has executed all earlier
+operations. Then it executes the operation by performing the up-call to the
+service code, increments its commit-number, updates the client’s entry in the
+client-table, but does not send the reply to the client.
+
+If a client doesn’t receive a timely response to a request, it resends the
+request to all replicas. This way if the group has moved to a later view, its
+message will reach the new primary. Backups ignore client requests; only the
+primary processes them.
+
+The protocol could be modified to allow backups to process PREPARE messages out
+of order in Step 3. However there is no great benefit in doing things this way,
+and it complicates the view change protocol. Therefore backups process PREPARE
+messages in op-number order.
+
+The protocol does not require any writing to disk. For example, replicas do not
+need to write the log to disk when they add the operation to the log.
+
+The protocol as described above has backups executing operations quickly:
+information about commits propagates rapidly, and backups execute operations as
+soon as they can. A somewhat lazier approach could be used, but it is important
+that backups not lag very far behind. The reason is that when there is a view
+change, the replica that becomes the new primary will be unable to execute new
+client requests until it is up to date. By executing operations speedily, we
+ensure that when a replica takes over as primary it is able to respond to new
+client requests with low delay.
+
+View Changes
+
+If a timeout expires without a communication from the primary, the replicas
+carry out a view change to switch to a new primary. View changes are used to
+mask failures of the primary.
+
+Every completed operation involves an up-call to the service code on each
+replica. The result of the up-call on the primary (which should be identical to
+the result on the backups) is returned to the client. The result of one of
+these up-calls must survive a view-change in the order that it was made at the
+time of execution. This is called the correctness condition for view changes.
+
+During failure, this up-call would have been performed at the old primary
+first, and therefore the replicas carrying out the view change may not know
+whether the up-call occurred. However, up-calls occur only for committed
+operations. This means that the old primary must have received at least f
+PREPAREOK messages from other replicas, and this in turn implies that the
+operation is recorded in the logs of at least f + 1 replicas (the old primary
+and the f backups that sent the PREPAREOK messages).
+
+Therefore the view change protocol obtains information from the logs of at
+least f + 1 replicas. This is sufficient to ensure that all committed
+operations will be known, since each must be recorded in at least one of these
+logs; here we are relying on the quorum intersection property. Operations that
+had not committed might also survive, but this is not a problem: it is
+beneficial to have as many operations survive as possible.
+
+However, it’s impossible to guarantee that every client request that was
+preparing when the view change occurred makes it into the new view. For
+example, operation 25 might have been preparing when the view change happened,
+but none of the replicas that knew about it participated in the view change
+protocol and as a result the new primary knows nothing about operation 25. In
+this case, the new primary might assign this number to a different operation.
+
+If two operations are assigned the same op-number, how can we ensure that the
+right one is executed at that point in the order? The solution to this dilemma
+is to use the view-number: two operations can be assigned the same number only
+when there has been a view change and in this case the one assigned a number in
+the later view prevails.
+
+The view change protocol works as follows. Again the presentation ignores minor
+details having to do with filtering of duplicate messages and with re-sending
+of messages that appear to have been lost.
+
+1. A replica i that notices the need for a view change advances its
+view-number, sets its status to viewchange, and sends a <STARTVIEWCHANGE v, i>
+message to all the other replicas, where v identifies the new view. A replica
+notices the need for a view change either based on its own timer, or because it
+receives a STARTVIEWCHANGE or DOVIEWCHANGE message for a view with a larger
+number than its own view-number.
+
+* STARTVIEWCHANGE operation
+* v - the new view
+* i - the index of the replica
+
+**TODO Remove i, since it will be derived from the underlying key-exchange
+or unix domain peer authentication.
+
+2. When replica i receives STARTVIEWCHANGE messages for its view-number from f
+other replicas, it sends a <DOVIEWCHANGE v, l, v’, n, k, i> message to the node
+that will be the primary in the new view.  Here v is its view-number, l is its
+log, v 0 is the view number of the latest view in which its status was normal,
+n is the op-number, and k is the commitnumber.
+
+* STARTVIEWCHANGE operation
+* v - view-number
+* l - log
+* v` - the view number of the latest view in which its status was normal
+* n - op-number
+* k - commit-number
+
+3. When the new primary receives f + 1 DOVIEWCHANGE messages from different
+replicas (including itself), it sets its view-number to that in the messages
+and selects as the new log the one contained in the message with the largest
+v`; if several messages have the same v` it selects the one among them with
+the largest n. It sets its op-number to that of the topmost entry in the new
+log, sets its commit-number to the largest such number it received in the
+DOVIEWCHANGE messages, changes its status to normal, and informs the other
+replicas of the completion of the view change by sending <STARTVIEW v, l, n, k>
+messages to the other replicas, where l is the new log, n is the op-number, and
+k is the commit-number.
+
+* STARTVIEW operation
+* v - view-number
+* l - the new log
+* n - op-number
+* k - commit-number
+
+4. The new primary starts accepting client requests. It also executes (in
+order) any committed operations that it hadn’t executed previously, updates its
+client table, and sends the replies to the clients.
+
+5. When other replicas receive the STARTVIEW message, they replace their log
+with the one in the message, set their op-number to that of the latest entry in
+the log, set their view-number to the view number in the message, change their
+status to normal, and update the information in their client-table. If there
+are non-committed operations in the log, they send a <PREPAREOK v, n, i>
+message to the primary; here n is the op-number. Then they execute all
+operations known to be committed that they haven’t executed previously, advance
+their commit-number, and update the information in their client-table.
+
+In this protocol we solve the problem of more than one request being assigned
+the same op-number by taking the log for the next view from latest previous
+active view and ignoring logs from earlier view.
+
+A view change may not succeed, e.g., because the new primary fails. In this
+case the replicas will start a further view change, with yet another primary.
+
+The protocol as described is expensive because the log is big, and therefore
+messages can be large. The approach we use to reduce the expense of view
+changes is with checkpoints, discussed later.
+
+Recovery
+
+This section describes a recovery protocol that doesn’t require disk I/O during
+either normal processing or during a view change.
+
+When a node comes back up after a crash it sets its status to recovering and
+carries out the recovery protocol.  While a replica’s status is recovering it
+does not participate in either the request processing protocol or the view
+change protocol. To carry out the recovery protocol, the node needs to know the
+configuration. It can learn this by waiting to receive messages from other
+group members and then fetching the configuration from one of them;
+alternatively this information could be stored on disk.
+
+The recovery protocol is as follows:
+
+1. The recovering replica, i, sends a <RECOVERY i, x> message to all other
+replicas, where x is a nonce.
+
+* RECOVERY operation
+* i - the index of the replica
+* x - a nonce
+
+**NOTE: Removed i and derive it's value
+
+2. A replica j replies to a RECOVERY message only when its status is normal. In
+this case the replica sends a <RECOVERYRESPONSE v, x, l, n, k, j> message to
+the recovering replica, where v is its viewnumber and x is the nonce in the
+RECOVERY message. If j is the primary of its view, l is its log, n is its
+op-number, and k is the commit-number; otherwise these values are nil.
+
+* RECOVERYRESPONSE operation
+* v - the replica's view-number
+* x - the nonce sent in the RECOVERY operation
+* l - the log if this replica is the primary, otherwise nil
+* n - op-number  if this is the primary, otherwise nil
+* k - the commit-number if this is the primary, otherwise nil
+* j - this replica's index if it is the primary,otherwise nil
+
+3. The recovering replica waits to receive at least f + 1 RECOVERYRESPONSE
+messages from different replicas, all containing the nonce it sent in its
+RECOVERY message, including one from the primary of the latest view it learns
+of in these messages.  Then it updates its state using the information from the
+primary, changes its status to normal, and the recovery protocol is complete.
+
+If the group is doing a view change at the time of recovery, and the recovering
+replica, i, would be the primary of the new view, that view change cannot
+complete, since i will not respond to the DOVIEWCHANGE messages. This will
+cause the group to do a further view change, and i will be able to recover once
+this view change occurs.
+
+The protocol uses the nonce to ensure that the recovering replica accepts only
+RECOVERYRESPONSE messages that are for this recovery and not an earlier one. It
+can produce the nonce by reading its clock; this will produce a unique nonce
+assuming clocks always advance. Alternatively, it could maintain a counter on
+disk and advance this counter on each recovery.
+
+Non-deterministic Operations
+
+State machine replication requires that if replicas start in the same state and
+execute the same sequence of operations, they will end up with the same state.
+However, applications frequently have non-deterministic operations.  For
+example, file reads and writes are non-deterministic if they require setting
+“time-last-read” and “time-lastmodified”. If these values are obtained by
+having each replica read its clock independently, the states at the replicas
+will diverge.
+
+We can avoid divergence due to non-determinism by having the primary predict
+the value. It can do this by using local information, e.g., it reads its clock
+when a file operation arrives. Or it can carry out a pre-step in the protocol
+in which it requests values from the backups, waits for f responses, and then
+computes the predicted value as a deterministic function of their responses and
+its own. The predicted value is stored in the log along with the client request
+and propagated to the other replicas. When the operation is executed, the
+predicted value is used.
+
+Use of predicted values can require changes to the application code. There may
+need to be an up-call to obtain a predicted value from the application prior to
+running the protocol. Also, the application needs to use the predicted value
+when it executes the request.
+
+Client Recovery
+
+If a client crashes and recovers it must start up with a request-number larger
+than what it had before it failed.  It fetches its latest number from the
+replicas and adds 2 to this value to be sure the new request-number is big
+enough. Adding 2 ensures that its next request will have a unique number even
+in the odd case where the latest request it sent before it failed is still in
+transit (since that request will have as its request number the number the
+client learns plus 1).
+
+Checkpoints
+
+Every O operations the replication code makes an upcall to the application,
+requesting it to take a checkpoint; here O is a system parameter, on the order
+of 100 or 1000. To take a checkpoint the application must record a snapshot of
+its state on disk; additionally it records a checkpoint number, which is simply
+the op-number of the latest operation included in the checkpoint. When it
+executes operations after the checkpoint, it must not modify the snapshot, but
+this can be accomplished by using copy-on-write. These copied pages then become
+what needs to be saved to make the next snapshot and thus checkpoints need not
+be very expensive.
+
+When a node recovers, it first obtains the application state from another
+replica. To make this efficient, the application maintains a Merkle tree over
+the pages in the snapshot. The recovering node uses the Merkle tree to
+determine which pages to fetch; it only needs to fetch those that differ from
+their counterpart at the other replica. It’s possible that the node it is
+fetching from may take another checkpoint while the recovery is in process; in
+this case the recovering node re-walks the Merkle tree to pick up any
+additional changes.
+
+After the recovering node has all the application state as of the latest
+checkpoint at the node it is fetching from, it can run the recovery protocol.
+When it runs the protocol it informs the other nodes of the current value of
+its state by including the number of the checkpoint in its RECOVERY message.
+The primary then sends it the log from that point on.
+
+As mentioned checkpoints also speed up recovery since the recovering replica
+only needs to execute requests in the portion of the log not covered by the
+checkpoint. Furthermore checkpoints allow the system to garbage collect the
+log, since only the operations after the latest checkpoint are needed. Keeping
+a larger log than the minimum is a good idea however. For example, when a
+recovering node runs the recovery protocol, the primary might have just taken a
+checkpoint, and if it immediately discarded the log prefix reflected in that
+checkpoint, it would be unable to bring the recovering replica up to date
+without transferring application state. A large enough suffix of the log
+should be retained to avoid this problem.
+
+State Transfer
+
+State transfer is used by a node that has gotten behind (but hasn’t crashed) to
+bring itself up-to-date. There are two cases, depending on whether the slow
+node has learned that it is missing requests in its current view, or has heard
+about a later view. In the former case it only needs to learn about requests
+after its op-number. In the latter it needs to learn about requests after the
+latest committed request in its log, since requests after that might have been
+reordered in the view change, so in this case it sets its op-number to its
+commit-number and removes all entries after this from its log.
+
+To get the state the replica sends a <GETSTATE v, n', i> message to one of the
+other replicas, where v is its view-number and n' is its op-number.
+
+* GETSTATE operation
+* v - view-number
+* n' - the replica's op-number
+* i - the index of the replica
+
+**NOTE: Remove i
+
+A replica responds to a GETSTATE message only if its status is normal and it is
+currently in view v. In this case it sends a <NEWSTATE v, l, n, k> message,
+where v is its view-number, l is its log after n' , n is its op-number, and k
+is its commit-number.
+
+* NEWSTATE operation
+* v - view-number
+* l - the log on this replica, after n'
+* n - the replica's op-number
+* k - the replica's commit-number
+
+When replica i receives the NEWSTATE message, it appends the log in the message
+to its log and updates its state using the other information in the message.
+
+Because of garbage collecting the log, it’s possible for there to be a gap
+between the last operation known to the slow replica and what the responder
+knows. Should a gap occur, the slow replica first brings itself almost up to
+date using application state (like a recovering node would do) to get to a
+recent checkpoint, and then completes the job by obtaining the log forward from
+the point. In the process of getting the checkpoint, it moves to the view in
+which that checkpoint was taken.
+
+View Changes
+
+To complete a view change, the primary of the new view must obtain an
+up-to-date log, and we would like the protocol to be efficient: we want to have
+small messages, and we want to avoid adding steps to the protocol.
+
+The protocol described previously has a small number of steps, but big
+messages. We can make these messages smaller, but if we do, there is always a
+chance that more messages will be required.
+
+A reasonable way to get good behavior most of the time is for replicas to
+include a suffix of their log in their DOVIEWCHANGE messages. The amount sent
+can be small since the most likely case is that the new primary is up to date.
+Therefore sending the latest log entry, or perhaps the latest two entries,
+should be sufficient. Occasionally, this information won’t be enough; in this
+case the primary can ask for more information, and it might even need to first
+use application state to bring itself up to date.
+
+Optimizations
+
+To support causality, there must be a way for a client to inform a backup of
+its previous operation. One way to do this is for the client to maintain a
+last-request-number in its state. When the client does a write, the primary
+returns the op-number that it assigned to that request, and the client stores
+this in last-request-number. When the client sends a read request it includes
+this number, and the replica responds only if it has executed operations at
+least this far; in its response it includes its commitnumber, which the client
+stores in last-request-number.
+
+The “reads at backups” provides a form of load balancing; effectively it allows
+the backups to be used as caches that are up to date enough to satisfy the
+causality requirements. However unlike the first approach (“reads at the
+primary”) it does not provide external consistency. The first approach provides
+causality even in a setting where there are many storage repositories. In this
+setting, the second approach requires a different way of capturing causality,
+e.g., with vector timestamps [12] or Lamport clocks [4].

@@ -1,3 +1,5 @@
+https://www.usenix.org/conference/fast18/presentation/alagappan
+
 A single node acts as the leader; all data updates flow only through the leader.
 
 For any given epoch, only one leader is guaranteed to exist.
