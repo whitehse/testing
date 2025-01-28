@@ -635,7 +635,147 @@ the VR state.
 
 * RECONFIGURATION operation
 * e - epoch-number
-* c - 
+* c - The client making the request
+* s - The client's request number
+* new-config
+
+**NOTE: Remove c
 
 The procesing of the request happens as follows:
+
+1. The primary adds the request to its log, sends a PREPARE message to the
+backups, and stops accepting client requests.
+
+2. The backups handle the PREPARE in the usual way: they add the request to
+their log, but only when they are up to date. Then they send PREPAREOK
+responses to the primary.
+
+3. When the primary receives f of these responses from different replicas, it
+increments its epochnumber, sends COMMIT messages to the other old replicas,
+and sends <STARTEPOCH e, n, old-config, new-config> messages to replicas that
+are being added to the system, i.e., those that are members of the new group
+but not of the old group. Here e is the new epoch-number and n is the
+op-number.  Then it executes all client requests ordered before the
+RECONFIGURATION request that it hadn’t executed previously and sets its status
+to transitioning.
+
+* STARTEPOCH operation
+* e - The new epoch-number
+* n - The op-number
+* old-config
+* new-config
+
+Processing in the New Group
+
+Replicas that are members of the replica group for the
+new epoch handle reconfiguration as follows:
+
+1. When a replica learns of the new epoch (e.g., because it receives a
+STARTEPOCH or COMMIT message), it initializes its state to record the old and
+new configurations, the new epoch-number, and the opnumber, sets its
+view-number to 0, and sets its status to transitioning.
+
+2. If the replica is missing requests from its log, it brings its state up to
+date by sending state transfer messages to the old replicas and also to other
+new replicas. This allows it to get a complete state up to the op-number, and
+thus learn of all client requests up to the reconfiguration request.
+
+3. Once a replica in the new group is up to date with respect to the start of
+the epoch, it sets its status to normal and starts to carry out normal
+processing; it executes any requests in the log that it hasn’t already executed
+and, if it is the primary of the new group, it starts accepting new requests.
+Additionally, it sends <EPOCHSTARTED e, i> messages to the replicas that are
+being replaced.
+
+* EPOCHSTARTED operation
+* e - The new epoch-number
+* i - index of this replica
+
+**NOTE: remove i
+
+Replicas in the new group select the primary in the usual way, by using a
+deterministic function of the configuration for the new epoch and the current
+view number.
+
+Replicas in the new group might receive (duplicate) STARTEPOCH messages after
+they have completed state transfer. In this case they send an EPOCHSTARTED
+response to the sender.
+
+Processing at Replicas being Replaced
+
+1. When a replica being replaced learns of the new epoch (e.g., by receiving a
+COMMIT message for the reconfiguration request), it changes its epochnumber to
+that of the new epoch and sets its status to transitioning. If the replica
+doesn’t yet have the reconfiguration request in its log it obtains it by
+performing state transfer from other old replicas. Then it stores the current
+configuration in oldconfiguration and stores the new configuration in
+configuration.
+
+2. Replicas being replaced respond to state transfer requests from replicas in
+the new group until they receive f' + 1 EPOCHSTARTED messages from the new
+replicas, where f' is the threshold of the new group. At this point the
+replica being replaced shuts down.
+
+3. If a replica being replaced doesn’t receive the EPOCHSTARTED messages in a
+timely way, it sends STARTEPOCH messages to the new replicas (or to the subset
+of those replicas it hasn’t already heard from). New replicas respond to these
+messages either by moving to the epoch, or if they are already active in the
+next epoch, they send the EPOCHSTARTED message to the old replica.
+
+Other Protocol Changes
+
+To support reconfigurations, we need to modify the view change and recovery
+protocols so that they work while a reconfiguration is underway.
+
+The most important change is that a replica will not accept messages for an
+epoch earlier than what it knows.  Thus a replica will not accept a normal case
+or view change message that contains an old epoch-number; instead it informs
+the sender about the new epoch.
+
+Additionally, in the view change protocol the new primary needs to recognize
+that a reconfiguration is in process, so that it stops accepting new client
+requests. To handle this case the new primary checks the topmost request in the
+log; if it is a RECONFIGURATION request, it won’t accept any additional client
+requests. Furthermore, if the request is committed, it sends STARTEPOCH
+messages to the new replicas.
+
+The recovery protocol also needs to change. An old replica that is attempting
+to recover while a reconfiguration is underway may be informed about the next
+epoch.  If the replica isn’t a member of the new replica group it shuts down;
+otherwise, it continues with recovery by communicating with replicas in the new
+group. (Here we are assuming that new replicas are warm when they start up as
+discussed in Section 7.5.)
+
+In both the view change and recovery protocols, RECONFIGURATION requests that
+are in the log, but not in the topmost entry, are ignored, because in this case
+the reconfiguration has already happened.
+
+Locating the Group
+
+Since the group can move, a new client needs a way to find the current
+configuration. This requires an out-ofband mechanism, e.g., the current
+configuration can be obtained by communicating with a web site run by the
+administrator.
+
+Old clients can also use this mechanism to find the new group. However, to make
+it easy for current clients to find the group, old replicas that receive a
+client request with an old epoch number inform the client about the
+reconfiguration by sending it a <NEWEPOCH e, v, newconfig> message.
+
+Correctness of View Changes
+
+The correctness condition for view changes is that every committed operation
+survives into all subsequent views in the same position in the serial order.k
+
+Correctness of the Recovery Protocol
+
+The recovery protocol is correct because it guarantees that when a recovering
+replica changes its status to normal it does so in a state at least as recent
+as what it knew when it failed.
+
+Correctness of Reconfiguration
+
+Reconfiguration is correct because it preserves all committed requests in the
+order selected for them.  The primary of the old group stops accepting client
+requests as soon as it receives a RECONFIGURATION request.
 
