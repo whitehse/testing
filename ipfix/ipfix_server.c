@@ -255,68 +255,6 @@ void hex_dump(char *desc, void *addr, int len) {
 // Scope 11 Field Length = 00 01 = 1 byte 
 // Padding (to 4 byte boundary) = 00 00
 
-// Field 1 Type: 00 01 - octetDeltaCount
-// Field 1 Length: 00 08 - 8 bytes
-
-// Field 1 Type: 00 08 - 8, sourceIPv4Address
-// Field 1 Length: 00 04 - 4 bytes
-// Field 2 Type: 00 0c - 12, destinationIPv4Address
-// Field 2 Length: 00 04 - 4 bytes
-// Field 3 Type: 00 05 - 5, ipClassOfService
-// Field 3 Length: 00 01 - 1 byte
-// Field 4 Type: 00 04 - 4, protocolIdentifier
-// Field 4 Length: 00 01 - 1 byte
-// Field 5 Type: 00 07 - 7, sourceTransportPort
-// Field 5 Length: 00 02, 2 bytes
-// Field 6 Type: 00 0b - destinationTransportPort
-// Field 6 Length: 00 02 - 2 bytes
-// Field 7 Type: 00 20, icmpTypeCodeIPv4
-// Field 7 Length: 00 02 - 2 bytes
-// Field 8 Type: 00 0a - ingressInterface
-// Field 8 Length: 00 04 - 4 bytes
-// Field 9 Type: 00 3a - vlanId
-// Field 9 Length: 00 02 - 2 bytes
-// Field 10 Type: 00 09 - sourceIPv4PrefixLength
-// Field 10 Length: 00 01 - 1 byte
-// Field 11 Type: 00 0d - destination IPv4PrefixLength
-// Field 11 Length: 00 01 - 1 byte
-// Field 12 Type: 00 10 - bgpSourceAsNumber
-// Field 12 Length: 00 04 - 4 bytes
-// Field 13 Type: 00 11 - bgpDestinationAsNumber
-// Field 13 Length: 00 04 - 4 bytes
-// Field 14 Type: 00 0f - ipnextHopIPv4Address
-// Field 14 Length: 00 04 - 4 bytes
-// Field 15 Type: 00 06 - tcpControlBits
-// Field 15 Length: 00 01 - 1 byte
-// Field 16 Type: 00 0e - egreeeInterface
-// Field 16 Length: 00 04 - 4 bytes
-// Field 17 Type: 00 34 - minimumTTL
-// Field 17 Length: 00 01 - 1 byte
-// Field 18 Type: 00 35 - maximumTTL
-// Field 18 Length: 00 01 - 1 byte
-// Field 19 Type: 00 88 - flowEndReason
-// Field 19 Length: 00 01 - 1 byte
-// Field 20 Type: 00 3c - ipVersion
-// Field 20 Length: 00 01 - 1 byte
-// Field 21 Type: 00 12 - bgpNextHopIPv4Address
-// Field 21 Length: 00 04 - 4 bytes
-// Field 22 Type: 00 3d - flowDirection
-// Field 22 Length: 00 01 - 1 byte
-// Field 23 Type: 00 f3 - dog1qVlanId
-// Field 23 Length: 00 02 - 2 bytes
-// Field 24 Type: 00 f5 - dot1qCustomerVlanId
-// Field 24 Length: 00 02 - 2 bytes
-// Field 25 Type: 00 36 - fragmentationIdentification
-// Field 25 Length: 00 04 - 4 bytes
-// Field 26 Type: 00 01 - octetDeltaCount
-// Field 26 Length: 00 08 - 8 bytes
-// Field 27 Type: 00 02 - packetDeltaCount
-// Field 27 Length: 00 08 - 8 bytes
-// Field 28 Type: 00 98 - flowStartMilliseconds
-// Field 28 Length: 00 08 - 8 bytes
-// Field 29 Type: 00 99 - flowEndMilliseconds
-// Field 29 Length: 00 08 - 8 bytes
-//
 //  0000  00 0a 01 7c 67 99 27 a7 00 09 4d 7b 00 08 00 00  ...|g.'...M{....
 //  0010  01 00 01 6c 4a 7d 03 29 ae 80 81 66 00 06 01 bb  ...lJ}.)...f....
 //  0020  d5 dc 00 00 00 00 02 5c 00 b5 14 1b 00 00 3b 41  .......\......;A
@@ -349,6 +287,41 @@ void hex_dump(char *desc, void *addr, int len) {
 // observation domain id = 00 08 00 00 - 524288
 // Data Set = 01 00 - 256 - Data Set
 // Data Set Length = 01 6c - 364 bytes
+
+// Record 1
+  // Field 1 Value: 4a 7d 03 29 - SourceIPv4Address, 74.125.3.41
+  // Field 2 Value: ae 80 81 66 - DestinationIPv4Address, 174.128.129.102
+  // Field 3 Value: 00 - ipClassOfService, 0
+  // Field 4 Type: 06 - protocolIdentifier, TCP
+  // Field 5 Type: 01 bb - sourceTransportPort, 443
+  // Field 6 Type: d5 dc - destinationTransportPort, 54748
+  // Field 7 Type: 00 00 - icmpTypeCodeIPv4, 0, ICMP Reply (?)
+  // Field 8 Type: 00 00 02 5c - ingressInterface, 604
+  // Field 9 Type: 00 b5 - vlanId, 181
+  // Field 10 Type: 14 - sourceIPv4PrefixLength, 20
+  // Field 11 Type: 1b - destination IPv4PrefixLength, 27
+  // Field 12 Type: 00 00 3b 41 - bgpSourceAsNumber, 15169
+  // Field 13 Type: 00 06 10 c0 - bgpDestinationAsNumber, 397504
+  // Field 14 Type: ae 80 81 be - ipnextHopIPv4Address, 174.128.129.190
+  // Field 15 Type: 10 - tcpControlBits, 16
+  // Field 16 Type: 00 00 02 67 - egressInterface, 615
+  // Field 17 Type: 7A - minimumTTL, 122
+  // Field 18 Type: 7A - maximumTTL, 122
+  // Field 19 Type: 02 - flowEndReason, 2, active timeout
+  // Field 20 Type: 04 - ipVersion, 4 (IPv4, taken from IP version field in the packet header)
+  // Field 21 Type: ae 80 81 01 - bgpNextHopIPv4Address, 174.128.129.1
+  // Field 22 Type: ff - flowDirection, Invalid, must be 0x00 or 0x01 per the spec
+  // Field 23 Type: 00 00 - dog1qVlanId, 0
+  // Field 24 Type: 00 00 - dot1qCustomerVlanId, 0
+  // Field 25 Type: 00 00 00 00 - fragmentationIdentification, 0
+  // Field 26 Type: 00 00 00 00 00 00 21 f0 - octetDeltaCount, 8688
+  // Field 27 Type: 00 00 00 00 00 00 00 06 - packetDeltaCount, 6
+  // Field 28 Type: 00 00 01 94 ae 41 f7 00 - flowStartMilliseconds - Tue Jan 28 2025 12:52:26 GMT-0600 (Central Standard Time) and 240 milliseconds
+  // Field 29 Type: 00 00 01 94 ae 42 aa 00 - flowEndMilliseconds - Tue Jan 28 2025 12:53:12 GMT-0600 (Central Standard Time) and 64 milliseconds
+// Record 2
+  // Field 1 Value: b8 1c 29 05 - SourceIPv4Address, 184.28.41.5
+  // Field 2 Value: ae 80 9c 14 - DestinationIPv4Address, 174.128.156.20
+  // ...
 
 
 void echo_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
