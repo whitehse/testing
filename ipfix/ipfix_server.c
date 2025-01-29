@@ -230,7 +230,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // Data Set Length = 00 38 - 56
 // Template ID = 02 00 - 512
 // Field Count = 00 0b - 11
-// Scope Field Count = 00 01 - 1
+// Scope Field Count = 00 01 - 1 (must not be zero. What happens when its greater than one)
 // Scope 1 Information Element id = 00 90 - 144, exportingProcessId
 // Scope 1 Field Length = 00 04 - 4 bytes
 // Scope 2 Information Element id = 00 29 = exportedOctetTotalCount
@@ -248,7 +248,12 @@ void hex_dump(char *desc, void *addr, int len) {
 // Scope 8 Information Element id = 00 24 - flowActiveTimeout
 // Scope 8 Field Length = 00 02 - two bytes
 // Scope 9 Information Element id = 00 25 - flowIdleTimeout
-// Scope 9 Field Length = 
+// Scope 9 Field Length = 00 02 - 2 bytes
+// Scope 10 Information Element id = 00 d6 - exportProtocolVersion
+// Scope 10 Field Length = 00 01 = 1 byte
+// Scope 11 Information Element id = 00 d7 - exportTransportProtocol
+// Scope 11 Field Length = 00 01 = 1 byte 
+// Padding (to 4 byte boundary) = 00 00
 
 // Field 1 Type: 00 01 - octetDeltaCount
 // Field 1 Length: 00 08 - 8 bytes
