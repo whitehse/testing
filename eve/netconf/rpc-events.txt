@@ -1,0 +1,5 @@
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+<create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+<stream>exa-events</stream>
+</create-subscription>
+</rpc>

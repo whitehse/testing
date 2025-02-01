@@ -1,0 +1,61 @@
+connect --host 192.168.35.15 --port 830 --ssh --login sysadmin
+outputformat json
+#subscribe --filter-xpath /
+subscribe --stream exa-events
+
+get --filter-xpath /status/system
+
+  <status xmlns="http://www.calix.com/ns/exa/base">
+    <system>
+      <ont xmlns="http://www.calix.com/ns/exa/gpon-interface-base">
+        <ont-id>281</ont-id>
+        <status>
+          <vendor>CXNK</vendor>
+
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1"><get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"><identifier>ietf-inet-types</identifier><version>2013-07-15</version><format xmlns:ncm="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">ncm:yang</format></get-schema></rpc>             
+
+ietf-inet-types
+version
+format
+ncm:yang
+
+
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1"><get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"><identifier>ietf-inet-types</identifier><version>2013-07-15</version><format xmlns:ncm="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">ncm:yang</format></get-schema></rpc>
+
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1"><get-schema xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"><identifier>ietf-inet-types</identifier><version>2013-07-15</version><format xmlns:ncm="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">ncm:yang</format></get-schema></rpc>             
+
+get-schema --model ietf-inet-types --version 2013-07-15 --format yang --out /tmp/ietf-inet-types.yang
+
+<?xml version="1.0" encoding="UTF-8"?>
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"><eventTime>2022-11-22T16:01:37-06:00</eventTime>
+<ont-us-sdber xmlns='http://www.calix.com/ns/exa/gpon-interface-base'>
+  <description>ONT Upstream SDBER rate exceeded</description>
+  <probable-cause>Upstream Signal Degrade Bit Error Rate (SDBER) exceeded.</probable-cause>
+  <details>SerialNo=83DF8B</details>
+  <device-sequence-number>48548</device-sequence-number>
+  <instance-id>5.48544</instance-id>
+  <id>5033</id>
+  <name>ont-us-sdber</name>
+  <perceived-severity>CLEAR</perceived-severity>
+  <prev-severity>MINOR</prev-severity>
+  <alarm>true</alarm>
+  <service-impacting>true</service-impacting>
+  <service-affecting>false</service-affecting>
+  <alarm-type>QOS</alarm-type>
+  <category>PON</category>
+  <hw-failure-event>false</hw-failure-event>
+  <repair-action>No action;</repair-action>
+  <address>/config/system/ont[ont-id='4125']</address>
+  <port>gp1</port>
+  <ont-id>4125</ont-id>
+  <phys-pon-shelf>1</phys-pon-shelf>
+  <phys-pon-slot>1</phys-pon-slot>
+  <phys-pon-port>gp1</phys-pon-port>
+  <serial-number>83DF8B</serial-number>
+  <equipment-type>ONT</equipment-type>
+  <vendor-id>CXNK</vendor-id>
+</ont-us-sdber>
+</notification>
+
