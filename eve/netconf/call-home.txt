@@ -1,0 +1,1 @@
+<version>1</version><identity><mac>00:02:5d:d9:21:47</mac><serial-number>071904926728</serial-number><model-name>E7 System</model-name><source-ip>192.168.35.13</source-ip></identity>
