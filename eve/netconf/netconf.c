@@ -163,12 +163,14 @@ int cbors = 0;
 
 static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   time_t t = time(NULL);
-  ssh_t *ssh = w->data;
+  struct ssh *ssh = w->data;
   struct assh_event_s event;
   assh_status_t err = ASSH_OK;
   ssize_t r;
   int looped = 0;
+  puts("Calling assh_event_get(ssh->session...");
   int result = assh_event_get(ssh->session, &event, t);
+  puts("Called assh_event_get(ssh->session...");
   //printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
   if (event.id < 0 || event.id > 100) {
     sleep(60);
@@ -465,7 +467,7 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
 //    perror("calling fcntl");
 //  }
 
-  struct assh_context_s *context;//[number_of_hosts];
+  struct assh_context_s *context;
   context = malloc(sizeof(struct assh_context_s));
 
   if (assh_context_create(&context, ASSH_CLIENT,
@@ -485,15 +487,15 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
 
   struct asshh_client_inter_session_s *inter;
   inter = malloc(sizeof(struct asshh_client_inter_session_s));
-  // "pty" doesn't mean anything consequential. It just needs
+  // "pty" doesn't mean anything special. It just needs
   // to be a non-NULL value to force an interactive session
-  asshh_client_init_inter_session(inter, "", "pty");
+  asshh_client_init_inter_session(inter, /*command to run*/"", "pty");
 
   struct ssh *ssh;
   ssh = malloc(sizeof(struct ssh));
   ssh->session = session;
   ssh->inter = inter;
-  //ssh->hostname = hosts;
+  ssh->hostname = '192.168.35.13';
   ssh->user = 'sysadmin';
   ssh->auth_methods = &auth_methods;
 
@@ -506,14 +508,15 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ev_io_init (socket_watcher[1], socket_cb, client_sd, EV_WRITE);
   ssh->socket_watcher_writer = socket_watcher[1];
 
-  socket_watcher[0]->data = &ssh;
-  socket_watcher[1]->data = &ssh;
-  ev_io_start (loop, &ssh->socket_watcher_reader);
+  socket_watcher[0]->data = ssh;
+  socket_watcher[1]->data = ssh;
+  ev_io_start (loop, ssh->socket_watcher_reader);
   ssh->reader_running = 1;
-  ev_io_start (loop, &ssh->socket_watcher_writer);
+  ev_io_start (loop, ssh->socket_watcher_writer);
   ssh->writer_running = 1;
 
   // Initialize and start watcher to read client requests
+  w_client->data = ssh;
   ev_io_init(w_client, socket_cb, client_sd, EV_READ);
   ev_io_start(loop, w_client);
 }
