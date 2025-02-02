@@ -159,10 +159,6 @@ void hexDump(char *desc, void *addr, int len)
 char buff[BUFF_SZ + 1];
 struct io_uring ring;
 
-static void timeout_cb (EV_P_ ev_timer *w, int revents) {
-  fprintf (stderr, "timeout\n");
-}
-
 int cbors = 0;
 
 static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
@@ -290,14 +286,14 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         //printf("Client User called, ", r);
         struct assh_event_userauth_client_user_s *eu = &event.userauth_client.user;
         //assh_buffer_strset(&eu->username, ssh->user);
-        assh_buffer_strset(&eu->username, "support");
+        assh_buffer_strset(&eu->username, "sysadmin");
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_METHODS:
         //printf("Client User methods called, ", r);
         struct assh_event_userauth_client_methods_s *ev = &event.userauth_client.methods;
-        assh_buffer_strset(&ev->password, "FiberFAST!!5upporT");
+        assh_buffer_strset(&ev->password, "sysadmin");
         ev->select = ASSH_USERAUTH_METHOD_PASSWORD;
         //ev->select = ASSH_USERAUTH_METHOD_PUBKEY;
         assh_event_done(ssh->session, &event, ASSH_OK);
@@ -417,6 +413,115 @@ out:
   return;
 }
 
+void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
+  struct sockaddr_in client_addr;
+  socklen_t client_len = sizeof(client_addr);
+  int client_sd;
+  struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+
+  if(EV_ERROR & revents) {
+    perror("got invalid event");
+    return;
+  }
+
+  // Accept client request
+  client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
+
+  if (client_sd < 0) {
+    perror("accept error");
+    return;
+  }
+
+  //total_clients ++; // Increment total_clients count
+  printf("Successfully received connection from callhome server.\n");
+  //printf("%d client(s) connected.\n", total_clients);
+
+
+
+
+//  sock[i] = -1;
+//  if (!getaddrinfo(hosts[i], port, &hints, &(servinfo[i]))) {
+//    for (si[i] = servinfo[i]; si[i] != NULL; si[i] = si[i]->ai_next) {
+//      sock[i] = socket(si[i]->ai_family, si[i]->ai_socktype, si[i]->ai_protocol);
+//      if (sock[i] < 0)
+//        continue;
+//
+//      if (connect(sock[i], si[i]->ai_addr, si[i]->ai_addrlen)) {
+//        close(sock[i]);
+//        sock[i] = -1;
+//        continue;
+//      }
+//
+//      break;
+//    }
+//    freeaddrinfo(servinfo[i]);
+//  }
+//  if (sock[i] < 0)
+//    ERROR("Unable to connect: %s\n", strerror(errno));
+//
+//  int status = fcntl(sock[i], F_SETFL, fcntl(sock[i], F_GETFL, 0) | O_NONBLOCK);
+//
+//  if (status == -1) {
+//    perror("calling fcntl");
+//  }
+
+  struct assh_context_s *context;//[number_of_hosts];
+  context = malloc(sizeof(struct assh_context_s));
+
+  if (assh_context_create(&context, ASSH_CLIENT,
+                          NULL, NULL, NULL, NULL) ||
+      assh_service_register_default(context) ||
+      assh_algo_register_default(context, ASSH_SAFETY_WEAK))
+    ERROR("Unable to create an assh context.\n");
+
+  struct assh_session_s *session;
+  session = malloc(sizeof(struct assh_session_s));
+
+  if (assh_session_create(context, &session))
+    ERROR("Unable to create an assh session.\n");
+
+  enum assh_userauth_methods_e auth_methods =
+    ASSH_USERAUTH_METHOD_PUBKEY;
+
+  struct asshh_client_inter_session_s *inter;
+  inter = malloc(sizeof(struct asshh_client_inter_session_s));
+  // "pty" doesn't mean anything consequential. It just needs
+  // to be a non-NULL value to force an interactive session
+  asshh_client_init_inter_session(inter, "", "pty");
+
+  struct ssh *ssh;
+  ssh = malloc(sizeof(struct ssh));
+  ssh->session = session;
+  ssh->inter = inter;
+  //ssh->hostname = hosts;
+  ssh->user = 'sysadmin';
+  ssh->auth_methods = &auth_methods;
+
+  ev_io *socket_watcher[2];
+  socket_watcher[0] = malloc(sizeof(ev_io));
+  socket_watcher[1] = malloc(sizeof(ev_io));
+
+  ev_io_init (socket_watcher[0], socket_cb, client_sd, EV_READ);
+  ssh->socket_watcher_reader = socket_watcher[0];
+  ev_io_init (socket_watcher[1], socket_cb, client_sd, EV_WRITE);
+  ssh->socket_watcher_writer = socket_watcher[1];
+
+  socket_watcher[0]->data = &ssh;
+  socket_watcher[1]->data = &ssh;
+  ev_io_start (loop, &ssh->socket_watcher_reader);
+  ssh->reader_running = 1;
+  ev_io_start (loop, &ssh->socket_watcher_writer);
+  ssh->writer_running = 1;
+
+  // Initialize and start watcher to read client requests
+  ev_io_init(w_client, socket_cb, client_sd, EV_READ);
+  ev_io_start(loop, w_client);
+}
+
+static void timeout_cb (EV_P_ ev_timer *w, int revents) {
+  fprintf (stderr, "timeout\n");
+}
+
 int main(int argc, char **argv) {
   if (assh_deps_init())
     ERROR("initialization error\n");
@@ -428,11 +533,11 @@ int main(int argc, char **argv) {
   if (user == NULL)
     ERROR("Unspecified user name\n");
 
-  int number_of_hosts = 1;
-  char *hosts[] = {"127.0.0.1"};
+  //int number_of_hosts = 1;
+  //char *hosts[] = {"127.0.0.1"};
 
-  const char *command = argv[2];
-  const char *port = "30007";
+  //const char *command = argv[2];
+  //const char *port = "30007";
   //const char *port = "830";
 
   struct ev_loop *loop = EV_DEFAULT;
@@ -442,108 +547,46 @@ int main(int argc, char **argv) {
     .ai_socktype = SOCK_STREAM,
   };
 
-  ssh_t ssh[number_of_hosts];
-  int sock[number_of_hosts];
-  struct addrinfo *servinfo[number_of_hosts];
-  struct addrinfo *si[number_of_hosts];
-  struct asshh_client_inter_session_s *inter[number_of_hosts];
+  //int sock[number_of_hosts];
+  //struct addrinfo *servinfo[number_of_hosts];
+  //struct addrinfo *si[number_of_hosts];
 
   signal(SIGPIPE, SIG_IGN);
 
   //printf("Starting loop\n");
   int status;
 
-  for (int i=0; i<number_of_hosts; i++) {
-    //printf("Setting up socket\n");
-    sock[i] = -1;
-    if (!getaddrinfo(hosts[i], port, &hints, &(servinfo[i]))) {
-      for (si[i] = servinfo[i]; si[i] != NULL; si[i] = si[i]->ai_next) {
-        sock[i] = socket(si[i]->ai_family, si[i]->ai_socktype, si[i]->ai_protocol);
-        if (sock[i] < 0)
-          continue;
-
-        if (connect(sock[i], si[i]->ai_addr, si[i]->ai_addrlen)) {
-          close(sock[i]);
-          sock[i] = -1;
-          continue;
-        }
-
-        break;
-      }
-      freeaddrinfo(servinfo[i]);
-    }
-    if (sock[i] < 0)
-      ERROR("Unable to connect: %s\n", strerror(errno));
-
-    int status = fcntl(sock[i], F_SETFL, fcntl(sock[i], F_GETFL, 0) | O_NONBLOCK);
-
-    if (status == -1) {
-      perror("calling fcntl");
-    }
-
-    struct assh_context_s *context[number_of_hosts];
-    context[i] = malloc(sizeof(struct assh_context_s));
-
-    if (assh_context_create(&context[i], ASSH_CLIENT,
-                            NULL, NULL, NULL, NULL) ||
-        assh_service_register_default(context[i]) ||
-        assh_algo_register_default(context[i], ASSH_SAFETY_WEAK))
-      ERROR("Unable to create an assh context.\n");
-
-    //printf("Finished assh_context_create for %s\n", hosts[i]);
-
-    struct assh_session_s *session[number_of_hosts];
-    session[i] = malloc(sizeof(struct assh_session_s));
-
-    if (assh_session_create(context[i], &session[i]))
-      ERROR("Unable to create an assh session.\n");
-
-    //printf("Finished assh_session_create for %s\n", hosts[i]);
-
-    enum assh_userauth_methods_e auth_methods =
-      ASSH_USERAUTH_METHOD_PUBKEY;
-
-    inter[i] = malloc(sizeof(struct asshh_client_inter_session_s));
-    // "pty" doesn't mean anything consequential. It just needs
-    // to be a non-NULL value
-    asshh_client_init_inter_session(inter[i], command, "pty");
-    //asshh_client_init_inter_session(inter[i], command, NULL);
-    //inter[i]->state = ASSH_CLIENT_INTER_ST_PTY;
-    
-
-    //printf("Finished client_init_inter_session for %s\n", hosts[i]);
-
-    ssh[i].session = session[i];
-    ssh[i].inter = inter[i];
-    ssh[i].hostname = hosts[i];
-    ssh[i].user = user;
-    ssh[i].auth_methods = &auth_methods;
-
-    //printf("Finished setting ssh for %s\n", hosts[i]);
-
-    ev_io *socket_watcher[number_of_hosts*2];
-    socket_watcher[i*2] = malloc(sizeof(ev_io));
-    socket_watcher[i*2+1] = malloc(sizeof(ev_io));
-
-    ev_io_init (socket_watcher[i*2], socket_cb, sock[i], EV_READ);
-    ssh[i].socket_watcher_reader = socket_watcher[i*2];
-    ev_io_init (socket_watcher[i*2+1], socket_cb, sock[i], EV_WRITE);
-    ssh[i].socket_watcher_writer = socket_watcher[i*2+1];
-
-    socket_watcher[i*2]->data = &ssh[i];
-    socket_watcher[i*2+1]->data = &ssh[i];
-    ev_io_start (loop, ssh[i].socket_watcher_reader);
-    ssh[i].reader_running = 1;
-    ev_io_start (loop, ssh[i].socket_watcher_writer);
-    ssh[i].writer_running = 1;
+  int netconf_listener_fd;
+  struct sockaddr_in server, client;
+  int len;
+  int netconf_callhome_port = 4444;
+  netconf_listener_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (netconf_listener_fd < 0) {
+    perror("Cannot create socket");
+    exit(1);
   }
+  server.sin_family = AF_INET;
+  server.sin_addr.s_addr = INADDR_ANY;
+  server.sin_port = htons(netconf_callhome_port);
+  len = sizeof(server);
+  if (bind(netconf_listener_fd, (struct sockaddr *)&server, len) < 0) {
+    perror("Cannot bind sokcet");
+    exit(2);
+  }
+  if (listen(netconf_listener_fd, 100000) < 0) {
+    perror("Listen error");
+    exit(3);
+  }
+
+  struct ev_io w_accept;
+  ev_io_init(&w_accept, netconf_listener_cb, netconf_listener_fd, EV_READ);
+  ev_io_start(loop, &w_accept);
 
   //ev_timer timeout_watcher;
   //ev_timer_init (&timeout_watcher, timeout_cb, 0.5, 10.);
   //ev_timer_start (loop, &timeout_watcher);
   //printf("Set timer event\n");
 
-  //ev_run (g.loop, 0);
   ev_run (loop, 0);
 
   abort();
