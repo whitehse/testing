@@ -206,11 +206,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
   struct assh_event_transport_read_s *ter;
 
   while (result) {
-    //printf("Loop %d, ", looped);
+    //printf("Loop %d\n", looped);
     looped = looped + 1;
     switch (event.id) {
       case ASSH_EVENT_READ:
-        //printf("EVENT Read Called, ");
+        //printf("EVENT Read Called\n");
         ter = &event.transport.read;
         if (revents & EV_WRITE && ssh->writer_running) {
           // A write (availability) event was received from the socket, via libev,
@@ -243,11 +243,14 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
             ter->transferred = r;
             break;
         }
+        //printf("Calling event_read -> event_done\n");
         assh_event_done(ssh->session, &event, err);
+        //printf("Finished event_read -> event_done\n");
+        //printf("EVENT Read Finished\n");
         break;
 
       case ASSH_EVENT_WRITE:
-        //printf("EVENT Write Called, ");
+        //printf("EVENT Write Called\n");
         struct assh_event_transport_write_s *tew = &event.transport.write;
         if (revents & EV_READ && ssh->reader_running) {
           // A read event was received from the socket, via libev,
@@ -280,10 +283,11 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         }
         //printf("Wrote %d bytes, ", r);
         assh_event_done(ssh->session, &event, err);
+        //printf("EVENT Write Finished\n");
         break;
 
       case ASSH_EVENT_SESSION_ERROR:
-        fprintf(stderr, "SSH error: %s\n", assh_error_str(event.session.error.code));
+        //fprintf(stderr, "SSH error: %s\n", assh_error_str(event.session.error.code));
         // Example: SSH error: IO error
         /* TODO This may not be the right thing to do */
         //assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
@@ -294,21 +298,22 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
-        //printf("Host key lookup called, ", r);
+        //printf("Host key lookup called\n");
         struct assh_event_kex_hostkey_lookup_s *ek = &event.kex.hostkey_lookup;
         ek->accept = 1;
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_BANNER:
-        //printf("Client Banner called, ", r);
+        //printf("Client Banner called\n");
         struct assh_event_userauth_client_banner_s *eb = &event.userauth_client.banner;
-        assert(&event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
+        //assert(&event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
+        assert(event.id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_USER:
-        //printf("Client User called, ", r);
+        //printf("Client User called\n");
         struct assh_event_userauth_client_user_s *eu = &event.userauth_client.user;
         //assh_buffer_strset(&eu->username, ssh->user);
         assh_buffer_strset(&eu->username, "sysadmin");
@@ -316,7 +321,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_METHODS:
-        //printf("Client User methods called, ", r);
+        //printf("Client User methods called\n");
         struct assh_event_userauth_client_methods_s *ev = &event.userauth_client.methods;
         assh_buffer_strset(&ev->password, "sysadmin");
         ev->select = ASSH_USERAUTH_METHOD_PASSWORD;
@@ -325,35 +330,153 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
-        //printf("Client PWChange called, ", r);
+        //printf("Client PWChange called\n");
         assh_event_done(ssh->session, &event, ASSH_OK);
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
-        //printf("Client Keyboard called, ", r);
+        printf("Client Keyboard called\n");
         assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       case ASSH_EVENT_SERVICE_START:
-        //printf("Service Start called, ", r);
+        printf("Service Start called\n");
+        assh_bool_t conn = event.service.start.srv ==
+                           &assh_service_connection;
+  
+        assh_event_done(ssh->session, &event, ASSH_OK);
+  
+        if (conn) {
+          /* we can send channel related requests from this point */
+          assert(ssh->inter->state == ASSH_CLIENT_INTER_ST_INIT);
+  
+          if (asshh_inter_open_session(ssh->session, &ssh->inter->channel)) {
+            puts("asshh_inter_open_session failed");
+            goto err;
+          }
+    
+          ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_SESSION);
+        }
+        break;
       case ASSH_EVENT_CHANNEL_OPEN:
-        //printf("Channel Confirmation open, ", r);
+        printf("Event Channel open\n");
+        break;
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
-        //printf("Channel Confirmation called, ", r);
+        printf("Channel Confirmation called\n");
+        struct assh_event_channel_confirmation_s *ev_confirm = &event.connection.channel_confirmation;
+
+        if (ev_confirm->ch != ssh->inter->channel)
+          return;
+
+        assert(ssh->inter->state == ASSH_CLIENT_INTER_ST_SESSION);
+
+        assh_event_done(ssh->session, &event, ASSH_OK);
+
+        if (ssh->inter->term == NULL) {
+          puts("EVENT_CHANNEL_CONFIRMATION_ERR");
+          goto err;
+        }
+
+        ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_PTY);
+
+        //struct asshh_inter_pty_req_s i;
+        //asshh_inter_init_pty_req(&i, ssh->inter->term, ssh->inter->char_width, ssh->inter->char_height, 0, 0, NULL);
+        struct asshh_inter_subsystem_s i;
+        asshh_inter_init_subsystem(&i, "netconf");
+
+        //if (asshh_inter_send_pty_req(ssh->session, ssh->inter->channel, &ssh->inter->request, &i)) {
+        if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i)) {
+          puts("EVENT_CHANNEL_CONFIRMATION_ERR");
+          goto err;
+        }
+        break;
+
       case ASSH_EVENT_CHANNEL_FAILURE:
-        //printf("Channel Failure called, ", r);
+        printf("Channel Failure called\n");
+          struct assh_event_channel_failure_s *ev_channel_failure = &event.connection.channel_failure;
+
+        if (ev_channel_failure->ch != ssh->inter->channel)
+          return;
+
+        assert(ssh->inter->state == ASSH_CLIENT_INTER_ST_SESSION);
+
+        assh_event_done(ssh->session, &event, ASSH_OK);
+
+        goto err;
+
       case ASSH_EVENT_REQUEST_SUCCESS:
-        //printf("Request Success called, ", r);
+        printf("Request Success called\n");
+        struct assh_event_request_success_s *ev_request_success = &event.connection.request_success;
+
+        if (ev_request_success->ch != ssh->inter->channel ||
+          ev_request_success->rq != ssh->inter->request)
+          break;
+
+        assh_event_done(ssh->session, &event, ASSH_OK);
+
+        switch (ssh->inter->state)
+          {
+          case ASSH_CLIENT_INTER_ST_PTY:
+//          exec:
+//            if (ssh->inter->command)
+//             {
+//                struct asshh_inter_exec_s i;
+//                assh_buffer_strset(&i.command, ssh->inter->command);
+//                if (asshh_inter_send_exec(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
+//                  goto err;
+//                ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
+//              }
+//            else
+//              {
+//                if (asshh_inter_send_shell(ssh->session, ssh->inter->channel, &ssh->inter->request))
+//                  goto err;
+//                ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
+//              }
+
+            struct asshh_inter_subsystem_s i;
+            if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
+              goto err;
+            ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
+            break;
+
+          case ASSH_CLIENT_INTER_ST_EXEC:
+            ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_OPEN);
+            break;
+
+          default:
+            ASSH_UNREACHABLE();
+          }
+        break;
+
       case ASSH_EVENT_REQUEST_FAILURE:
-        //printf("Request Failure called, ", r);
+        printf("Request Failure called\n");
+        struct assh_event_request_failure_s *ev_request_failure = &event.connection.request_failure;
+
+        if (ev_request_failure->ch != ssh->inter->channel ||
+            ev_request_failure->rq != ssh->inter->request)
+          break;
+
+        assh_event_done(ssh->session, &event, ASSH_OK);
+
+        goto err;
+
       case ASSH_EVENT_CHANNEL_CLOSE:
-        //printf("Channel Close called, ", r);
-        asshh_client_event_inter_session(ssh->session, &event, ssh->inter);
+        printf("Channel Close called\n");
+        struct assh_event_channel_close_s *ev_channel_close = &event.connection.channel_close;
+
+        if (ev_channel_close->ch != ssh->inter->channel)
+          break;
+
+        ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_CLOSED);
+        assh_event_done(ssh->session, &event, ASSH_OK);
+        break;
+
+        //asshh_client_event_inter_session(ssh->session, &event, ssh->inter);
         if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED)
           assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         break;
 
       case ASSH_EVENT_CHANNEL_DATA:
         //printf("state = %d\n", ssh->inter->state);
-        //printf("Channel Data called, ", r);
+        //printf("Channel Data called\n");
         //printf("Read %d bytes\n", r);
         struct assh_event_channel_data_s *ec = &event.connection.channel_data;
         //struct cbor_load_result result;
@@ -386,6 +509,24 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     }
     result = assh_event_get(ssh->session, &event, t);
   }
+
+err:
+  switch (ssh->inter->state)
+    {
+    case ASSH_CLIENT_INTER_ST_INIT:
+    case ASSH_CLIENT_INTER_ST_SESSION:
+      ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_CLOSED);
+      break;
+    case ASSH_CLIENT_INTER_ST_PTY:
+    case ASSH_CLIENT_INTER_ST_EXEC:
+    case ASSH_CLIENT_INTER_ST_OPEN:
+      assh_channel_close(ssh->inter->channel);
+      ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_CLOSING);
+      break;
+    case ASSH_CLIENT_INTER_ST_CLOSING:
+    case ASSH_CLIENT_INTER_ST_CLOSED:
+      break;
+    }
 out:
   return;
 }
@@ -412,7 +553,6 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   printf("Successfully received connection from callhome server.\n");
 
   struct assh_context_s *context;
-  context = malloc(sizeof(struct assh_context_s));
 
   if (assh_context_create(&context, ASSH_CLIENT,
                           NULL, NULL, NULL, NULL) ||
@@ -421,7 +561,6 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
     ERROR("Unable to create an assh context.\n");
 
   struct assh_session_s *session;
-  session = malloc(sizeof(struct assh_session_s));
 
   if (assh_session_create(context, &session))
     ERROR("Unable to create an assh session.\n");
@@ -431,17 +570,19 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
 
   struct asshh_client_inter_session_s *inter;
   inter = malloc(sizeof(struct asshh_client_inter_session_s));
-  // "pty" doesn't mean anything special. It just needs
-  // to be a non-NULL value to force an interactive session
-  //asshh_client_init_inter_session(inter, /*command to run*/"show version", "pty");
-  asshh_client_init_inter_session(inter, /*command to run*/"show version", NULL);
+  asshh_client_init_inter_session(inter, /*command to run*/"show version", "vt100");
+  
+  //struct asshh_inter_subsystem_s *inter_subsystem;
+  //inter_subsystem = malloc(sizeof(struct asshh_inter_subsystem_s));
+  //asshh_inter_init_subsystem(inter_subsystem, "netconf");
 
   struct ssh *ssh;
   ssh = malloc(sizeof(struct ssh));
   ssh->session = session;
   ssh->inter = inter;
-  ssh->hostname = '192.168.35.13';
-  ssh->user = 'sysadmin';
+  //ssh->inter_subsystem = inter_subsystem;
+  //ssh->hostname = '192.168.35.13';
+  //ssh->user = 'sysadmin';
   ssh->auth_methods = &auth_methods;
   ssh->banner_seen = 0;
 
@@ -472,8 +613,8 @@ int main(int argc, char **argv) {
   if (assh_deps_init())
     ERROR("initialization error\n");
 
-  if (argc < 3)
-    ERROR("usage: ./rexec host 'command'\n");
+  //if (argc < 3)
+  //  ERROR("usage: ./rexec host 'command'\n");
 
   const char *user = getenv("USER");
   if (user == NULL)

@@ -13,6 +13,7 @@
 struct ssh {
     struct assh_session_s *session;
     struct asshh_client_inter_session_s *inter;
+    struct asshh_inter_subsystem_s *inter_subsystem;
     char *hostname;
     char *user;
     enum assh_userauth_methods_e *auth_methods;
