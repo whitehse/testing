@@ -20,6 +20,7 @@ struct ssh {
     int reader_running;
     ev_io *socket_watcher_writer;
     int writer_running;
+    int banner_seen;
 };
 typedef struct ssh ssh_t;
 

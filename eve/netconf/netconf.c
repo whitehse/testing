@@ -161,19 +161,41 @@ struct io_uring ring;
 
 int cbors = 0;
 
+int cbs = 0;
+
 static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
+  if (cbs == 0) {
+    puts("socket_cb called");
+    cbs = 1;
+  }
   time_t t = time(NULL);
   struct ssh *ssh = w->data;
   struct assh_event_s event;
-  assh_status_t err = ASSH_OK;
   ssize_t r;
   int looped = 0;
-  puts("Calling assh_event_get(ssh->session...");
+  //if ((revents & EV_WRITE) && ssh->banner_seen == 0) {
+  //  goto out;
+  //}
+
+  if ((revents & EV_READ) && ssh->banner_seen == 0) {
+    char *buffer[1024];
+    ssh->banner_seen = 1;
+    r = read(w->fd, buffer, 1024);
+    printf("%.*s", r, buffer);
+    puts("Sending ack");
+    r = write(w->fd, "<ack>ok</ack>", 13);
+    goto out;
+  }
+    
+  assh_status_t err = ASSH_OK;
+  //puts("Calling assh_event_get(ssh->session...");
   int result = assh_event_get(ssh->session, &event, t);
-  puts("Called assh_event_get(ssh->session...");
+  printf("event.id = %d\n", event.id);
+  //puts("Called assh_event_get(ssh->session...");
   //printf("socket_cb called, socket %d, socket events %d, assh event %d\n", w->fd, revents, event.id);
   if (event.id < 0 || event.id > 100) {
-    sleep(60);
+    puts("event.id is either less than zero or greater than 100");
+    sleep(5);
   }
   if (result == 0) {
     ev_io_stop (loop, ssh->socket_watcher_reader);
@@ -202,6 +224,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           goto out;
         }
         r = read(w->fd, ter->buf.data, ter->buf.size);
+        //hexDump("ssh receive data:", ter->buf.data, ter->buf.size);
         //printf("In READ case, ter->buf.size = %d\n", ter->buf.size);
         switch (r) {
           case -1:
@@ -333,61 +356,13 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         //printf("Channel Data called, ", r);
         //printf("Read %d bytes\n", r);
         struct assh_event_channel_data_s *ec = &event.connection.channel_data;
-        struct cbor_load_result result;
+        //struct cbor_load_result result;
 
         assh_status_t err = ASSH_OK;
 
-        //ssize_t r = write(1, ec->data.data, ec->data.size);
-        //printf("Buffer size is %d\n", ec->transferred);
-        cbors += 1;
-        printf("\n%d cbors received.\n", cbors);
         //ter = &event.transport.read;
-        cbor_item_t* item = cbor_load(ec->data.data, ec->data.size, &result);
+        //printf("\n%.*s\n", ec->data.size, ec->data.data);
         //free(buffer);
-
-        if (result.error.code != CBOR_ERR_NONE) {
-          printf(
-              "There was an error while reading the input near byte %zu (read %zu "
-              "bytes in total): ",
-              result.error.position, result.read);
-          switch (result.error.code) {
-            case CBOR_ERR_MALFORMATED: {
-              printf("Malformed data\n");
-              break;
-            }
-            case CBOR_ERR_MEMERROR: {
-              printf("Memory error -- perhaps the input is too large?\n");
-              break;
-            }
-            case CBOR_ERR_NODATA: {
-              printf("The input is empty\n");
-              break;
-            }
-            case CBOR_ERR_NOTENOUGHDATA: {
-              printf("Data seem to be missing -- is the input complete?\n");
-              break;
-            }
-            case CBOR_ERR_SYNTAXERROR: {
-              printf(
-                  "Syntactically malformed data -- see "
-                  "https://www.rfc-editor.org/info/std94\n");
-              break;
-            }
-            case CBOR_ERR_NONE: {
-              // GCC's cheap dataflow analysis gag
-              break;
-            }
-          }
-        } else {
-          printf("CBOR data was properly formatted\n");
-        }
-
-        cbor_describe(item, stdout);
-
-        cJSON* cjson_item = cbor_to_cjson(item);
-        char* json_string = cJSON_Print(cjson_item);
-        printf("%s\n", json_string);
-        free(json_string);
 
         ssize_t r = write(1, ec->data.data, ec->data.size);
         switch (r) {
@@ -434,38 +409,7 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
     return;
   }
 
-  //total_clients ++; // Increment total_clients count
   printf("Successfully received connection from callhome server.\n");
-  //printf("%d client(s) connected.\n", total_clients);
-
-
-
-
-//  sock[i] = -1;
-//  if (!getaddrinfo(hosts[i], port, &hints, &(servinfo[i]))) {
-//    for (si[i] = servinfo[i]; si[i] != NULL; si[i] = si[i]->ai_next) {
-//      sock[i] = socket(si[i]->ai_family, si[i]->ai_socktype, si[i]->ai_protocol);
-//      if (sock[i] < 0)
-//        continue;
-//
-//      if (connect(sock[i], si[i]->ai_addr, si[i]->ai_addrlen)) {
-//        close(sock[i]);
-//        sock[i] = -1;
-//        continue;
-//      }
-//
-//      break;
-//    }
-//    freeaddrinfo(servinfo[i]);
-//  }
-//  if (sock[i] < 0)
-//    ERROR("Unable to connect: %s\n", strerror(errno));
-//
-//  int status = fcntl(sock[i], F_SETFL, fcntl(sock[i], F_GETFL, 0) | O_NONBLOCK);
-//
-//  if (status == -1) {
-//    perror("calling fcntl");
-//  }
 
   struct assh_context_s *context;
   context = malloc(sizeof(struct assh_context_s));
@@ -489,7 +433,8 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   inter = malloc(sizeof(struct asshh_client_inter_session_s));
   // "pty" doesn't mean anything special. It just needs
   // to be a non-NULL value to force an interactive session
-  asshh_client_init_inter_session(inter, /*command to run*/"", "pty");
+  //asshh_client_init_inter_session(inter, /*command to run*/"show version", "pty");
+  asshh_client_init_inter_session(inter, /*command to run*/"show version", NULL);
 
   struct ssh *ssh;
   ssh = malloc(sizeof(struct ssh));
@@ -498,27 +443,25 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ssh->hostname = '192.168.35.13';
   ssh->user = 'sysadmin';
   ssh->auth_methods = &auth_methods;
+  ssh->banner_seen = 0;
 
-  ev_io *socket_watcher[2];
-  socket_watcher[0] = malloc(sizeof(ev_io));
-  socket_watcher[1] = malloc(sizeof(ev_io));
+  ev_io *writer_watcher;
+  ev_io *reader_watcher;
+  writer_watcher = malloc(sizeof(ev_io));
+  reader_watcher = malloc(sizeof(ev_io));
 
-  ev_io_init (socket_watcher[0], socket_cb, client_sd, EV_READ);
-  ssh->socket_watcher_reader = socket_watcher[0];
-  ev_io_init (socket_watcher[1], socket_cb, client_sd, EV_WRITE);
-  ssh->socket_watcher_writer = socket_watcher[1];
+  ev_io_init (writer_watcher, socket_cb, client_sd, EV_WRITE);
+  ssh->socket_watcher_writer = writer_watcher;
+  ev_io_init (reader_watcher, socket_cb, client_sd, EV_READ);
+  ssh->socket_watcher_reader = reader_watcher;
 
-  socket_watcher[0]->data = ssh;
-  socket_watcher[1]->data = ssh;
+  writer_watcher->data = ssh;
+  reader_watcher->data = ssh;
+
   ev_io_start (loop, ssh->socket_watcher_reader);
   ssh->reader_running = 1;
   ev_io_start (loop, ssh->socket_watcher_writer);
   ssh->writer_running = 1;
-
-  // Initialize and start watcher to read client requests
-  w_client->data = ssh;
-  ev_io_init(w_client, socket_cb, client_sd, EV_READ);
-  ev_io_start(loop, w_client);
 }
 
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
