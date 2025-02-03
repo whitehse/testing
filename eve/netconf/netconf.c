@@ -358,18 +358,6 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
       case ASSH_EVENT_CHANNEL_OPEN:
         printf("Event Channel open\n");
-        struct assh_event_channel_open_s *ev_channel_open = &event.connection.channel_open;
-
-        /* allocate output data packet */
-        //uint8_t *data;
-        char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
-        size_t length = strlen(hello_string);
-        err = assh_channel_data_alloc(ev_channel_open->ch, (uint8_t **)&hello_string, &length, length);
-
-        if (ASSH_STATUS(err) == ASSH_OK) {
-          puts("Sending hellow string");
-          assh_channel_data_send(ev_channel_open->ch, length);
-        }
 
         break;
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
@@ -399,6 +387,18 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i)) {
           puts("EVENT_CHANNEL_CONFIRMATION_ERR");
           goto err;
+        }
+
+        /* allocate output data packet */
+        //uint8_t *data;
+        char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
+        size_t length = strlen(hello_string);
+        err = assh_channel_data_alloc(ev_confirm->ch, (uint8_t **)&hello_string, &length, length);
+        printf("Tried allocating buffer to hello string. The result is %d\n", ASSH_STATUS(err));
+
+        if (ASSH_STATUS(err) == ASSH_OK) {
+          puts("Sending hello string");
+          assh_channel_data_send(ev_confirm->ch, length);
         }
         break;
 
