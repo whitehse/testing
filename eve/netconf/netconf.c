@@ -182,7 +182,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     ssh->banner_seen = 1;
     r = read(w->fd, buffer, 1024);
     printf("%.*s", r, buffer);
-    puts("Sending ack");
+    puts("\nSending: <ack>ok</ack>\n");
     r = write(w->fd, "<ack>ok</ack>", 13);
     goto out;
   }
@@ -358,6 +358,19 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
       case ASSH_EVENT_CHANNEL_OPEN:
         printf("Event Channel open\n");
+        struct assh_event_channel_open_s *ev_channel_open = &event.connection.channel_open;
+
+        /* allocate output data packet */
+        //uint8_t *data;
+        char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
+        size_t length = strlen(hello_string);
+        err = assh_channel_data_alloc(ev_channel_open->ch, (uint8_t **)&hello_string, &length, length);
+
+        if (ASSH_STATUS(err) == ASSH_OK) {
+          puts("Sending hellow string");
+          assh_channel_data_send(ev_channel_open->ch, length);
+        }
+
         break;
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
         printf("Channel Confirmation called\n");
@@ -481,7 +494,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         struct assh_event_channel_data_s *ec = &event.connection.channel_data;
         //struct cbor_load_result result;
 
-        assh_status_t err = ASSH_OK;
+        err = ASSH_OK;
 
         //ter = &event.transport.read;
         //printf("\n%.*s\n", ec->data.size, ec->data.data);
