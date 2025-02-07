@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# cat >> ~/gdbinit <EOF
+# cat >> ~/.gdbinit <EOF
 # set sysroot /
 # #set substitute-path /usr/src/include /mnt/include
 # EOF 
