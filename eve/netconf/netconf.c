@@ -209,10 +209,15 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 
   struct assh_event_transport_read_s *ter;
   int send_hello_and_subscribe = 0;
+  int last_id = 555;
 
   while (result) {
     //printf("Loop %d\n", looped);
     looped = looped + 1;
+    if (last_id = ASSH_EVENT_READ && event.id != ASSH_EVENT_READ) {
+      printf("Exited the read loop\n"); 
+    }
+
     switch (event.id) {
       case ASSH_EVENT_READ:
         //printf("EVENT Read Called\n");
@@ -545,6 +550,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         assh_event_done(ssh->session, &event, ASSH_OK);
     }
     result = assh_event_get(ssh->session, &event, t);
+    last_id = event.id;
   }
 
 err:
@@ -607,7 +613,8 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
 
   struct asshh_client_inter_session_s *inter;
   inter = malloc(sizeof(struct asshh_client_inter_session_s));
-  asshh_client_init_inter_session(inter, /*command to run*/"show version", "vt100");
+  //asshh_client_init_inter_session(inter, /*command to run*/"show version", "vt100");
+  asshh_client_init_inter_session(inter, /*command to run*/"", "vt100");
   
   //struct asshh_inter_subsystem_s *inter_subsystem;
   //inter_subsystem = malloc(sizeof(struct asshh_inter_subsystem_s));
