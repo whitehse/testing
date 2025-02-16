@@ -12,6 +12,8 @@ EOF
 
 my $ipfix_hash = csv (in => "ipfix-information-elements.csv",
                       headers => "auto");   # as array of hash
+ 
+@$ipfix_hash = @$ipfix_hash[ 1 .. $#$ipfix_hash ];
 
 my $icmp_hash = csv (in => "icmp-parameters-types.csv",
                      headers => "auto");   # as array of hash
@@ -24,6 +26,7 @@ my $proto_hash = csv (in => "protocol-numbers-1.csv",
 
 print <<"END";
 enum IANA_ABSTRACT_TYPE {
+  IANA_TYPE_NONE,
   IANA_TYPE_BASICLIST,
   IANA_TYPE_BOOLEAN,
   IANA_TYPE_DATETIMEMICROSECONDS,
@@ -46,7 +49,21 @@ enum IANA_ABSTRACT_TYPE {
   IANA_TYPE_UNSIGNED256
 };
 
+enum IANA_SEMANTICS {
+  IANA_SEMANTIC_NONE,
+  IANA_SEMANTIC_DELTACOUNTER,
+  IANA_SEMANTIC_IDENTIFIER,
+  IANA_SEMANTIC_FLAGS,
+  IANA_SEMANTIC_DEFAULT,
+  IANA_SEMANTIC_QUANTITY,
+  IANA_SEMANTIC_TOTALCOUNTER,
+  IANA_SEMANTIC_LIST,
+  IANA_SEMANTIC_SNMPCOUNTER,
+  IANA_SEMANTIC_SNMPGAUGE
+};
+
 enum IANA_UNITS {
+  IANA_UNIT_NONE,
   IANA_UNIT_OCTETS,
   IANA_UNIT_PACKETS,
   IANA_UNIT_FLOWS,
@@ -78,13 +95,45 @@ print <<'EOF';
 struct iana_ipfix {
   uint32_t elementid; /* 8 */
   char *name; /*sourceIPv4Address */
-  int abstract_data_type; /* ipv4Address/IANA_IPV4ADDRESS */
+  int abstract_data_type; /* ipv4Address/IANA_TYPE_IPV4ADDRESS */
+  int semantic; /* deltaCounter/IANA_SEMANTIC_DELTACOUNTER */
   int unit; /* octets/IANA_UNIT_OCTETS */
   int low_range;
   int high_range;
 };
 EOF
 
+my $num_of_ipfix_elements = @$ipfix_hash;
+print "static struct iana_ipfix iana_ipfix_elements[$num_of_ipfix_elements] = {\n";
+
+foreach my $ipfix_hash_row (@$ipfix_hash) {
+  my $abstract_data_type = "IANA_TYPE_NONE";
+  if ($ipfix_hash_row->{'Abstract Data Type'} ne '') {
+    $abstract_data_type = "IANA_TYPE_" . uc $ipfix_hash_row->{'Abstract Data Type'};
+  }
+  my $data_type_semantic = "IANA_SEMANTIC_NONE";
+  if ($ipfix_hash_row->{'Data Type Semantics'} ne '') {
+    $data_type_semantic = "IANA_SEMANTIC_" . uc $ipfix_hash_row->{'Data Type Semantics'};
+  }
+  my $unit = "IANA_UNIT_NONE";
+  if ($ipfix_hash_row->{'Units'} ne '') {
+    $unit = "IANA_UNIT_" . uc $ipfix_hash_row->{'Units'};
+    $unit  =~ s/-/_/g;
+    $unit  =~ s/ /_/g;
+  }
+  my $low_range = 0;
+  my $high_range = "0xFFFFFF";
+  if ($ipfix_hash_row->{'Range'} =~ m/\-/) {
+    ($low_range, $high_range) = $ipfix_hash_row->{'Range'} =~ /(.*)\-(.*)/;
+  }
+print <<"EOF";
+  { $ipfix_hash_row->{'ElementID'}, "$ipfix_hash_row->{'Name'}", $abstract_data_type, $data_type_semantic, $unit, $low_range, $high_range},
+EOF
+}
+
+print <<'EOF';
+};
+EOF
 
 
 print <<'EOF';
