@@ -7,81 +7,80 @@
 #include <errno.h>
 
 #include <ev.h>
-//#define EV_STANDALONE 1
-//#include <ev.c>
-//#include <cfgpath.h>
-//#include <cbor.h>
+#include <cbor.h>
 #include <cjson/cJSON.h>
 
+#include <ipfix_iana.h>
+
+/* Maximum packet size for flow packets. Flow packets, and in particular
+ * UDP flow packets, are unlikely to be more than 1500 bytes */
+#define PACKET_BUFFER_SIZE 2048
 int counter;
 
-#define EVE_CONNECTION_INIT        1
-#define EVE_CONNECTION_ESTABLISHED 2
+cJSON* cbor_to_cjson(cbor_item_t* item) {
+  switch (cbor_typeof(item)) {
+    case CBOR_TYPE_UINT:
+      return cJSON_CreateNumber(cbor_get_int(item));
+    case CBOR_TYPE_NEGINT:
+      return cJSON_CreateNumber(-1 - cbor_get_int(item));
+    case CBOR_TYPE_BYTESTRING:
+      // cJSON only handles null-terminated string -- binary data would have to
+      // be escaped
+      return cJSON_CreateString("Unsupported CBOR item: Bytestring");
+    case CBOR_TYPE_STRING:
+      if (cbor_string_is_definite(item)) {
+        // cJSON only handles null-terminated string
+        char* null_terminated_string = malloc(cbor_string_length(item) + 1);
+        memcpy(null_terminated_string, cbor_string_handle(item),
+               cbor_string_length(item));
+        null_terminated_string[cbor_string_length(item)] = 0;
+        cJSON* result = cJSON_CreateString(null_terminated_string);
+        free(null_terminated_string);
+        return result;
+      }
+      return cJSON_CreateString("Unsupported CBOR item: Chunked string");
+    case CBOR_TYPE_ARRAY: {
+      cJSON* result = cJSON_CreateArray();
+      for (size_t i = 0; i < cbor_array_size(item); i++) {
+        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_array_get(item, i)));
+      }
+      return result;
+    }
+    case CBOR_TYPE_MAP: {
+      cJSON* result = cJSON_CreateObject();
+      for (size_t i = 0; i < cbor_map_size(item); i++) {
+        char* key = malloc(128);
+        snprintf(key, 128, "Surrogate key %zu", i);
+        // JSON only support string keys
+        if (cbor_isa_string(cbor_map_handle(item)[i].key) &&
+            cbor_string_is_definite(cbor_map_handle(item)[i].key)) {
+          size_t key_length = cbor_string_length(cbor_map_handle(item)[i].key);
+          if (key_length > 127) key_length = 127;
+          // Null-terminated madness
+          memcpy(key, cbor_string_handle(cbor_map_handle(item)[i].key),
+                 key_length);
+          key[key_length] = 0;
+        }
 
-//cJSON* cbor_to_cjson(cbor_item_t* item) {
-//  switch (cbor_typeof(item)) {
-//    case CBOR_TYPE_UINT:
-//      return cJSON_CreateNumber(cbor_get_int(item));
-//    case CBOR_TYPE_NEGINT:
-//      return cJSON_CreateNumber(-1 - cbor_get_int(item));
-//    case CBOR_TYPE_BYTESTRING:
-//      // cJSON only handles null-terminated string -- binary data would have to
-//      // be escaped
-//      return cJSON_CreateString("Unsupported CBOR item: Bytestring");
-//    case CBOR_TYPE_STRING:
-//      if (cbor_string_is_definite(item)) {
-//        // cJSON only handles null-terminated string
-//        char* null_terminated_string = malloc(cbor_string_length(item) + 1);
-//        memcpy(null_terminated_string, cbor_string_handle(item),
-//               cbor_string_length(item));
-//        null_terminated_string[cbor_string_length(item)] = 0;
-//        cJSON* result = cJSON_CreateString(null_terminated_string);
-//        free(null_terminated_string);
-//        return result;
-//      }
-//      return cJSON_CreateString("Unsupported CBOR item: Chunked string");
-//    case CBOR_TYPE_ARRAY: {
-//      cJSON* result = cJSON_CreateArray();
-//      for (size_t i = 0; i < cbor_array_size(item); i++) {
-//        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_array_get(item, i)));
-//      }
-//      return result;
-//    }
-//    case CBOR_TYPE_MAP: {
-//      cJSON* result = cJSON_CreateObject();
-//      for (size_t i = 0; i < cbor_map_size(item); i++) {
-//        char* key = malloc(128);
-//        snprintf(key, 128, "Surrogate key %zu", i);
-//        // JSON only support string keys
-//        if (cbor_isa_string(cbor_map_handle(item)[i].key) &&
-//            cbor_string_is_definite(cbor_map_handle(item)[i].key)) {
-//          size_t key_length = cbor_string_length(cbor_map_handle(item)[i].key);
-//          if (key_length > 127) key_length = 127;
-//          // Null-terminated madness
-//          memcpy(key, cbor_string_handle(cbor_map_handle(item)[i].key),
-//                 key_length);
-//          key[key_length] = 0;
-//        }
-//
-//        cJSON_AddItemToObject(result, key,
-//                              cbor_to_cjson(cbor_map_handle(item)[i].value));
-//        free(key);
-//      }
-//      return result;
-//    }
-//    case CBOR_TYPE_TAG:
-//      return cJSON_CreateString("Unsupported CBOR item: Tag");
-//    case CBOR_TYPE_FLOAT_CTRL:
-//      if (cbor_float_ctrl_is_ctrl(item)) {
-//        if (cbor_is_bool(item)) return cJSON_CreateBool(cbor_get_bool(item));
-//        if (cbor_is_null(item)) return cJSON_CreateNull();
-//        return cJSON_CreateString("Unsupported CBOR item: Control value");
-//      }
-//      return cJSON_CreateNumber(cbor_float_get_float(item));
-//  }
-//
-//  return cJSON_CreateNull();
-//}
+        cJSON_AddItemToObject(result, key,
+                              cbor_to_cjson(cbor_map_handle(item)[i].value));
+        free(key);
+      }
+      return result;
+    }
+    case CBOR_TYPE_TAG:
+      return cJSON_CreateString("Unsupported CBOR item: Tag");
+    case CBOR_TYPE_FLOAT_CTRL:
+      if (cbor_float_ctrl_is_ctrl(item)) {
+        //if (cbor_is_bool(item)) return cJSON_CreateBool(cbor_get_bool(item));
+        if (cbor_is_null(item)) return cJSON_CreateNull();
+        return cJSON_CreateString("Unsupported CBOR item: Control value");
+      }
+      return cJSON_CreateNumber(cbor_float_get_float(item));
+  }
+
+  return cJSON_CreateNull();
+}
 
 void hex_dump(char *desc, void *addr, int len) {
     int i;
@@ -128,11 +127,9 @@ void hex_dump(char *desc, void *addr, int len) {
     printf("  %s\n", buff);
 }
 
-#define BUFFER_SIZE 1024
-
 // https://www.iana.org/assignments/ipfix/ipfix.xhtml
 
-//received 140 bytes from client. Packets seen: 161
+//received 140 bytes from client.
 //IPFIX Client: :
 //  0000  00 0a 00 8c 67 99 2c c2 00 10 27 41 00 08 00 00  ....g.,...'A....
 //  0010  00 02 00 7c 01 00 00 1d 00 08 00 04 00 0c 00 04  ...|............
@@ -212,8 +209,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // Field 29 Type: 00 99 - flowEndMilliseconds
 // Field 29 Length: 00 08 - 8 bytes
 
-
-//received 72 bytes from client. Packets seen: 162
+//received 72 bytes from client.
 //IPFIX Client: :
 //  0000  00 0a 00 48 67 99 2c c2 00 00 00 67 00 08 00 00  ...Hg.,....g....
 //  0010  00 03 00 38 02 00 00 0b 00 01 00 90 00 04 00 29  ...8...........)
@@ -230,7 +226,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // Data Set Length = 00 38 - 56
 // Template ID = 02 00 - 512
 // Field Count = 00 0b - 11
-// Scope Field Count = 00 01 - 1 (must not be zero. What happens when its greater than one)
+// Scope Field Count = 00 01 - 1 (must not be zero. What happens when its greater than one?)
 // Scope 1 Information Element id = 00 90 - 144, exportingProcessId
 // Scope 1 Field Length = 00 04 - 4 bytes
 // Scope 2 Information Element id = 00 29 = exportedOctetTotalCount
@@ -255,6 +251,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // Scope 11 Field Length = 00 01 = 1 byte 
 // Padding (to 4 byte boundary) = 00 00
 
+// Flow record packet:
 //  0000  00 0a 01 7c 67 99 27 a7 00 09 4d 7b 00 08 00 00  ...|g.'...M{....
 //  0010  01 00 01 6c 4a 7d 03 29 ae 80 81 66 00 06 01 bb  ...lJ}.)...f....
 //  0020  d5 dc 00 00 00 00 02 5c 00 b5 14 1b 00 00 3b 41  .......\......;A
@@ -323,15 +320,9 @@ void hex_dump(char *desc, void *addr, int len) {
   // Field 2 Value: ae 80 9c 14 - DestinationIPv4Address, 174.128.156.20
   // ...
 
-
-void echo_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
-  char buffer[BUFFER_SIZE];
-  //char buffer[1024];
+void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
+  char buffer[PACKET_BUFFER_SIZE];
   ssize_t read;
-
-  //connection_t *connection = w->data;
-
-  //hex_dump(NULL, client_initial_key, 32);
 
   if(EV_ERROR & revents) {
     perror("got invalid event");
@@ -339,32 +330,196 @@ void echo_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   }
 
   memset(buffer, 0, sizeof(buffer));
-  //int size = read(w->fd, buffer, sizeof(buffer));
-  read = recv(w->fd, buffer, BUFFER_SIZE, 0);
+  struct sockaddr_in client_addr;
+  int addr_len = sizeof(struct sockaddr);
+  read = recvfrom(w->fd, buffer, PACKET_BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
   if ( read < 0 ) {
     perror("read error");
     exit(5);
   }
 
+  int res = getpeername(w->fd, (struct sockaddr *)&client_addr, &addr_len);
+  char flow_generator_ipv4_address[20];
+  strcpy(flow_generator_ipv4_address, inet_ntoa(client_addr.sin_addr));
+
   if (read == 0) {
     if (errno == EAGAIN || errno == EWOULDBLOCK) {
       perror("Something weird happened");
-      return 0;
+      return;
     } else {
       puts("Socket was closed");
       ev_io_stop(loop, w);
       close(w->fd);
       free(w);
-      return 0;
+      return;
     }
   }
 
-  counter = counter + 1;
-  printf("received %d bytes from client. Packets seen: %d\n", read, counter);
-  hex_dump("IPFIX Client: ", buffer, read);
+  /* The header is always 16 bytes long */
+  if (read < 16) {
+    return;
+  }
+
+  uint16_t version = ntohs(*(uint16_t *) (buffer+0));
+  uint16_t message_length = ntohs(*(uint16_t *) (buffer+2));
+  uint32_t message_timestamp = ntohl(*(uint32_t *) (buffer+4));
+  uint32_t sequence_number = ntohl(*(uint32_t *) (buffer+8));
+  uint32_t observation_domain_id = ntohl(*(uint32_t *) (buffer+12));
+  /* Something went wrong between the OS/Network and the contents reported in the packet */
+  /* This will need to be updated for future versions of ipfix */
+  if (version != 10 || message_length != read) {
+    printf("version is %d, and message length is %d, although %d was read from the socket.\n", version, message_length, read);
+    return;
+  }
+
+  /* libcbor seems to be a nicely designed library and appropriate for
+   * storing data that doesn't have a strict compile-time-known format.
+   * The resulting data structure will represent a binary form of structured
+   * data called CBOR (RFC 8949), which is easily conveted from and to JSON
+   * for human readability and can be efficiently stored on disk or transmitted
+   * over the network in a fairly efficient binary format */
+  cbor_item_t* root = cbor_new_indefinite_map();
+  bool success = cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("flow_generator_ipv4_address")),
+    .value = cbor_move(cbor_build_string(flow_generator_ipv4_address))});
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("version")),
+    .value = cbor_move(cbor_build_uint16(version))});
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("message_length")),
+    .value = cbor_move(cbor_build_uint16(message_length))});
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("timestamp")),
+    .value = cbor_move(cbor_build_uint32(message_timestamp))});
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("sequence_number")),
+    .value = cbor_move(cbor_build_uint32(sequence_number))});
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("observation_domain_id")),
+    .value = cbor_move(cbor_build_uint32(observation_domain_id))});
+
+  /* The message_length includes the message header or, in other words, the
+   * message_length is the length of the entire packet */
+  /* Data set definitions have an ID of less than 256 (e.g. 2)
+   * These are sent periodically from the flow source and
+   * subsequent flow records (ID >= 256) will use the format
+   * defined */
+  int bytes_remaining_in_packet = message_length - 16;
+  int buffer_offset = 16;
+  /* A set will be at least 4 bytes long (for the set header) even if there are
+   * no actual contents within the set. We will deal with padding within the
+   * loop */
+  while (success && bytes_remaining_in_packet >= 8) {
+    uint16_t set_id = ntohs(*(uint16_t *) (buffer+buffer_offset));
+    uint16_t set_length = ntohs(*(uint16_t *) (buffer+buffer_offset+2));
+    /* The set length scrolls off the screen. Bail out */
+    if (set_length > bytes_remaining_in_packet || set_length < 4) {
+      printf("The set_length scrolls off the screen\n");
+      cbor_decref(&root);
+      return;
+    }
+    int bytes_remaining_in_set = set_length - 4;
+    int buffer_offset_for_this_set = buffer_offset + 4;
+    if (set_id < 256) { /* template definition */
+      // Set ID (Template) = 00 02
+      // Data Set Length = 00 7c - 124
+      /* There must be a template ID and field length if a template definition is encountered */
+      if (bytes_remaining_in_set < 4) {
+        printf("A template definition was encountered, without ID and number of fields being defined\n");
+        cbor_decref(&root);
+        return;
+      }
+      // Template ID = 01 00 - 256
+      // Number of fields = 00 1d - 29
+      uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+      uint16_t number_of_fields = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+      bytes_remaining_in_set -= 4;
+      buffer_offset_for_this_set += 4;
+      int number_of_fields_left_to_process = number_of_fields;
+      /* A field definition should be at least 4 bytes */
+      while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
+        uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+        uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+        // Field 1 Type: 00 08 - 8, sourceIPv4Address
+        // Field 1 Length: 00 04 - 4 bytes
+        // Field 2 Type: 00 0c - 12, destinationIPv4Address
+        // Field 2 Length: 00 04 - 4 bytes
+        bytes_remaining_in_set -= 4;
+        buffer_offset_for_this_set += 4;
+        number_of_fields_left_to_process -= 1;
+      }
+      //success &= cbor_map_add(root, (struct cbor_pair){
+      //  .key = cbor_move(cbor_build_string("set_id")),
+      //  .value = cbor_move(cbor_build_uint16(set_id))});
+    }
+    bytes_remaining_in_packet -= set_length;
+    buffer_offset += set_length;
+  }
+      /* We're going to build this in reverse order. That is
+       * build the data set map, create an array of all dataset maps,
+       * typically only one, then attach the array to a new map called
+       * data_sets and then attach the data_sets map to the root map.
+       * This should look something like: 
+
+       {
+        "flow_generator_ipv4_address": "174.128.129.4",
+        "version": 10,
+        "message_length": 140,
+        "timestamp": 1739718327,
+        "sequence_number": 311889030,
+        "observation_domain_id": 524288,
+        "templates": [
+           {
+           }
+        ]
+        "flow_sets":  [
+          {
+                "test": "value"
+          }
+        ]
 }
 
-void echo_accept_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
+
+
+*/
+      //cbor_item_t* array_of_sets = cbor_new_indefinite_array();
+      //cbor_item_t* data_sets = cbor_new_indefinite_map();
+
+//      cbor_item_t* data_sets = cbor_new_indefinite_map();
+//      bool data_sets_success = cbor_map_add(data_sets, (struct cbor_pair){
+//        .key = cbor_move(cbor_build_string("test")),
+//        .value = cbor_move(cbor_build_string("value"))});
+//      success &= cbor_map_add(root, (struct cbor_pair){
+//        .key = cbor_move(cbor_build_string("set")),
+//        .value = cbor_move(data_sets)});
+//    }
+
+  if (!success) {
+    puts("\nBuilding CBOR failed");
+    return;
+  }
+
+  unsigned char* cbor_buffer;
+  size_t cbor_buffer_size;
+  cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
+  cJSON* cjson_item = cbor_to_cjson(root);
+  char* json_string = cJSON_Print(cjson_item);
+  //printf("%s\n", json_string);
+  free(json_string);
+  cJSON_Delete(cjson_item);
+  free(cbor_buffer);
+  cbor_decref(&root);
+
+  counter = counter + 1;
+  if (counter % 1000 == 0) {
+    printf("\nPackets seen: %d\n", counter);
+  }
+  //hex_dump("IPFIX Client: ", buffer, read);
+}
+
+/* This is unused for UDP based ipfix collection. Keep in place
+ * for TCP/SCTP flow collection if needed in the future */
+void flow_accept_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
   struct sockaddr_in client_addr;
   socklen_t client_len = sizeof(client_addr);
   int client_sd;
@@ -382,9 +537,7 @@ void echo_accept_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     return;
   }
 
-  printf("Successfully connected with client.\n");
-
-  ev_io_init(w_client, echo_read_cb, client_sd, EV_READ);
+  ev_io_init(w_client, flow_read_cb, client_sd, EV_READ);
   ev_io_start(loop, w_client);
 }
 
@@ -392,36 +545,33 @@ int main(int argc, char const *argv[]) {
   struct ev_loop *loop = ev_default_loop(0);
   counter = 0;
 
-  int echo_server_fd;
+  int flow_server_fd;
   struct sockaddr_in server, client;
   int len;
-  int echo_port = 1235;
-  //echo_server_fd = socket(AF_INET, SOCK_STREAM, 0);
-  echo_server_fd = socket(AF_INET, SOCK_DGRAM, 0);
-  if (echo_server_fd < 0) {
+  int flow_port = 1235;
+  //flow_server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  /* Listen on UDP */
+  flow_server_fd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (flow_server_fd < 0) {
     perror("Cannot create socket");
     exit(1);
   }
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(echo_port);
+  server.sin_port = htons(flow_port);
   len = sizeof(server);
-  if (bind(echo_server_fd, (struct sockaddr *)&server, len) < 0) {
+  if (bind(flow_server_fd, (struct sockaddr *)&server, len) < 0) {
     perror("Cannot bind sokcet");
     exit(2);
   }
-  //if (listen(echo_server_fd, 100000) < 0) {
-  //  perror("Listen error");
-  //  exit(3);
-  //}
 
   struct ev_io *w_accept = (struct ev_io*) malloc (sizeof(struct ev_io));
-  //ev_io_init(w_accept, echo_accept_cb, echo_server_fd, EV_READ);
-  ev_io_init(w_accept, echo_read_cb, echo_server_fd, EV_READ);
+  /* Not needed for UDP based flow collection */
+  //ev_io_init(w_accept, flow_accept_cb, flow_server_fd, EV_READ);
+  ev_io_init(w_accept, flow_read_cb, flow_server_fd, EV_READ);
   ev_io_start(loop, w_accept);
 
   ev_run (loop, 0);
 
   return 0;
 }
-

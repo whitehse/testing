@@ -1,28 +1,6 @@
-#!/usr/bin/env perl
-
-use Text::CSV qw( csv );
-use Data::Dumper;
-use strict;
-
-print <<'EOF';
 #ifndef IPFIX_IANA_H
 #define IPFIX_IANA_H
 
-EOF
-
-my $ipfix_hash = csv (in => "ipfix-information-elements.csv",
-                      headers => "auto");   # as array of hash
-
-my $icmp_hash = csv (in => "icmp-parameters-types.csv",
-                     headers => "auto");   # as array of hash
-
-my $flowend_hash = csv (in => "ipfix-flow-end-reason.csv",
-                        headers => "auto");   # as array of hash
-
-my $proto_hash = csv (in => "protocol-numbers-1.csv",
-                      headers => "auto");   # as array of hash
-
-print <<"END";
 enum IANA_ABSTRACT_TYPE {
   IANA_TYPE_BASICLIST,
   IANA_TYPE_BOOLEAN,
@@ -63,18 +41,6 @@ enum IANA_UNITS {
   IANA_UNIT_FRAMES,
   IANA_UNIT_PORTS
 };
-END
-
-#static char axis[3][8] = { "X", "Y", "Z" };
-
-my $ipfix_header = @$ipfix_hash[0];
-foreach my $key (keys %$ipfix_header) {
-  my $name = lc $key;
-  $name  =~ s/ /_/g;
-  #print $name."\n";
-}
-
-print <<'EOF';
 struct iana_ipfix {
   uint32_t elementid; /* 8 */
   char *name; /*sourceIPv4Address */
@@ -83,11 +49,5 @@ struct iana_ipfix {
   int low_range;
   int high_range;
 };
-EOF
-
-
-
-print <<'EOF';
 
 #endif // IPFIX_IANA_H
-EOF
