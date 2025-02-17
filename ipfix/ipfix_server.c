@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
 
 #include <ev.h>
 #include <cbor.h>
@@ -150,7 +151,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // timestamp = 67 99 2c c2 - Tue Jan 28 2025 13:15:14 GMT-0600 (Central Standard Time)
 // sequence number = 00 10 27 41 - 1058625
 // observation domain id = 00 08 00 00 - 524288
-// Set ID (Template) = 00 02
+// Set ID (Template) = 00 02 (Template Set Definition)
 // Data Set Length = 00 7c - 124
 // Template ID = 01 00 - 256
 // Number of fields = 00 1d - 29
@@ -226,7 +227,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // timestamp = 67 99 2c c2 - Tue Jan 28 2025 13:15:14 GMT-0600 (Central Standard Time)
 // sequence number = 00 00 00 67 - 86
 // observation domain id = 00 08 00 00 - 524288
-// Set ID (Template) = 00 03
+// Set ID (Template) = 00 03 (Options Template Set Definition)
 // Data Set Length = 00 38 - 56
 // Template ID = 02 00 - 512
 // Field Count = 00 0b - 11
@@ -286,7 +287,7 @@ void hex_dump(char *desc, void *addr, int len) {
 // timestamp = 67 99 27 a7 - Tue Jan 28 2025 12:53:27 GMT-0600 (Central Standard Time)
 // sequence number = 00 09 4d 7b - 609659
 // observation domain id = 00 08 00 00 - 524288
-// Data Set = 01 00 - 256 - Data Set
+// Set ID = 01 00 - 256 (Data Set)
 // Data Set Length = 01 6c - 364 bytes
 
 // Record 1
@@ -445,10 +446,68 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     }
     int bytes_remaining_in_set = set_length - 4;
     int buffer_offset_for_this_set = buffer_offset + 4;
-    if (success && set_id < 256) { /* template definition */
+    if (success && set_id == 2) { /* template definition */
       // Set ID (Template) = 00 02
       // Data Set Length = 00 7c - 124
       /* There must be a template ID and field length if a template definition is encountered */
+      if (bytes_remaining_in_set < 4) {
+        printf("A template definition was encountered, without ID and number of fields being defined\n");
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
+        cbor_decref(&root);
+        return;
+      }
+      cbor_item_t* template = cbor_new_indefinite_map();
+      if (template == NULL) {
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
+        cbor_decref(&root);
+        return;
+      }
+      success &= cbor_array_push(array_of_templates, cbor_move(template));
+      // Template ID = 01 00 - 256
+      // Number of fields = 00 1d - 29
+      uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+      uint16_t number_of_fields = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("template_id")),
+        .value = cbor_move(cbor_build_uint16(template_id))});
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("number_of_fields")),
+        .value = cbor_move(cbor_build_uint16(number_of_fields))});
+      bytes_remaining_in_set -= 4;
+      buffer_offset_for_this_set += 4;
+      int number_of_fields_left_to_process = number_of_fields;
+      cbor_item_t* array_of_fields = cbor_new_indefinite_array();
+      if (array_of_fields == NULL) {
+        cbor_decref(&template);
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
+        cbor_decref(&root);
+        return;
+      }
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("fields")),
+        .value = cbor_move(array_of_fields)});
+      /* A field definition should be at least 4 bytes */
+      while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
+        uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+        uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+        if (field_type <= number_of_iana_ipfix_elements) {
+          //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
+          //success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
+        } else {
+          printf("Field Type %d is out of range\n", field_type);
+        }
+        // Field 1 Type: 00 08 - 8, sourceIPv4Address
+        // Field 1 Length: 00 04 - 4 bytes
+        // Field 2 Type: 00 0c - 12, destinationIPv4Address
+        // Field 2 Length: 00 04 - 4 bytes
+        bytes_remaining_in_set -= 4;
+        buffer_offset_for_this_set += 4;
+        number_of_fields_left_to_process -= 1;
+      }
+    } else if (success && set_id == 3) { /* template definition */
       if (bytes_remaining_in_set < 4) {
         printf("A template definition was encountered, without ID and number of fields being defined\n");
         cbor_decref(&array_of_templates);
@@ -549,20 +608,41 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     return;
   }
 
-  unsigned char* cbor_buffer;
-  size_t cbor_buffer_size;
-  cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
-  cJSON* cjson_item = cbor_to_cjson(root);
-  char* json_string = cJSON_Print(cjson_item);
-  printf("%s\n", json_string);
-  free(json_string);
-  cJSON_Delete(cjson_item);
-  free(cbor_buffer);
+  //unsigned char* cbor_buffer;
+  //size_t cbor_buffer_size;
+  //cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
+  //cJSON* cjson_item = cbor_to_cjson(root);
+  //char* json_string = cJSON_Print(cjson_item);
+  //printf("%s\n", json_string);
+  //free(json_string);
+  //cJSON_Delete(cjson_item);
+  //free(cbor_buffer);
   cbor_decref(&root);
 
   counter = counter + 1;
   if (counter % 1000 == 0) {
     printf("\nPackets seen: %d\n", counter);
+    FILE *fp;
+    char path[1024];
+    char line[1024];
+    size_t size = 0;
+    snprintf(path, sizeof(path), "/proc/%d/status", getpid());
+    fp = fopen(path, "r");
+    if (fp == NULL) {
+      perror("Error opening status file");
+      return;
+    }
+    while (fgets(line, sizeof(line), fp) != NULL) {
+      // Find the VmRSS line (Resident Set Size)
+      if (strncmp(line, "VmRSS:", 6) == 0) {
+        // Extract the memory usage value
+        if (sscanf(line, "VmRSS: %zu kB", &size) == 1) {
+          printf("Memory usage: %zu KB\n", size);
+        }
+        break; // Stop after finding VmRSS
+      }
+    }
+    fclose(fp);
   }
   //hex_dump("IPFIX Client: ", buffer, read);
 }
