@@ -13,7 +13,8 @@ EOF
 my $ipfix_hash = csv (in => "ipfix-information-elements.csv",
                       headers => "auto");   # as array of hash
  
-@$ipfix_hash = @$ipfix_hash[ 1 .. $#$ipfix_hash ];
+#@$ipfix_hash = @$ipfix_hash[ 1 .. $#$ipfix_hash ];
+pop @$ipfix_hash;
 
 my $icmp_hash = csv (in => "icmp-parameters-types.csv",
                      headers => "auto");   # as array of hash
@@ -92,7 +93,7 @@ foreach my $key (keys %$ipfix_header) {
 }
 
 print <<'EOF';
-struct iana_ipfix {
+struct iana_ipfix_element {
   uint32_t elementid; /* 8 */
   char *name; /*sourceIPv4Address */
   int abstract_data_type; /* ipv4Address/IANA_TYPE_IPV4ADDRESS */
@@ -104,25 +105,60 @@ struct iana_ipfix {
 EOF
 
 my $num_of_ipfix_elements = @$ipfix_hash;
-print "static struct iana_ipfix iana_ipfix_elements[$num_of_ipfix_elements] = {\n";
+#print "static struct iana_ipfix_element iana_ipfix_elements[$num_of_ipfix_elements] = {\n";
+print "static int number_of_iana_ipfix_elements = 530;\n";
+print "static struct iana_ipfix_element iana_ipfix_elements[530] = {\n";
 
 foreach my $ipfix_hash_row (@$ipfix_hash) {
-  my $abstract_data_type = "IANA_TYPE_NONE";
+  my $abstract_data_type;
+  my $data_type_semantic;
+  my $unit;
+  my $low_range;
+  my $high_range;
+  if ($ipfix_hash_row->{'ElementID'} =~ m/\-/) {
+    my ($first_index, $last_index) = $ipfix_hash_row->{'ElementID'} =~ /(.*)\-(.*)/;
+    foreach my $index ($first_index .. $last_index) {
+      $abstract_data_type = "IANA_TYPE_NONE";
+      if ($ipfix_hash_row->{'Abstract Data Type'} ne '') {
+        $abstract_data_type = "IANA_TYPE_" . uc $ipfix_hash_row->{'Abstract Data Type'};
+      }
+      $data_type_semantic = "IANA_SEMANTIC_NONE";
+      if ($ipfix_hash_row->{'Data Type Semantics'} ne '') {
+        $data_type_semantic = "IANA_SEMANTIC_" . uc $ipfix_hash_row->{'Data Type Semantics'};
+      }
+      $unit = "IANA_UNIT_NONE";
+      if ($ipfix_hash_row->{'Units'} ne '') {
+        $unit = "IANA_UNIT_" . uc $ipfix_hash_row->{'Units'};
+        $unit  =~ s/-/_/g;
+        $unit  =~ s/ /_/g;
+      }
+      $low_range = 0;
+      $high_range = "0xFFFFFF";
+      if ($ipfix_hash_row->{'Range'} =~ m/\-/) {
+        ($low_range, $high_range) = $ipfix_hash_row->{'Range'} =~ /(.*)\-(.*)/;
+      }
+    print <<"EOF";
+      { $index, "$ipfix_hash_row->{'Name'}", $abstract_data_type, $data_type_semantic, $unit, $low_range, $high_range},
+EOF
+    }
+    next;
+  }
+  $abstract_data_type = "IANA_TYPE_NONE";
   if ($ipfix_hash_row->{'Abstract Data Type'} ne '') {
     $abstract_data_type = "IANA_TYPE_" . uc $ipfix_hash_row->{'Abstract Data Type'};
   }
-  my $data_type_semantic = "IANA_SEMANTIC_NONE";
+  $data_type_semantic = "IANA_SEMANTIC_NONE";
   if ($ipfix_hash_row->{'Data Type Semantics'} ne '') {
     $data_type_semantic = "IANA_SEMANTIC_" . uc $ipfix_hash_row->{'Data Type Semantics'};
   }
-  my $unit = "IANA_UNIT_NONE";
+  $unit = "IANA_UNIT_NONE";
   if ($ipfix_hash_row->{'Units'} ne '') {
     $unit = "IANA_UNIT_" . uc $ipfix_hash_row->{'Units'};
     $unit  =~ s/-/_/g;
     $unit  =~ s/ /_/g;
   }
-  my $low_range = 0;
-  my $high_range = "0xFFFFFF";
+  $low_range = 0;
+  $high_range = "0xFFFFFF";
   if ($ipfix_hash_row->{'Range'} =~ m/\-/) {
     ($low_range, $high_range) = $ipfix_hash_row->{'Range'} =~ /(.*)\-(.*)/;
   }

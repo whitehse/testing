@@ -9,6 +9,7 @@
 #include <ev.h>
 #include <cbor.h>
 #include <cjson/cJSON.h>
+#include <hashmap.h>
 
 #include <ipfix_iana.h>
 
@@ -16,6 +17,9 @@
  * UDP flow packets, are unlikely to be more than 1500 bytes */
 #define PACKET_BUFFER_SIZE 2048
 int counter;
+
+//typedef HASHMAP(struct tcp_socket, struct tcp_connection) tcp_hash_t;
+//tcp_hash_t tcp_map;
 
 cJSON* cbor_to_cjson(cbor_item_t* item) {
   switch (cbor_typeof(item)) {
@@ -379,6 +383,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
    * for human readability and can be efficiently stored on disk or transmitted
    * over the network in a fairly efficient binary format */
   cbor_item_t* root = cbor_new_indefinite_map();
+  if (root == NULL) {
+    return;
+  }
   bool success = cbor_map_add(root, (struct cbor_pair){
     .key = cbor_move(cbor_build_string("flow_generator_ipv4_address")),
     .value = cbor_move(cbor_build_string(flow_generator_ipv4_address))});
@@ -400,14 +407,14 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 
   /* The message_length includes the message header or, in other words, the
    * message_length is the length of the entire packet */
-  /* Data set definitions have an ID of less than 256 (e.g. 2)
+  /* Template definitions have an ID of less than 256 (e.g. 2)
    * These are sent periodically from the flow source and
-   * subsequent flow records (ID >= 256) will use the format
-   * defined */
+   * subsequent flow records (ID >= 256) will reference the defined template
+   * by ID */
   int bytes_remaining_in_packet = message_length - 16;
   int buffer_offset = 16;
-  /* A set will be at least 4 bytes long (for the set header) even if there are
-   * no actual contents within the set. We will deal with padding within the
+  /* A set will be at least 4 bytes long (for the set header) even if there is
+   * no actual content within the set. We will deal with padding within the
    * loop */
   while (success && bytes_remaining_in_packet >= 8) {
     uint16_t set_id = ntohs(*(uint16_t *) (buffer+buffer_offset));
@@ -420,7 +427,23 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     }
     int bytes_remaining_in_set = set_length - 4;
     int buffer_offset_for_this_set = buffer_offset + 4;
-    if (set_id < 256) { /* template definition */
+    cbor_item_t* array_of_templates = cbor_new_indefinite_array();
+    if (array_of_templates == NULL) {
+      cbor_decref(&root);
+      return;
+    }
+    success &= cbor_map_add(root, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("templates")),
+      .value = cbor_move(array_of_templates)});
+    cbor_item_t* array_of_flow_sets = cbor_new_indefinite_array();
+    if (array_of_flow_sets == NULL) {
+      cbor_decref(&root);
+      return;
+    }
+    success &= cbor_map_add(root, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("flow_sets")),
+      .value = cbor_move(array_of_flow_sets)});
+    if (success && set_id < 256) { /* template definition */
       // Set ID (Template) = 00 02
       // Data Set Length = 00 7c - 124
       /* There must be a template ID and field length if a template definition is encountered */
@@ -429,17 +452,43 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         cbor_decref(&root);
         return;
       }
+      cbor_item_t* template = cbor_new_indefinite_map();
+      if (template == NULL) {
+        cbor_decref(&root);
+        return;
+      }
+      success &= cbor_array_push(array_of_templates, template);
       // Template ID = 01 00 - 256
       // Number of fields = 00 1d - 29
       uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
       uint16_t number_of_fields = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("template_id")),
+        .value = cbor_move(cbor_build_uint16(template_id))});
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("number_of_fields")),
+        .value = cbor_move(cbor_build_uint16(number_of_fields))});
       bytes_remaining_in_set -= 4;
       buffer_offset_for_this_set += 4;
       int number_of_fields_left_to_process = number_of_fields;
       /* A field definition should be at least 4 bytes */
+      cbor_item_t* array_of_fields = cbor_new_indefinite_array();
+      if (array_of_fields == NULL) {
+        cbor_decref(&root);
+        return;
+      }
+      success &= cbor_map_add(template, (struct cbor_pair){
+        .key = cbor_move(cbor_build_string("fields")),
+        .value = array_of_fields});
       while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
         uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
         uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+        if (field_type <= number_of_iana_ipfix_elements) {
+          //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
+          success &= cbor_array_push(array_of_fields, cbor_build_uint16(field_type));
+        } else {
+          printf("Field Type %d is out of range\n", field_type);
+        }
         // Field 1 Type: 00 08 - 8, sourceIPv4Address
         // Field 1 Length: 00 04 - 4 bytes
         // Field 2 Type: 00 0c - 12, destinationIPv4Address
@@ -448,19 +497,11 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         buffer_offset_for_this_set += 4;
         number_of_fields_left_to_process -= 1;
       }
-      //success &= cbor_map_add(root, (struct cbor_pair){
-      //  .key = cbor_move(cbor_build_string("set_id")),
-      //  .value = cbor_move(cbor_build_uint16(set_id))});
     }
     bytes_remaining_in_packet -= set_length;
     buffer_offset += set_length;
   }
-      /* We're going to build this in reverse order. That is
-       * build the data set map, create an array of all dataset maps,
-       * typically only one, then attach the array to a new map called
-       * data_sets and then attach the data_sets map to the root map.
-       * This should look something like: 
-
+      /*
        {
         "flow_generator_ipv4_address": "174.128.129.4",
         "version": 10,
@@ -470,6 +511,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         "observation_domain_id": 524288,
         "templates": [
            {
+              "template_id": 2,
+              "number_of_fields": 4,
+              fields: [ 8, 2, 7, 13 ]
            }
         ]
         "flow_sets":  [
@@ -478,21 +522,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
           }
         ]
 }
-
-
-
 */
-      //cbor_item_t* array_of_sets = cbor_new_indefinite_array();
-      //cbor_item_t* data_sets = cbor_new_indefinite_map();
-
-//      cbor_item_t* data_sets = cbor_new_indefinite_map();
-//      bool data_sets_success = cbor_map_add(data_sets, (struct cbor_pair){
-//        .key = cbor_move(cbor_build_string("test")),
-//        .value = cbor_move(cbor_build_string("value"))});
-//      success &= cbor_map_add(root, (struct cbor_pair){
-//        .key = cbor_move(cbor_build_string("set")),
-//        .value = cbor_move(data_sets)});
-//    }
 
   if (!success) {
     puts("\nBuilding CBOR failed");
@@ -504,7 +534,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
   cJSON* cjson_item = cbor_to_cjson(root);
   char* json_string = cJSON_Print(cjson_item);
-  //printf("%s\n", json_string);
+  printf("%s\n", json_string);
   free(json_string);
   cJSON_Delete(cjson_item);
   free(cbor_buffer);

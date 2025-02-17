@@ -56,7 +56,7 @@ enum IANA_UNITS {
   IANA_UNIT_FRAMES,
   IANA_UNIT_PORTS
 };
-struct iana_ipfix {
+struct iana_ipfix_element {
   uint32_t elementid; /* 8 */
   char *name; /*sourceIPv4Address */
   int abstract_data_type; /* ipv4Address/IANA_TYPE_IPV4ADDRESS */
@@ -65,7 +65,9 @@ struct iana_ipfix {
   int low_range;
   int high_range;
 };
-static struct iana_ipfix iana_ipfix_elements[504] = {
+static int number_of_iana_ipfix_elements = 530;
+static struct iana_ipfix_element iana_ipfix_elements[530] = {
+  { 0, "Reserved", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 1, "octetDeltaCount", IANA_TYPE_UNSIGNED64, IANA_SEMANTIC_DELTACOUNTER, IANA_UNIT_OCTETS, 0, 0xFFFFFF},
   { 2, "packetDeltaCount", IANA_TYPE_UNSIGNED64, IANA_SEMANTIC_DELTACOUNTER, IANA_UNIT_PACKETS, 0, 0xFFFFFF},
   { 3, "deltaFlowCount", IANA_TYPE_UNSIGNED64, IANA_SEMANTIC_DELTACOUNTER, IANA_UNIT_FLOWS, 0, 0xFFFFFF},
@@ -130,7 +132,11 @@ static struct iana_ipfix iana_ipfix_elements[504] = {
   { 62, "ipNextHopIPv6Address", IANA_TYPE_IPV6ADDRESS, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 63, "bgpNextHopIPv6Address", IANA_TYPE_IPV6ADDRESS, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 64, "ipv6ExtensionHeaders", IANA_TYPE_UNSIGNED32, IANA_SEMANTIC_FLAGS, IANA_UNIT_NONE, 0, 0xFFFFFF},
-  { 65-69, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 65, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 66, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 67, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 68, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 69, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 70, "mplsTopLabelStackSection", IANA_TYPE_OCTETARRAY, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 71, "mplsLabelStackSection2", IANA_TYPE_OCTETARRAY, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 72, "mplsLabelStackSection3", IANA_TYPE_OCTETARRAY, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
@@ -166,7 +172,29 @@ static struct iana_ipfix iana_ipfix_elements[504] = {
   { 102, "layer2packetSectionOffset", IANA_TYPE_UNSIGNED16, IANA_SEMANTIC_QUANTITY, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 103, "layer2packetSectionSize", IANA_TYPE_UNSIGNED16, IANA_SEMANTIC_QUANTITY, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 104, "layer2packetSectionData", IANA_TYPE_OCTETARRAY, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
-  { 105-127, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 105, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 106, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 107, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 108, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 109, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 110, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 111, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 112, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 113, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 114, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 115, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 116, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 117, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 118, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 119, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 120, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 121, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 122, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 123, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 124, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 125, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 126, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
+      { 127, "Assigned for NetFlow v9 compatibility", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 128, "bgpNextAdjacentAsNumber", IANA_TYPE_UNSIGNED32, IANA_SEMANTIC_IDENTIFIER, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 129, "bgpPrevAdjacentAsNumber", IANA_TYPE_UNSIGNED32, IANA_SEMANTIC_IDENTIFIER, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 130, "exporterIPv4Address", IANA_TYPE_IPV4ADDRESS, IANA_SEMANTIC_DEFAULT, IANA_UNIT_NONE, 0, 0xFFFFFF},
@@ -569,7 +597,6 @@ static struct iana_ipfix iana_ipfix_elements[504] = {
   { 527, "udpExID", IANA_TYPE_UNSIGNED16, IANA_SEMANTIC_IDENTIFIER, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 528, "udpSafeExIDList", IANA_TYPE_BASICLIST, IANA_SEMANTIC_LIST, IANA_UNIT_NONE, 0, 0xFFFFFF},
   { 529, "udpUnsafeExIDList", IANA_TYPE_BASICLIST, IANA_SEMANTIC_LIST, IANA_UNIT_NONE, 0, 0xFFFFFF},
-  { 530-32767, "Unassigned", IANA_TYPE_NONE, IANA_SEMANTIC_NONE, IANA_UNIT_NONE, 0, 0xFFFFFF},
 };
 
 #endif // IPFIX_IANA_H
