@@ -413,51 +413,57 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
    * by ID */
   int bytes_remaining_in_packet = message_length - 16;
   int buffer_offset = 16;
+  cbor_item_t* array_of_templates = cbor_new_indefinite_array();
+  if (array_of_templates == NULL) {
+    cbor_decref(&root);
+    return;
+  }
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("templates")),
+    .value = cbor_move(array_of_templates)});
+  cbor_item_t* array_of_flow_sets = cbor_new_indefinite_array();
+  if (array_of_flow_sets == NULL) {
+    cbor_decref(&root);
+    return;
+  }
+  success &= cbor_map_add(root, (struct cbor_pair){
+    .key = cbor_move(cbor_build_string("flow_sets")),
+    .value = cbor_move(array_of_flow_sets)});
   /* A set will be at least 4 bytes long (for the set header) even if there is
    * no actual content within the set. We will deal with padding within the
    * loop */
-  while (success && bytes_remaining_in_packet >= 8) {
+  while (success && bytes_remaining_in_packet >= 4) {
     uint16_t set_id = ntohs(*(uint16_t *) (buffer+buffer_offset));
     uint16_t set_length = ntohs(*(uint16_t *) (buffer+buffer_offset+2));
     /* The set length scrolls off the screen. Bail out */
     if (set_length > bytes_remaining_in_packet || set_length < 4) {
       printf("The set_length scrolls off the screen\n");
+      cbor_decref(&array_of_templates);
+      cbor_decref(&array_of_flow_sets);
       cbor_decref(&root);
       return;
     }
     int bytes_remaining_in_set = set_length - 4;
     int buffer_offset_for_this_set = buffer_offset + 4;
-    cbor_item_t* array_of_templates = cbor_new_indefinite_array();
-    if (array_of_templates == NULL) {
-      cbor_decref(&root);
-      return;
-    }
-    success &= cbor_map_add(root, (struct cbor_pair){
-      .key = cbor_move(cbor_build_string("templates")),
-      .value = cbor_move(array_of_templates)});
-    cbor_item_t* array_of_flow_sets = cbor_new_indefinite_array();
-    if (array_of_flow_sets == NULL) {
-      cbor_decref(&root);
-      return;
-    }
-    success &= cbor_map_add(root, (struct cbor_pair){
-      .key = cbor_move(cbor_build_string("flow_sets")),
-      .value = cbor_move(array_of_flow_sets)});
     if (success && set_id < 256) { /* template definition */
       // Set ID (Template) = 00 02
       // Data Set Length = 00 7c - 124
       /* There must be a template ID and field length if a template definition is encountered */
       if (bytes_remaining_in_set < 4) {
         printf("A template definition was encountered, without ID and number of fields being defined\n");
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
       cbor_item_t* template = cbor_new_indefinite_map();
       if (template == NULL) {
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
-      success &= cbor_array_push(array_of_templates, template);
+      success &= cbor_array_push(array_of_templates, cbor_move(template));
       // Template ID = 01 00 - 256
       // Number of fields = 00 1d - 29
       uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
@@ -471,21 +477,24 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
       bytes_remaining_in_set -= 4;
       buffer_offset_for_this_set += 4;
       int number_of_fields_left_to_process = number_of_fields;
-      /* A field definition should be at least 4 bytes */
       cbor_item_t* array_of_fields = cbor_new_indefinite_array();
       if (array_of_fields == NULL) {
+        cbor_decref(&template);
+        cbor_decref(&array_of_templates);
+        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
       success &= cbor_map_add(template, (struct cbor_pair){
         .key = cbor_move(cbor_build_string("fields")),
-        .value = array_of_fields});
+        .value = cbor_move(array_of_fields)});
+      /* A field definition should be at least 4 bytes */
       while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
         uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
         uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
         if (field_type <= number_of_iana_ipfix_elements) {
           //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
-          success &= cbor_array_push(array_of_fields, cbor_build_uint16(field_type));
+          //success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
         } else {
           printf("Field Type %d is out of range\n", field_type);
         }
@@ -497,6 +506,14 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         buffer_offset_for_this_set += 4;
         number_of_fields_left_to_process -= 1;
       }
+    } else if (success && set_id >= 256) { /* flow record set */
+      // Data Set = 01 00 - 256 - Data Set
+      // Data Set Length = 01 6c - 364 bytes
+      // Record 1
+      // Field 1 Value: 4a 7d 03 29 - SourceIPv4Address, 74.125.3.41
+      // Field 2 Value: ae 80 81 66 - DestinationIPv4Address, 174.128.129.102
+      // Field 3 Value: 00 - ipClassOfService, 0
+      // Field 4 Type: 06 - protocolIdentifier, TCP
     }
     bytes_remaining_in_packet -= set_length;
     buffer_offset += set_length;
@@ -526,6 +543,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 
   if (!success) {
     puts("\nBuilding CBOR failed");
+    cbor_decref(&array_of_templates);
+    cbor_decref(&array_of_flow_sets);
+    cbor_decref(&root);
     return;
   }
 
