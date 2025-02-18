@@ -474,9 +474,6 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
       int number_of_fields_left_to_process = number_of_fields;
       cbor_item_t* array_of_fields = cbor_new_indefinite_array();
       if (array_of_fields == NULL) {
-        cbor_decref(&template);
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
@@ -503,15 +500,11 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     } else if (success && set_id == 3) { /* */
 //      if (bytes_remaining_in_set < 4) {
 //        printf("A template definition was encountered, without ID and number of fields being defined\n");
-//        cbor_decref(&array_of_templates);
-//        cbor_decref(&array_of_flow_sets);
 //        cbor_decref(&root);
 //        return;
 //      }
 //      cbor_item_t* template = cbor_new_indefinite_map();
 //      if (template == NULL) {
-//        cbor_decref(&array_of_templates);
-//        cbor_decref(&array_of_flow_sets);
 //        cbor_decref(&root);
 //        return;
 //      }
@@ -531,9 +524,6 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 //      int number_of_fields_left_to_process = number_of_fields;
 //      cbor_item_t* array_of_fields = cbor_new_indefinite_array();
 //      if (array_of_fields == NULL) {
-//        cbor_decref(&template);
-//        cbor_decref(&array_of_templates);
-//        cbor_decref(&array_of_flow_sets);
 //        cbor_decref(&root);
 //        return;
 //      }
