@@ -22,7 +22,6 @@ int counter;
 //typedef HASHMAP(struct tcp_socket, struct tcp_connection) tcp_hash_t;
 //tcp_hash_t tcp_map;
 
-// This has a memory leak somewhere
 cJSON* cbor_to_cjson(cbor_item_t* item) {
   switch (cbor_typeof(item)) {
     case CBOR_TYPE_UINT:
@@ -594,9 +593,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   size_t cbor_buffer_size;
   cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
   cJSON* cjson_item = cbor_to_cjson(root);
-  char* json_string = cJSON_Print(cjson_item);
+  //char* json_string = cJSON_Print(cjson_item);
   //printf("%s\n", json_string);
-  free(json_string);
+  //free(json_string);
   cJSON_Delete(cjson_item);
   free(cbor_buffer);
   cbor_decref(&root);
