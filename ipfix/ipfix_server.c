@@ -22,6 +22,7 @@ int counter;
 //typedef HASHMAP(struct tcp_socket, struct tcp_connection) tcp_hash_t;
 //tcp_hash_t tcp_map;
 
+// This has a memory leak somewhere
 cJSON* cbor_to_cjson(cbor_item_t* item) {
   switch (cbor_typeof(item)) {
     case CBOR_TYPE_UINT:
@@ -47,7 +48,7 @@ cJSON* cbor_to_cjson(cbor_item_t* item) {
     case CBOR_TYPE_ARRAY: {
       cJSON* result = cJSON_CreateArray();
       for (size_t i = 0; i < cbor_array_size(item); i++) {
-        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_array_get(item, i)));
+        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_move(cbor_array_get(item, i))));
       }
       return result;
     }
@@ -77,7 +78,7 @@ cJSON* cbor_to_cjson(cbor_item_t* item) {
       return cJSON_CreateString("Unsupported CBOR item: Tag");
     case CBOR_TYPE_FLOAT_CTRL:
       if (cbor_float_ctrl_is_ctrl(item)) {
-        //if (cbor_is_bool(item)) return cJSON_CreateBool(cbor_get_bool(item));
+        if (cbor_is_bool(item)) return cJSON_CreateBool(cbor_get_bool(item));
         if (cbor_is_null(item)) return cJSON_CreateNull();
         return cJSON_CreateString("Unsupported CBOR item: Control value");
       }
@@ -408,10 +409,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
 
   /* The message_length includes the message header or, in other words, the
    * message_length is the length of the entire packet */
-  /* Template definitions have an ID of less than 256 (e.g. 2)
-   * These are sent periodically from the flow source and
-   * subsequent flow records (ID >= 256) will reference the defined template
-   * by ID */
+  /* Template definitions have an ID of 2. These are sent periodically
+   * from the flow source and subsequent flow records (ID >= 256) will
+   * reference the defined template by ID */
   int bytes_remaining_in_packet = message_length - 16;
   int buffer_offset = 16;
   cbor_item_t* array_of_templates = cbor_new_indefinite_array();
@@ -439,8 +439,6 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     /* The set length scrolls off the screen. Bail out */
     if (set_length > bytes_remaining_in_packet || set_length < 4) {
       printf("The set_length scrolls off the screen\n");
-      cbor_decref(&array_of_templates);
-      cbor_decref(&array_of_flow_sets);
       cbor_decref(&root);
       return;
     }
@@ -452,15 +450,11 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
       /* There must be a template ID and field length if a template definition is encountered */
       if (bytes_remaining_in_set < 4) {
         printf("A template definition was encountered, without ID and number of fields being defined\n");
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
       cbor_item_t* template = cbor_new_indefinite_map();
       if (template == NULL) {
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
         cbor_decref(&root);
         return;
       }
@@ -494,8 +488,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
         uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
         if (field_type <= number_of_iana_ipfix_elements) {
-          //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
-          //success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
+          success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
         } else {
           printf("Field Type %d is out of range\n", field_type);
         }
@@ -507,64 +500,64 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
         buffer_offset_for_this_set += 4;
         number_of_fields_left_to_process -= 1;
       }
-    } else if (success && set_id == 3) { /* template definition */
-      if (bytes_remaining_in_set < 4) {
-        printf("A template definition was encountered, without ID and number of fields being defined\n");
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
-        cbor_decref(&root);
-        return;
-      }
-      cbor_item_t* template = cbor_new_indefinite_map();
-      if (template == NULL) {
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
-        cbor_decref(&root);
-        return;
-      }
-      success &= cbor_array_push(array_of_templates, cbor_move(template));
-      // Template ID = 01 00 - 256
-      // Number of fields = 00 1d - 29
-      uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
-      uint16_t number_of_fields = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
-      success &= cbor_map_add(template, (struct cbor_pair){
-        .key = cbor_move(cbor_build_string("template_id")),
-        .value = cbor_move(cbor_build_uint16(template_id))});
-      success &= cbor_map_add(template, (struct cbor_pair){
-        .key = cbor_move(cbor_build_string("number_of_fields")),
-        .value = cbor_move(cbor_build_uint16(number_of_fields))});
-      bytes_remaining_in_set -= 4;
-      buffer_offset_for_this_set += 4;
-      int number_of_fields_left_to_process = number_of_fields;
-      cbor_item_t* array_of_fields = cbor_new_indefinite_array();
-      if (array_of_fields == NULL) {
-        cbor_decref(&template);
-        cbor_decref(&array_of_templates);
-        cbor_decref(&array_of_flow_sets);
-        cbor_decref(&root);
-        return;
-      }
-      success &= cbor_map_add(template, (struct cbor_pair){
-        .key = cbor_move(cbor_build_string("fields")),
-        .value = cbor_move(array_of_fields)});
-      /* A field definition should be at least 4 bytes */
-      while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
-        uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
-        uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
-        if (field_type <= number_of_iana_ipfix_elements) {
-          //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
-          //success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
-        } else {
-          printf("Field Type %d is out of range\n", field_type);
-        }
-        // Field 1 Type: 00 08 - 8, sourceIPv4Address
-        // Field 1 Length: 00 04 - 4 bytes
-        // Field 2 Type: 00 0c - 12, destinationIPv4Address
-        // Field 2 Length: 00 04 - 4 bytes
-        bytes_remaining_in_set -= 4;
-        buffer_offset_for_this_set += 4;
-        number_of_fields_left_to_process -= 1;
-      }
+    } else if (success && set_id == 3) { /* */
+//      if (bytes_remaining_in_set < 4) {
+//        printf("A template definition was encountered, without ID and number of fields being defined\n");
+//        cbor_decref(&array_of_templates);
+//        cbor_decref(&array_of_flow_sets);
+//        cbor_decref(&root);
+//        return;
+//      }
+//      cbor_item_t* template = cbor_new_indefinite_map();
+//      if (template == NULL) {
+//        cbor_decref(&array_of_templates);
+//        cbor_decref(&array_of_flow_sets);
+//        cbor_decref(&root);
+//        return;
+//      }
+//      success &= cbor_array_push(array_of_templates, cbor_move(template));
+//      // Template ID = 01 00 - 256
+//      // Number of fields = 00 1d - 29
+//      uint16_t template_id = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+//      uint16_t number_of_fields = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+//      success &= cbor_map_add(template, (struct cbor_pair){
+//        .key = cbor_move(cbor_build_string("template_id")),
+//        .value = cbor_move(cbor_build_uint16(template_id))});
+//      success &= cbor_map_add(template, (struct cbor_pair){
+//        .key = cbor_move(cbor_build_string("number_of_fields")),
+//        .value = cbor_move(cbor_build_uint16(number_of_fields))});
+//      bytes_remaining_in_set -= 4;
+//      buffer_offset_for_this_set += 4;
+//      int number_of_fields_left_to_process = number_of_fields;
+//      cbor_item_t* array_of_fields = cbor_new_indefinite_array();
+//      if (array_of_fields == NULL) {
+//        cbor_decref(&template);
+//        cbor_decref(&array_of_templates);
+//        cbor_decref(&array_of_flow_sets);
+//        cbor_decref(&root);
+//        return;
+//      }
+//      success &= cbor_map_add(template, (struct cbor_pair){
+//        .key = cbor_move(cbor_build_string("fields")),
+//        .value = cbor_move(array_of_fields)});
+//      /* A field definition should be at least 4 bytes */
+//      while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
+//        uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
+//        uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
+//        if (field_type <= number_of_iana_ipfix_elements) {
+//          //printf("Field Type, %d, Field String %s, Field Length, %d\n", field_type, iana_ipfix_elements[field_type].name, field_length);
+//          //success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
+//        } else {
+//          printf("Field Type %d is out of range\n", field_type);
+//        }
+//        // Field 1 Type: 00 08 - 8, sourceIPv4Address
+//        // Field 1 Length: 00 04 - 4 bytes
+//        // Field 2 Type: 00 0c - 12, destinationIPv4Address
+//        // Field 2 Length: 00 04 - 4 bytes
+//        bytes_remaining_in_set -= 4;
+//        buffer_offset_for_this_set += 4;
+//        number_of_fields_left_to_process -= 1;
+//      }
     } else if (success && set_id >= 256) { /* flow record set */
       // Data Set = 01 00 - 256 - Data Set
       // Data Set Length = 01 6c - 364 bytes
@@ -597,30 +590,29 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
                 "test": "value"
           }
         ]
-}
+       }
 */
 
   if (!success) {
     puts("\nBuilding CBOR failed");
-    cbor_decref(&array_of_templates);
-    cbor_decref(&array_of_flow_sets);
     cbor_decref(&root);
     return;
   }
 
-  //unsigned char* cbor_buffer;
-  //size_t cbor_buffer_size;
-  //cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
-  //cJSON* cjson_item = cbor_to_cjson(root);
-  //char* json_string = cJSON_Print(cjson_item);
+  //cbor_describe(root, stdout);
+  unsigned char* cbor_buffer;
+  size_t cbor_buffer_size;
+  cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
+  cJSON* cjson_item = cbor_to_cjson(root);
+  char* json_string = cJSON_Print(cjson_item);
   //printf("%s\n", json_string);
-  //free(json_string);
-  //cJSON_Delete(cjson_item);
-  //free(cbor_buffer);
+  free(json_string);
+  cJSON_Delete(cjson_item);
+  free(cbor_buffer);
   cbor_decref(&root);
 
   counter = counter + 1;
-  if (counter % 1000 == 0) {
+  if (counter % 50000 == 0) {
     printf("\nPackets seen: %d\n", counter);
     FILE *fp;
     char path[1024];
@@ -691,7 +683,7 @@ int main(int argc, char const *argv[]) {
   server.sin_port = htons(flow_port);
   len = sizeof(server);
   if (bind(flow_server_fd, (struct sockaddr *)&server, len) < 0) {
-    perror("Cannot bind sokcet");
+    perror("Cannot bind socket");
     exit(2);
   }
 
