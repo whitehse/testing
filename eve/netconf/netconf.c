@@ -1,5 +1,5 @@
-#define CONFIG_ASSH_DEBUG
-#define CONFIG_ASSH_DEBUG_EVENT
+//#define CONFIG_ASSH_DEBUG
+//#define CONFIG_ASSH_DEBUG_EVENT
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -73,7 +73,7 @@ cJSON* cbor_to_cjson(cbor_item_t* item) {
     case CBOR_TYPE_ARRAY: {
       cJSON* result = cJSON_CreateArray();
       for (size_t i = 0; i < cbor_array_size(item); i++) {
-        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_array_get(item, i)));
+        cJSON_AddItemToArray(result, cbor_to_cjson(cbor_move(cbor_array_get(item, i))));
       }
       return result;
     }
@@ -215,13 +215,12 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     //printf("Loop %d\n", looped);
     looped = looped + 1;
     if (last_id = ASSH_EVENT_READ && event.id != ASSH_EVENT_READ) {
-      printf("Exited the read loop\n"); 
+      //printf("Exited the read loop\n"); 
     }
 
     switch (event.id) {
       case ASSH_EVENT_READ:
         //printf("EVENT Read Called\n");
-        ter = &event.transport.read;
         if (revents & EV_WRITE && ssh->writer_running) {
           // A write (availability) event was received from the socket, via libev,
           // but ASSH is in an ASSH_EVENT_READ state. Stop the ev write watcher and
@@ -233,6 +232,8 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           assh_event_done(ssh->session, &event, err);
           goto out;
         }
+//        asshh_fd_event(ssh->session, &event, w->fd);
+        ter = &event.transport.read;
         r = read(w->fd, ter->buf.data, ter->buf.size);
         //hexDump("ssh receive data:", ter->buf.data, ter->buf.size);
         //printf("In READ case, ter->buf.size = %d\n", ter->buf.size);
@@ -260,9 +261,9 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         break;
 
       case ASSH_EVENT_WRITE:
-        //printf("EVENT Write Called\n");
-        struct assh_event_transport_write_s *tew = &event.transport.write;
+        printf("EVENT Write Called\n");
         if (revents & EV_READ && ssh->reader_running) {
+          puts("Entered out of sync condition");
           // A read event was received from the socket, via libev,
           // but ASSH is in an ASSH_EVENT_WRITE state. Stop the ev read watcher and
           // start the ev write (availability) watcher
@@ -273,6 +274,8 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           assh_event_done(ssh->session, &event, err);
           goto out;
         }
+//        asshh_fd_event(ssh->session, &event, w->fd);
+        struct assh_event_transport_write_s *tew = &event.transport.write;
         r = write(w->fd, tew->buf.data, tew->buf.size);
         switch (r) {
           case -1:
@@ -291,7 +294,7 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
             tew->transferred = r;
             break;
         }
-        //printf("Wrote %d bytes, ", r);
+        printf("Wrote %d bytes\n", r);
         assh_event_done(ssh->session, &event, err);
         //printf("EVENT Write Finished\n");
         break;
@@ -367,11 +370,12 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         }
         break;
       case ASSH_EVENT_CHANNEL_OPEN:
-        printf("Event Channel open\n");
-
+        printf("Event Channel open request from remote host. No channel for you!\n");
+        struct assh_event_request_s *er = &event.connection.request;
+        er->reply = ASSH_CONNECTION_REPLY_FAILED;
         break;
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
-        printf("Channel Confirmation called\n");
+        printf("Our channel open request was confirmed by the remote host\n");
         struct assh_event_channel_confirmation_s *ev_confirm = &event.connection.channel_confirmation;
 
         if (ev_confirm->ch != ssh->inter->channel)
@@ -399,6 +403,12 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
           goto err;
         }
 
+//        if (send_hello_and_subscribe == 0) {
+//          send_hello_and_subscribe = 1;
+          /* allocate output data packet */
+          //uint8_t *data;
+//        }
+
         break;
 
       case ASSH_EVENT_CHANNEL_FAILURE:
@@ -414,6 +424,15 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 
         goto err;
 
+      case ASSH_EVENT_CHANNEL_ABORT:
+        printf("ASSH_EVENT_CHANNEL_ABORT was called.\n");
+        break;
+
+//      case ASSH_EVENT_CHANNEL_WINDOW:
+//        printf("ASSH_EVENT_CHANNEL_WINDOW was called.\n");
+//        break;
+
+      case ASSH_CLIENT_INTER_ST_EXEC:
       case ASSH_EVENT_REQUEST_SUCCESS:
         printf("Request Success called\n");
         struct assh_event_request_success_s *ev_request_success = &event.connection.request_success;
@@ -444,9 +463,9 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 //                ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
 //              }
 
-            struct asshh_inter_subsystem_s i;
-            if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
-              goto err;
+            //struct asshh_inter_subsystem_s i;
+            //if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
+            //  goto err;
             ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
             break;
 
@@ -463,7 +482,9 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
 
       case ASSH_EVENT_REQUEST_FAILURE:
         struct assh_event_request_failure_s *ev_request_failure = &event.connection.request_failure;
-        printf("Request Failure called, reason: %d\n", ev_request_failure->reason);
+        printf("Request Failure called, reason: %s\n", ev_request_failure->reason ? "REQUEST_FAILED" : "SESSION_DISCONNECTED");
+        // ASSH_REQUEST_SESSION_DISCONNECTED, 0
+        // ASSH_REQUEST_FAILED, 1
 
         if (ev_request_failure->ch != ssh->inter->channel ||
             ev_request_failure->rq != ssh->inter->request)
@@ -504,45 +525,79 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
         //free(buffer);
 
         ssize_t r = write(1, ec->data.data, ec->data.size);
-        switch (r) {
-          case -1:
-            r = 0;
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
-              break;
-          case 0:
-            r = -1;
-            err = ASSH_ERR_IO;
-          default:
-            ec->transferred = r;
-        }
-        //printf("Wrote %d bytes to stdout, ", r);
-        assh_event_done(ssh->session, &event, err);
-
-//        if (send_hello_and_subscribe == 0) {
-//          send_hello_and_subscribe = 1;
-//          /* allocate output data packet */
-//          //uint8_t *data;
-//          char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
-//          size_t hello_length = strlen(hello_string);
-//          err = assh_channel_data_alloc(ev_confirm->ch, (uint8_t **)&hello_string, &hello_length, 1);
-//          printf("Tried allocating buffer to hello string. The result is %d\n", ASSH_STATUS(err));
-//  
-//          if (ASSH_STATUS(err) == ASSH_OK) {
-//            puts("Sending hello string");
-//            assh_channel_data_send(ev_confirm->ch, hello_length);
-//          }
-//
-//          char *subscribe_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\"><create-subscription xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\"><stream>exa-events</stream></create-subscription></rpc>";
-//          size_t subscribe_length = strlen(subscribe_string);
-//          err = assh_channel_data_alloc(ev_confirm->ch, (uint8_t **)&subscribe_string, &subscribe_length, 1);
-//          printf("Tried allocating buffer to subscribe string. The result is %d\n", ASSH_STATUS(err));
-//
-//          if (ASSH_STATUS(err) == ASSH_OK) {
-//            puts("Sending subscribe string");
-//            assh_channel_data_send(ev_confirm->ch, subscribe_length);
-//          }
+//        switch (r) {
+//          case -1:
+//            r = 0;
+//            if (errno == EAGAIN || errno == EWOULDBLOCK)
+//              break;
+//          case 0:
+//            r = -1;
+//            err = ASSH_ERR_IO;
+//          default:
+//            ec->transferred = r;
 //        }
 
+        ec->transferred = ec->data.size;
+        //assh_channel_window_adjust(ec->ch, ec->transferred);
+        assh_event_done(ssh->session, &event, err);
+
+        uint8_t *send_buf;
+        //printf("Wrote %d bytes to stdout, ", r);
+        if (strncmp(ec->data.data + ec->data.size - 14 , "</hello>]]>]]>", 14) == 0) {
+          puts("\nEnd of hello seen\n");
+          char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
+          size_t hello_length = strlen(hello_string);
+          err = assh_channel_data_alloc(ev_confirm->ch, &send_buf, &hello_length, hello_length);
+          memcpy(send_buf, hello_string, hello_length);
+          printf("Tried allocating buffer to hello string. The result is %d\n", ASSH_STATUS(err));
+          if (ASSH_STATUS(err) == ASSH_OK) {
+            puts("Sending hello string");
+            assh_channel_data_send(ev_confirm->ch, hello_length);
+          }
+
+          char *subscribe_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\"><create-subscription xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\"><stream>exa-events</stream></create-subscription></rpc>]]>]]>";
+          size_t subscribe_length = strlen(subscribe_string);
+          err = assh_channel_data_alloc(ev_confirm->ch, &send_buf, &subscribe_length, subscribe_length);
+          memcpy(send_buf, subscribe_string, subscribe_length);
+          printf("Tried allocating buffer to subscribe string. The result is %d\n", ASSH_STATUS(err));
+          if (ASSH_STATUS(err) == ASSH_OK) {
+            puts("Sending subscribe string");
+            assh_channel_data_send(ev_confirm->ch, subscribe_length);
+          }
+//          char *get_onts_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"487\"><get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><filter type=\"xpath\" select=\"/status/system/ont\"/></get></rpc>]]>]]>"
+//          size_t get_onts_length = strlen(get_onts_string);
+//          err = assh_channel_data_alloc(ev_confirm->ch, &send_buf, &get_onts_length, get_onts_length);
+//          memcpy(send_buf, get_onts_string, get_onts_length);
+//          printf("Tried allocating buffer to get_onts string. The result is %d\n", ASSH_STATUS(err));
+//          if (ASSH_STATUS(err) == ASSH_OK) {
+//            puts("Sending onts_string string");
+//            assh_channel_data_send(ev_confirm->ch, get_onts_length);
+//          }
+        } else {
+          puts("\nEnd of hello not seen\n");
+        }
+
+        break;
+
+      case ASSH_EVENT_KEX_DONE:
+        printf("Key exchange completed\n");
+        assh_event_done(ssh->session, &event, ASSH_OK);
+        break;
+
+      case ASSH_EVENT_USERAUTH_CLIENT_SUCCESS:
+        printf("User authentication completed\n");
+        assh_event_done(ssh->session, &event, ASSH_OK);
+        break;
+
+      case ASSH_EVENT_REQUEST:
+        struct assh_event_request_s *ereq = &event.connection.request;
+        printf("Received event request %.*s", ereq->type.len, ereq->type.str);
+        assh_event_done(ssh->session, &event, ASSH_OK);
+        break;
+
+      case ASSH_EVENT_CHANNEL_WINDOW:
+        printf("An channel window event was received\n");
+        assh_event_done(ssh->session, &event, ASSH_OK);
         break;
 
       default:
@@ -552,6 +607,8 @@ static void socket_cb (struct ev_loop *loop, ev_io *w, int revents) {
     result = assh_event_get(ssh->session, &event, t);
     last_id = event.id;
   }
+
+  goto out;
 
 err:
   switch (ssh->inter->state)
@@ -715,7 +772,7 @@ int main(int argc, char **argv) {
   server.sin_port = htons(netconf_callhome_port);
   len = sizeof(server);
   if (bind(netconf_listener_fd, (struct sockaddr *)&server, len) < 0) {
-    perror("Cannot bind sokcet");
+    perror("Cannot bind socket");
     exit(2);
   }
   if (listen(netconf_listener_fd, 100000) < 0) {
