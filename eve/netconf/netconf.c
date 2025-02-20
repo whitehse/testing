@@ -551,7 +551,6 @@ err:
       break;
     }
 out:
-  printf("*");
   return;
 }
 
