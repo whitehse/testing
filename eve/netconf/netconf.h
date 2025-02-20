@@ -1,5 +1,5 @@
-#ifndef EVE_SSH_AGGREGATOR_H
-#define EVE_SSH_AGGREGATOR_H
+#ifndef NETCONF_H
+#define NETCONF_H
 
 /*
 #define EVE_SSH_AGGREGATOR_OK               0 // successful result
@@ -28,4 +28,33 @@ struct ssh {
 };
 typedef struct ssh ssh_t;
 
-#endif // EVE_SSH_AGGREGATOR_H
+struct juniper_banner {
+//Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):
+//MSG-ID: DEVICE-CONN-INFO\r\n
+//MSG-VER: V1\r\n
+//DEVICE-ID: <device-id>\r\n
+//HOST-KEY: <public-host-key>\r\n
+//HMAC:<HMAC(pub-SSH-host-key, <secret>)>\r\n
+  char *msg_id;
+  char *msg_ver;
+  char *device_id;
+  char *host_key;
+  char *hmac;
+};
+
+struct calix_banner {
+//<version>1</version>
+//<identity>
+//  <mac>00:02:5d:d9:21:47</mac>
+//  <serial-number>071904926728</serial-number>
+//  <model-name>E7 System</model-name>
+//  <source-ip>192.168.35.13</source-ip>
+//</identity>
+  char *version;
+  char *mac;
+  char *serial_number;
+  char *model_name;
+  char *source_ip;
+};
+
+#endif // NETCONF_H

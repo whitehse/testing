@@ -38,6 +38,7 @@
 #include <ev.h>
 #include <cbor.h>
 #include <cjson/cJSON.h>
+#include <expat.h>
 #include <netconf.h>
 
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
@@ -158,6 +159,90 @@ void hexDump(char *desc, void *addr, int len)
 
     // And print the final ASCII bit.
     printf("  %s\n", buff);
+}
+
+static void XMLCALL start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  int i;
+  //int *const depthPtr = (int *)userData;
+  (void)atts;
+
+  printf("<%s>\n", tag_name);
+  //for (i = 0; i < *depthPtr; i++) {
+  //  *depthPtr += 1;
+  //}
+
+  //struct token_tailq *token = malloc(sizeof(*token));
+  //token->token_id = TAGBEGIN;
+  //token->charval = strdup(name);
+  //TAILQ_INSERT_TAIL(token_head, token, tokens);
+
+  //for (i = 0; atts[i]; i += 2) {
+  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTENAME;
+  //  token->charval = strdup(atts[i]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTEVALUE;
+  //  token->charval = strdup(atts[i+1]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+  //}
+
+  //token = malloc(sizeof(*token));
+  //token->token_id = TAGEND;
+  //TAILQ_INSERT_TAIL(token_head, token, tokens);
+}
+
+static void XMLCALL end_element(void *data, const XML_Char *tag_name) {
+  //int *const depthPtr = (int *)userData;
+  //(void)name;
+  //*depthPtr -= 1;
+
+  printf("<%s>\n", tag_name);
+
+  //struct token_tailq *token = malloc(sizeof(*token));
+  //token->token_id = TAGCLOSE;
+  //token->charval = strdup(name);
+  //TAILQ_INSERT_TAIL(token_head, token, tokens);
+}
+
+static void XMLCALL char_handler(void *data, const XML_Char *s, int len) {
+  //struct token_tailq *token = malloc(sizeof(*token));
+  //token->token_id = CONTENT;
+  //token->charval = calloc(len+1, sizeof(char));
+  //strncpy(token->charval, s, len);
+  //TAILQ_INSERT_TAIL(token_head, token, tokens);
+}
+
+//Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):
+//MSG-ID: DEVICE-CONN-INFO\r\n
+//MSG-VER: V1\r\n
+//DEVICE-ID: <device-id>\r\n
+//HOST-KEY: <public-host-key>\r\n
+//HMAC:<HMAC(pub-SSH-host-key, <secret>)>\r\n
+//
+//Calix AXOS sends this:
+//<version>1</version>
+//<identity>
+//  <mac>00:02:5d:d9:21:47</mac>
+//  <serial-number>071904926728</serial-number>
+//  <model-name>E7 System</model-name>
+//  <source-ip>192.168.35.13</source-ip>
+//</identity>
+//
+// And then expects:
+//  <ack>ok</ack>
+void process_identity(){
+  XML_Parser parser = XML_ParserCreate(NULL);
+
+  int done;
+  int depth = 0;
+
+  XML_SetUserData(parser, &depth);
+  XML_SetElementHandler(parser, start_element, end_element);
+  XML_SetCharacterDataHandler(parser, char_handler);
+  XML_ParserFree(parser);
 }
 
 static void process_assh_events (struct ssh *ssh) {
@@ -409,7 +494,7 @@ static void process_assh_events (struct ssh *ssh) {
         uint8_t *send_buf;
         //printf("Wrote %d bytes to stdout, ", r);
         if (strncmp(ec->data.data + ec->data.size - 14 , "</hello>]]>]]>", 14) == 0) {
-          puts("\nEnd of hello seen\n");
+          //puts("\nEnd of hello seen\n");
           char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
           size_t hello_length = strlen(hello_string);
           err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &hello_length, hello_length);
@@ -429,17 +514,17 @@ static void process_assh_events (struct ssh *ssh) {
             puts("Sending subscribe string");
             assh_channel_data_send(ssh->inter->channel, subscribe_length);
           }
-          //char *get_onts_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"487\"><get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><filter type=\"xpath\" select=\"/status/system/ont\"/></get></rpc>]]>]]>";
-          //size_t get_onts_length = strlen(get_onts_string);
-          //err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &get_onts_length, get_onts_length);
-          //memcpy(send_buf, get_onts_string, get_onts_length);
-          //printf("Tried allocating buffer to get_onts string. The result is %d\n", ASSH_STATUS(err));
-          //if (ASSH_STATUS(err) == ASSH_OK) {
-          //  puts("Sending onts_string string");
-          //  assh_channel_data_send(ssh->inter->channel, get_onts_length);
-          //}
+          char *get_onts_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"487\"><get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><filter type=\"xpath\" select=\"/status/system/ont\"/></get></rpc>]]>]]>";
+          size_t get_onts_length = strlen(get_onts_string);
+          err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &get_onts_length, get_onts_length);
+          memcpy(send_buf, get_onts_string, get_onts_length);
+          printf("Tried allocating buffer to get_onts string. The result is %d\n", ASSH_STATUS(err));
+          if (ASSH_STATUS(err) == ASSH_OK) {
+            puts("Sending onts_string string");
+            assh_channel_data_send(ssh->inter->channel, get_onts_length);
+          }
         } else {
-          puts("\nEnd of hello not seen\n");
+          //puts("\nEnd of hello not seen\n");
         }
 
         break;
@@ -473,9 +558,9 @@ static void process_assh_events (struct ssh *ssh) {
     if (assh_event_get(ssh->session, ssh->event, time(NULL)) == 0) {
       puts("result was zero. Bailing");
       ev_io_stop (loop, ssh->socket_watcher_reader);
-      free(ssh->socket_watcher_reader);
+      //free(ssh->socket_watcher_reader);
       ev_io_stop (loop, ssh->socket_watcher_writer);
-      free(ssh->socket_watcher_writer);
+      //free(ssh->socket_watcher_writer);
       goto out;
     }
     //printf("The next event id is %d\n", ssh->event->id);
@@ -585,7 +670,7 @@ static void ssh_network_write (struct ev_loop *loop, ev_io *w, int revents) {
   } else if (ssh->banner_seen == 1 && ssh->banner_written == 0) {
     puts("Socket is writable and banner has been seen. Send ack");
     ssh->banner_written = 1;
-    //printf("\n%s: Sending: <ack>ok</ack>\n", ssh->call_home_remote_address);
+    printf("\n%s: Sending: <ack>ok</ack>\n", ssh->call_home_remote_address);
     int r = write(w->fd, "<ack>ok</ack>", 13);
     goto out;
   }
