@@ -41,10 +41,10 @@
 #include <expat.h>
 #include <netconf.h>
 
+// TODO: Get rid of this and replace
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
-#define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
-#define DPRINT(x...) printf(x)
 
+// TODO: Verify and document the size. Name it something better
 #define BUFFER_SIZE 1024
 
 struct ev_loop *loop;
@@ -171,10 +171,7 @@ static void XMLCALL start_element(void *data, const XML_Char *tag_name, const XM
   //  *depthPtr += 1;
   //}
 
-  //struct token_tailq *token = malloc(sizeof(*token));
-  //token->token_id = TAGBEGIN;
   //token->charval = strdup(name);
-  //TAILQ_INSERT_TAIL(token_head, token, tokens);
 
   //for (i = 0; atts[i]; i += 2) {
   //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
@@ -188,10 +185,6 @@ static void XMLCALL start_element(void *data, const XML_Char *tag_name, const XM
   //  token->charval = strdup(atts[i+1]);
   //  TAILQ_INSERT_TAIL(token_head, token, tokens);
   //}
-
-  //token = malloc(sizeof(*token));
-  //token->token_id = TAGEND;
-  //TAILQ_INSERT_TAIL(token_head, token, tokens);
 }
 
 static void XMLCALL end_element(void *data, const XML_Char *tag_name) {
@@ -201,18 +194,13 @@ static void XMLCALL end_element(void *data, const XML_Char *tag_name) {
 
   printf("<%s>\n", tag_name);
 
-  //struct token_tailq *token = malloc(sizeof(*token));
-  //token->token_id = TAGCLOSE;
   //token->charval = strdup(name);
-  //TAILQ_INSERT_TAIL(token_head, token, tokens);
 }
 
 static void XMLCALL char_handler(void *data, const XML_Char *s, int len) {
-  //struct token_tailq *token = malloc(sizeof(*token));
   //token->token_id = CONTENT;
   //token->charval = calloc(len+1, sizeof(char));
   //strncpy(token->charval, s, len);
-  //TAILQ_INSERT_TAIL(token_head, token, tokens);
 }
 
 //Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):
@@ -263,35 +251,34 @@ static void process_assh_events (struct ssh *ssh) {
         /* TODO This may not be the right thing to do */
         //assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         //close(w->fd);
-        //w->data->
         /* */
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
-        printf("Host key lookup called\n");
+        //printf("Host key lookup called\n");
         struct assh_event_kex_hostkey_lookup_s *ek = &ssh->event->kex.hostkey_lookup;
         ek->accept = 1;
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
-        puts("Host key lookup finished");
+        //puts("Host key lookup finished");
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_BANNER:
-        printf("Client Banner called\n");
+        //printf("Client Banner called\n");
         struct assh_event_userauth_client_banner_s *eb = &ssh->event->userauth_client.banner;
         assert(ssh->event->id == ASSH_EVENT_USERAUTH_CLIENT_BANNER);
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_USER:
-        printf("Client User called\n");
+        //printf("Client User called\n");
         struct assh_event_userauth_client_user_s *eu = &ssh->event->userauth_client.user;
         assh_buffer_strset(&eu->username, "sysadmin");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_METHODS:
-        printf("Client User methods called\n");
+        //printf("Client User methods called\n");
         struct assh_event_userauth_client_methods_s *ev = &ssh->event->userauth_client.methods;
         assh_buffer_strset(&ev->password, "sysadmin");
         ev->select = ASSH_USERAUTH_METHOD_PASSWORD;
@@ -300,15 +287,15 @@ static void process_assh_events (struct ssh *ssh) {
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
-        printf("Client PWChange called\n");
+        //printf("Client PWChange called\n");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
-        printf("Client Keyboard called\n");
+        //printf("Client Keyboard called\n");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       case ASSH_EVENT_SERVICE_START:
-        printf("Service Start called\n");
+        //printf("Service Start called\n");
         assh_bool_t conn = ssh->event->service.start.srv ==
                            &assh_service_connection;
   
@@ -332,7 +319,7 @@ static void process_assh_events (struct ssh *ssh) {
         er->reply = ASSH_CONNECTION_REPLY_FAILED;
         break;
       case ASSH_EVENT_CHANNEL_CONFIRMATION:
-        printf("Our channel open request was confirmed by the remote host\n");
+        //printf("Our channel open request was confirmed by the remote host\n");
         struct assh_event_channel_confirmation_s *ev_confirm = &ssh->event->connection.channel_confirmation;
 
         if (ev_confirm->ch != ssh->inter->channel)
@@ -349,12 +336,11 @@ static void process_assh_events (struct ssh *ssh) {
 
         ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_PTY);
 
-        //struct asshh_inter_pty_req_s i;
-        //asshh_inter_init_pty_req(&i, ssh->inter->term, ssh->inter->char_width, ssh->inter->char_height, 0, 0, NULL);
+        // TODO: This runs on each new connection. Do testing to run it once
+        // or move it to the accept callback
         struct asshh_inter_subsystem_s i;
         asshh_inter_init_subsystem(&i, "netconf");
 
-        //if (asshh_inter_send_pty_req(ssh->session, ssh->inter->channel, &ssh->inter->request, &i)) {
         if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i)) {
           puts("EVENT_CHANNEL_CONFIRMATION_ERR");
           goto err;
@@ -362,7 +348,7 @@ static void process_assh_events (struct ssh *ssh) {
         break;
 
       case ASSH_EVENT_CHANNEL_FAILURE:
-        printf("Channel Failure called\n");
+        //printf("Channel Failure called\n");
           struct assh_event_channel_failure_s *ev_channel_failure = &ssh->event->connection.channel_failure;
 
         if (ev_channel_failure->ch != ssh->inter->channel)
@@ -375,7 +361,8 @@ static void process_assh_events (struct ssh *ssh) {
         goto err;
 
       case ASSH_EVENT_CHANNEL_ABORT:
-        printf("ASSH_EVENT_CHANNEL_ABORT was called.\n");
+        //printf("ASSH_EVENT_CHANNEL_ABORT was called.\n");
+        assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
 //      case ASSH_EVENT_CHANNEL_WINDOW:
@@ -383,6 +370,10 @@ static void process_assh_events (struct ssh *ssh) {
 //        break;
 
       case ASSH_CLIENT_INTER_ST_EXEC:
+        // TODO: Do something here or remove.
+        assh_event_done(ssh->session, ssh->event, ASSH_OK);
+        break;
+
       case ASSH_EVENT_REQUEST_SUCCESS:
         printf("Request Success called\n");
         struct assh_event_request_success_s *ev_request_success = &ssh->event->connection.request_success;
@@ -396,43 +387,24 @@ static void process_assh_events (struct ssh *ssh) {
         switch (ssh->inter->state)
           {
           case ASSH_CLIENT_INTER_ST_PTY:
-            printf("ASSH_CLIENT_INTER_ST_PTY case called\n");
-//          exec:
-//            if (ssh->inter->command)
-//             {
-//                struct asshh_inter_exec_s i;
-//                assh_buffer_strset(&i.command, ssh->inter->command);
-//                if (asshh_inter_send_exec(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
-//                  goto err;
-//                ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
-//              }
-//            else
-//              {
-//                if (asshh_inter_send_shell(ssh->session, ssh->inter->channel, &ssh->inter->request))
-//                  goto err;
-//                ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
-//              }
-
-            //struct asshh_inter_subsystem_s i;
-            //if (asshh_inter_send_subsystem(ssh->session, ssh->inter->channel, &ssh->inter->request, &i))
-            //  goto err;
+            //printf("ASSH_CLIENT_INTER_ST_PTY case called\n");
             ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_EXEC);
             break;
 
           case ASSH_CLIENT_INTER_ST_EXEC:
-            printf("ASSH_CLIENT_INTER_ST_EXEC case called\n");
+            //printf("ASSH_CLIENT_INTER_ST_EXEC case called\n");
             ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_OPEN);
             break;
 
           default:
-            printf("ASSH_CLIENT_INTER_ default case called\n");
+            //printf("ASSH_CLIENT_INTER_ default case called\n");
             ASSH_UNREACHABLE();
           }
         break;
 
       case ASSH_EVENT_REQUEST_FAILURE:
         struct assh_event_request_failure_s *ev_request_failure = &ssh->event->connection.request_failure;
-        printf("Request Failure called, reason: %s\n", ev_request_failure->reason ? "REQUEST_FAILED" : "SESSION_DISCONNECTED");
+        //printf("Request Failure called, reason: %s\n", ev_request_failure->reason ? "REQUEST_FAILED" : "SESSION_DISCONNECTED");
         // ASSH_REQUEST_SESSION_DISCONNECTED, 0
         // ASSH_REQUEST_FAILED, 1
 
@@ -445,13 +417,13 @@ static void process_assh_events (struct ssh *ssh) {
         goto err;
 
       case ASSH_EVENT_CHANNEL_CLOSE:
-        printf("Channel Close called\n");
+        //printf("Channel Close called\n");
         struct assh_event_channel_close_s *ev_channel_close = &ssh->event->connection.channel_close;
 
         if (ev_channel_close->ch != ssh->inter->channel)
           break;
 
-        printf("Actually Closing channel\n");
+        //printf("Actually Closing channel\n");
         ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_CLOSED);
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
@@ -462,39 +434,22 @@ static void process_assh_events (struct ssh *ssh) {
         break;
 
       case ASSH_EVENT_CHANNEL_DATA:
-        //printf("state = %d\n", ssh->inter->state);
-        printf("Channel Data called\n");
-        //printf("Read %d bytes\n", r);
+        //printf("Channel Data called\n");
         struct assh_event_channel_data_s *ec = &ssh->event->connection.channel_data;
-        //struct cbor_load_result result;
 
         err = ASSH_OK;
 
-        //ter = ssh->event->transport.read;
-        //printf("\n%.*s\n", ec->data.size, ec->data.data);
-        //free(buffer);
-
+        // Disregard any I/O errors writing to standard out since it's not important
         ssize_t r = write(1, ec->data.data, ec->data.size);
-//        switch (r) {
-//          case -1:
-//            r = 0;
-//            if (errno == EAGAIN || errno == EWOULDBLOCK)
-//              break;
-//          case 0:
-//            r = -1;
-//            err = ASSH_ERR_IO;
-//          default:
-//            ec->transferred = r;
-//        }
-
         ec->transferred = ec->data.size;
         //assh_channel_window_adjust(ec->ch, ec->transferred);
         assh_event_done(ssh->session, ssh->event, err);
 
         uint8_t *send_buf;
-        //printf("Wrote %d bytes to stdout, ", r);
+        // TODO: This is a hack and doesn't always match the end of the hello since this
+        // sometimes gets split across two packets
         if (strncmp(ec->data.data + ec->data.size - 14 , "</hello>]]>]]>", 14) == 0) {
-          //puts("\nEnd of hello seen\n");
+          // Send back hello
           char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
           size_t hello_length = strlen(hello_string);
           err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &hello_length, hello_length);
@@ -505,6 +460,7 @@ static void process_assh_events (struct ssh *ssh) {
             assh_channel_data_send(ssh->inter->channel, hello_length);
           }
 
+          // Subscribe to notifications
           char *subscribe_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"1\"><create-subscription xmlns=\"urn:ietf:params:xml:ns:netconf:notification:1.0\"><stream>exa-events</stream></create-subscription></rpc>]]>]]>";
           size_t subscribe_length = strlen(subscribe_string);
           err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &subscribe_length, subscribe_length);
@@ -514,6 +470,8 @@ static void process_assh_events (struct ssh *ssh) {
             puts("Sending subscribe string");
             assh_channel_data_send(ssh->inter->channel, subscribe_length);
           }
+
+          // Get the state of all ONTs
           char *get_onts_string = "<rpc xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"487\"><get xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><filter type=\"xpath\" select=\"/status/system/ont\"/></get></rpc>]]>]]>";
           size_t get_onts_length = strlen(get_onts_string);
           err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &get_onts_length, get_onts_length);
@@ -523,8 +481,6 @@ static void process_assh_events (struct ssh *ssh) {
             puts("Sending onts_string string");
             assh_channel_data_send(ssh->inter->channel, get_onts_length);
           }
-        } else {
-          //puts("\nEnd of hello not seen\n");
         }
 
         break;
@@ -546,12 +502,12 @@ static void process_assh_events (struct ssh *ssh) {
         break;
 
       case ASSH_EVENT_CHANNEL_WINDOW:
-        printf("An channel window event was received\n");
+        //printf("An channel window event was received\n");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       default:
-        printf("Some other event happened: %d\n", ssh->event->id);
+        //printf("Some other event happened: %d\n", ssh->event->id);
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
     }
 
@@ -568,8 +524,8 @@ static void process_assh_events (struct ssh *ssh) {
 
   //puts("Bailed out of do loop. Network interface needed");
   if (ssh->event->id == ASSH_EVENT_READ ) {
-    ev_io_start(loop, ssh->socket_watcher_reader);
     ev_io_stop(loop, ssh->socket_watcher_writer);
+    ev_io_start(loop, ssh->socket_watcher_reader);
   } else if (ssh->event->id == ASSH_EVENT_WRITE) {
     ev_io_stop(loop, ssh->socket_watcher_reader);
     ev_io_start(loop, ssh->socket_watcher_writer);
@@ -603,17 +559,19 @@ static void ssh_network_read (struct ev_loop *loop, ev_io *w, int revents) {
   struct ssh *ssh = w->data;
   int r;
   if (ssh->banner_seen == 0) {
-    puts("Socket is readable, and the banner has arrived");
+    //puts("Socket is readable, and the banner has arrived");
     char *buffer[1024];
     ssh->banner_seen = 1;
     r = read(w->fd, buffer, 1024);
-    printf("%s: %.*s", ssh->call_home_remote_address, r, buffer);
+    //printf("%s: %.*s", ssh->call_home_remote_address, r, buffer);
+    // We need to send the ack, which is done in ssh_network_write
     ev_io_stop(loop, ssh->socket_watcher_reader);
     ev_io_start(loop, ssh->socket_watcher_writer);
     goto out;
   }
 
   // We're going to assume that the library is in a READ state
+  // TODO: Add a santity check and bail if things don't make sense
   assh_status_t assh_status = ASSH_OK;
   struct assh_event_transport_read_s *transport_read;
   transport_read = &ssh->event->transport.read;
@@ -636,25 +594,23 @@ static void ssh_network_read (struct ev_loop *loop, ev_io *w, int revents) {
   }
   assh_event_done(ssh->session, ssh->event, assh_status);
   if (assh_event_get(ssh->session, ssh->event, time(NULL)) == 0) {
-    // TODO: Cleanup socket
+    // TODO: Cleanup socket. The frees may cause segfault. Test this
     ev_io_stop (loop, ssh->socket_watcher_reader);
-    free(ssh->socket_watcher_reader);
+    //free(ssh->socket_watcher_reader);
     ev_io_stop (loop, ssh->socket_watcher_writer);
-    free(ssh->socket_watcher_writer);
+    //free(ssh->socket_watcher_writer);
   }
 
   // Does the library need network activity?
   if (ssh->event->id == ASSH_EVENT_READ) {
     // Our read watcher is already active
-    goto out;
   } else if (ssh->event->id == ASSH_EVENT_WRITE) {
     ev_io_stop (loop, ssh->socket_watcher_reader);
     ev_io_start (loop, ssh->socket_watcher_writer);
-    goto out;
+  } else {
+    // There are internal assh library events to process
+    process_assh_events(ssh);
   }
-
-  // There are internal assh library events to process
-  process_assh_events(ssh);
 
 out:
   return;
@@ -668,14 +624,16 @@ static void ssh_network_write (struct ev_loop *loop, ev_io *w, int revents) {
     puts("Socket is writable, but no banner has been seen");
     goto out;
   } else if (ssh->banner_seen == 1 && ssh->banner_written == 0) {
-    puts("Socket is writable and banner has been seen. Send ack");
+    //puts("Socket is writable and banner has been seen. Send ack");
     ssh->banner_written = 1;
-    printf("\n%s: Sending: <ack>ok</ack>\n", ssh->call_home_remote_address);
-    int r = write(w->fd, "<ack>ok</ack>", 13);
+    //printf("\n%s: Sending: <ack>ok</ack>\n", ssh->call_home_remote_address);
+    // TODO: Add error checking and support partial writes
+    r = write(w->fd, "<ack>ok</ack>", 13);
     goto out;
   }
 
   // We're going to assume that the library is in a WRITE state
+  // TODO: Add a santity check and bail if things don't make sense
   assh_status_t assh_status = ASSH_OK;
   struct assh_event_transport_write_s *transport_write = &ssh->event->transport.write;
   r = write(w->fd, transport_write->buf.data, transport_write->buf.size);
@@ -698,28 +656,36 @@ static void ssh_network_write (struct ev_loop *loop, ev_io *w, int revents) {
 
   assh_event_done(ssh->session, ssh->event, assh_status);
   if (assh_event_get(ssh->session, ssh->event, time(NULL)) == 0) {
-    // TODO: Cleanup socket
+    // TODO: Cleanup socket. The frees may cause segfault. Test this
     ev_io_stop (loop, ssh->socket_watcher_reader);
-    free(ssh->socket_watcher_reader);
+    //free(ssh->socket_watcher_reader);
     ev_io_stop (loop, ssh->socket_watcher_writer);
-    free(ssh->socket_watcher_writer);
+    //free(ssh->socket_watcher_writer);
   }
 
   // Does the library need network activity?
   if (ssh->event->id == ASSH_EVENT_WRITE) {
     // Our write watcher is already active
-    goto out;
   } else if (ssh->event->id == ASSH_EVENT_READ) {
     ev_io_stop (loop, ssh->socket_watcher_writer);
     ev_io_start (loop, ssh->socket_watcher_reader);
-    goto out;
+  } else {
+    // There are internal assh library events to process
+    process_assh_events(ssh);
   }
-
-  // There are internal assh library events to process
-  process_assh_events(ssh);
 
 out:
   return;
+}
+
+// TODO: This isn't called from anywhere yet
+void cleanup_session (struct ssh *ssh) {
+  free(ssh->call_home_remote_address);
+  free(ssh->event);
+  XML_ParserFree(ssh->banner_parser);
+  XML_ParserFree(ssh->message_parser);
+  assh_session_release(ssh->session);
+  free(ssh);
 }
 
 void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
@@ -733,16 +699,12 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
     return;
   }
 
-  // Accept client request
   client_sd = accept(watcher->fd, (struct sockaddr *)&client_addr, &client_len);
 
   if (client_sd < 0) {
     perror("accept error");
     return;
   }
-
-  //printf("===Successfully received connection from callhome server===\n");
-  //sleep(5);
 
   int res = getpeername(client_sd, (struct sockaddr *)&client_addr, &client_len);
   char *call_home_remote_address;
@@ -771,10 +733,6 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   //asshh_client_init_inter_session(inter, /*command to run*/"show version", "vt100");
   asshh_client_init_inter_session(inter, /*command to run*/"", "vt100");
   
-  //struct asshh_inter_subsystem_s *inter_subsystem;
-  //inter_subsystem = malloc(sizeof(struct asshh_inter_subsystem_s));
-  //asshh_inter_init_subsystem(inter_subsystem, "netconf");
-
   struct ssh *ssh;
   ssh = malloc(sizeof(struct ssh));
   ssh->session = session;
@@ -786,9 +744,14 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ssh->event = malloc(sizeof(struct assh_event_s));
   if (assh_event_get(ssh->session, ssh->event, time(NULL)) == 0) {
     // Bail
+    // TODO: clean up properly
     abort();
   }
-  printf("Initial event state is %d\n", ssh->event->id);
+  // TODO: Add error checking
+  ssh->banner_parser = XML_ParserCreate(NULL);
+  ssh->message_parser = XML_ParserCreate(NULL);
+
+  //printf("Initial event state is %d\n", ssh->event->id);
   // The library starts in WRITE state, however the first network
   // event will be the banner sent by the call_home server. We
   // will handle the reader and watcher like this:
@@ -811,9 +774,6 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   reader_watcher->data = ssh;
 
   ev_io_start (loop, ssh->socket_watcher_reader);
-  //ssh->reader_running = 1;
-  //ev_io_start (loop, ssh->socket_watcher_writer);
-  //ssh->writer_running = 0;
 }
 
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
@@ -824,9 +784,6 @@ ev_signal signal_watcher;
 static void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
   puts("catch SIGINT");
   ev_break (EV_A_ EVBREAK_ALL);
-  //int true = 1;
-  //setsockopt(netconf_lister_fd,SOL_SOCKET,SO_REUSEADDR,&true,sizeof(int);
-  //shutdown(netconf_listener_fd, SHUT_RDWR);
   const int enable = 1;
   if (setsockopt(netconf_listener_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
     perror("setsockopt(SO_REUSEADDR) failed");
@@ -891,5 +848,6 @@ int main(int argc, char **argv) {
 
   printf("Connection closed\n");
 
+  // TODO: DO proper cleanup here
   //assh_session_release(session);
 }

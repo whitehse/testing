@@ -18,13 +18,13 @@ struct ssh {
     char *user;
     enum assh_userauth_methods_e *auth_methods;
     ev_io *socket_watcher_reader;
-    int reader_running;
     ev_io *socket_watcher_writer;
-    int writer_running;
     int banner_seen;
     int banner_written;
     char *call_home_remote_address;
     struct assh_event_s *event;
+    XML_Parser banner_parser;
+    XML_Parser message_parser;
 };
 typedef struct ssh ssh_t;
 
