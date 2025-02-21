@@ -24,12 +24,14 @@ struct ssh {
     XML_Parser banner_parser;
     int banner_is_complete;
     int banner_ack_is_complete;
+    XML_Parser hello_parser;
+    int hello_end_tag_seen;
+    int hello_is_complete;
+    int hello_et_al_sent;
     XML_Parser message_parser;
     int incoming_message_is_complete;
     int outgoing_message_is_complete;
-    int hello_seen;
 };
-typedef struct ssh ssh_t;
 
 struct juniper_banner {
 //Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):

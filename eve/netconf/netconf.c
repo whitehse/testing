@@ -178,17 +178,7 @@ void hexDump(char *desc, void *addr, int len)
 // And then expects:
 //  <ack>ok</ack>
 static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  printf("=<%s>=", tag_name);
-  //int i;
-  //int *const depthPtr = (int *)userData;
-  //(void)atts;
-
-  //printf("<%s>\n", tag_name);
-  //for (i = 0; i < *depthPtr; i++) {
-  //  *depthPtr += 1;
-  //}
-
-  //token->charval = strdup(name);
+  printf("B<%s>B", tag_name);
 
   //for (i = 0; atts[i]; i += 2) {
   //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
@@ -205,7 +195,7 @@ static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, c
 }
 
 static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
-  printf("=</%s>=", tag_name);
+  printf("B</%s>B", tag_name);
   if (strncmp(tag_name, "identity", 8) == 0) {
     struct ssh *ssh = (struct ssh *)data;
     ssh->banner_is_complete = 1;
@@ -213,6 +203,66 @@ static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
 }
 
 static void XMLCALL banner_char_handler(void *data, const XML_Char *s, int len) {
+  //token->token_id = CONTENT;
+  //token->charval = calloc(len+1, sizeof(char));
+  //strncpy(token->charval, s, len);
+}
+
+static void XMLCALL hello_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  //printf("H<%s>H", tag_name);
+  //for (i = 0; atts[i]; i += 2) {
+  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTENAME;
+  //  token->charval = strdup(atts[i]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTEVALUE;
+  //  token->charval = strdup(atts[i+1]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+  //}
+}
+
+static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
+  if (strncmp(tag_name, "hello", 5) == 0) {
+    struct ssh *ssh = (struct ssh *)data;
+    ssh->hello_end_tag_seen = 1;
+    printf("H</%s>H", tag_name);
+  }
+}
+
+static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
+  //token->token_id = CONTENT;
+  //token->charval = calloc(len+1, sizeof(char));
+  //strncpy(token->charval, s, len);
+}
+
+static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  printf("M<%s>M", tag_name);
+  //for (i = 0; atts[i]; i += 2) {
+  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTENAME;
+  //  token->charval = strdup(atts[i]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+
+  //  token = malloc(sizeof(*token));
+  //  token->token_id = ATTRIBUTEVALUE;
+  //  token->charval = strdup(atts[i+1]);
+  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
+  //}
+}
+
+static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
+  printf("M</%s>M", tag_name);
+  //if (strncmp(tag_name, "identity", 8) == 0) {
+  //  struct ssh *ssh = (struct ssh *)data;
+  //  ssh->banner_is_complete = 1;
+  //}
+}
+
+static void XMLCALL message_char_handler(void *data, const XML_Char *s, int len) {
   //token->token_id = CONTENT;
   //token->charval = calloc(len+1, sizeof(char));
   //strncpy(token->charval, s, len);
@@ -425,16 +475,61 @@ static void process_assh_events (struct ssh *ssh) {
         err = ASSH_OK;
 
         // Disregard any I/O errors writing to standard out since it's not important
-        ssize_t r = write(1, ec->data.data, ec->data.size);
-        ec->transferred = ec->data.size;
+        //ssize_t r = write(1, ec->data.data, ec->data.size);
+
+        if (ssh->hello_is_complete == 0) {
+          XML_Parse(ssh->hello_parser, ec->data.data, ec->data.size, 0);
+          // TODO: Account for a packet split within the ]]>]]>
+          if (XML_GetErrorCode(ssh->hello_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
+              ec->data.size >= 6 &&
+              strncmp(ec->data.data + ec->data.size-6, "]]>]]>", 6) == 0 &&
+              ssh->hello_end_tag_seen == 1) {
+            XML_ParserFree(ssh->hello_parser);
+            ssh->hello_is_complete = 1;
+            // TODO: Handle the case where the first operational message is stacked
+            // onto the end of the hello message (by passing it to the message parser)
+          } else if (XML_GetErrorCode(ssh->hello_parser) != XML_ERROR_NONE) {
+            // TODO: Bail and close connection
+            puts("There was an error in the hello");
+            printf("\nParse error at %llu, %llu: %s\n",
+                   XML_GetCurrentLineNumber(ssh->hello_parser),
+                   XML_GetCurrentByteIndex(ssh->hello_parser),
+                   XML_ErrorString(XML_GetErrorCode(ssh->hello_parser)));
+            printf("ec->data.size = %llu\n", ec->data.size);
+            printf("ssh->hello_is_complete = %d\n", ssh->hello_is_complete);
+            sleep(60);
+          } else {
+            // Incomplete hello packet. Fall through and continue parsing with the next packet
+          }
+        } else if (ssh->hello_is_complete == 1 && ssh->hello_et_al_sent == 1) {
+          // TODO: Operational message. Figure out how to handle multiple messages in the same packet
+          XML_Parse(ssh->message_parser, ec->data.data, ec->data.size, 0);
+          // TODO: Account for a packet split within the ]]>]]>
+          if (XML_GetErrorCode(ssh->hello_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
+              ec->data.size >= 6 &&
+              strncmp(ec->data.data + ec->data.size-6, "]]>]]>", 6) == 0) {
+            XML_ParserReset(ssh->message_parser, NULL);
+            XML_SetElementHandler(ssh->message_parser, message_start_element, message_end_element);
+            XML_SetCharacterDataHandler(ssh->message_parser, message_char_handler);
+            XML_SetUserData(ssh->message_parser, (void *)ssh);
+            // TODO: Handle the case where the first operational message is stacked
+            // onto the end of the hello message (by passing it to the message parser)
+          } else if (XML_GetErrorCode(ssh->message_parser) != XML_ERROR_NONE) {
+            // TODO: Bail and close connection
+            puts("There was an error in an operational message");
+            sleep(60);
+          } else {
+            // Incomplete operational message. Fall through and continue parsing with the next packet
+          }
+        }
+
         //assh_channel_window_adjust(ec->ch, ec->transferred);
+        ec->transferred = ec->data.size;
         assh_event_done(ssh->session, ssh->event, err);
 
-        uint8_t *send_buf;
-        // TODO: This is a hack and doesn't always match the end of the hello since this
-        // sometimes gets split across two packets
-        if (strncmp(ec->data.data + ec->data.size - 14 , "</hello>]]>]]>", 14) == 0) {
-          // Send back hello
+        if (ssh->hello_is_complete == 1 && ssh->hello_et_al_sent == 0) {
+          // Send back hello, et al
+          uint8_t *send_buf;
           char *hello_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><hello xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><capabilities><capability>urn:ietf:params:netconf:base:1.0</capability></capabilities></hello>]]>]]>";
           size_t hello_length = strlen(hello_string);
           err = assh_channel_data_alloc(ssh->inter->channel, &send_buf, &hello_length, hello_length);
@@ -466,8 +561,8 @@ static void process_assh_events (struct ssh *ssh) {
             puts("Sending onts_string string");
             assh_channel_data_send(ssh->inter->channel, get_onts_length);
           }
+          ssh->hello_et_al_sent = 1;
         }
-
         break;
 
       case ASSH_EVENT_KEX_DONE:
@@ -779,10 +874,19 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   XML_SetUserData(ssh->banner_parser, (void *)ssh);
   ssh->banner_is_complete = 0;
   ssh->banner_ack_is_complete = 0;
+  ssh->hello_parser = XML_ParserCreate(NULL);
+  XML_SetElementHandler(ssh->hello_parser, hello_start_element, hello_end_element);
+  XML_SetCharacterDataHandler(ssh->hello_parser, hello_char_handler);
+  XML_SetUserData(ssh->hello_parser, (void *)ssh);
+  ssh->hello_end_tag_seen = 0;
+  ssh->hello_is_complete = 0;
+  ssh->hello_et_al_sent = 0;
   ssh->message_parser = XML_ParserCreate(NULL);
+  XML_SetElementHandler(ssh->message_parser, message_start_element, message_end_element);
+  XML_SetCharacterDataHandler(ssh->message_parser, message_char_handler);
+  XML_SetUserData(ssh->message_parser, (void *)ssh);
   ssh->incoming_message_is_complete = 0;
   ssh->outgoing_message_is_complete = 0;
-  ssh->hello_seen = 0;
 
   //printf("Initial event state is %d\n", ssh->event->id);
   // The library starts in WRITE state, however the first network
