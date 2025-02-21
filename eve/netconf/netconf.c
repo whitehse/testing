@@ -1,5 +1,3 @@
-//#define CONFIG_ASSH_DEBUG
-//#define CONFIG_ASSH_DEBUG_EVENT
 #define _GNU_SOURCE
 #include <errno.h>
 #include <fcntl.h>
@@ -161,12 +159,31 @@ void hexDump(char *desc, void *addr, int len)
     printf("  %s\n", buff);
 }
 
-static void XMLCALL start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  int i;
+//Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):
+//MSG-ID: DEVICE-CONN-INFO\r\n
+//MSG-VER: V1\r\n
+//DEVICE-ID: <device-id>\r\n
+//HOST-KEY: <public-host-key>\r\n
+//HMAC:<HMAC(pub-SSH-host-key, <secret>)>\r\n
+//
+//Calix AXOS sends this:
+//<version>1</version>
+//<identity>
+//  <mac>00:02:5d:d9:21:47</mac>
+//  <serial-number>071904926728</serial-number>
+//  <model-name>E7 System</model-name>
+//  <source-ip>192.168.35.13</source-ip>
+//</identity>
+//
+// And then expects:
+//  <ack>ok</ack>
+static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  printf("=<%s>=", tag_name);
+  //int i;
   //int *const depthPtr = (int *)userData;
-  (void)atts;
+  //(void)atts;
 
-  printf("<%s>\n", tag_name);
+  //printf("<%s>\n", tag_name);
   //for (i = 0; i < *depthPtr; i++) {
   //  *depthPtr += 1;
   //}
@@ -187,50 +204,18 @@ static void XMLCALL start_element(void *data, const XML_Char *tag_name, const XM
   //}
 }
 
-static void XMLCALL end_element(void *data, const XML_Char *tag_name) {
-  //int *const depthPtr = (int *)userData;
-  //(void)name;
-  //*depthPtr -= 1;
-
-  printf("<%s>\n", tag_name);
-
-  //token->charval = strdup(name);
+static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
+  printf("=</%s>=", tag_name);
+  if (strncmp(tag_name, "identity", 8) == 0) {
+    struct ssh *ssh = (struct ssh *)data;
+    ssh->banner_is_complete = 1;
+  }
 }
 
-static void XMLCALL char_handler(void *data, const XML_Char *s, int len) {
+static void XMLCALL banner_char_handler(void *data, const XML_Char *s, int len) {
   //token->token_id = CONTENT;
   //token->charval = calloc(len+1, sizeof(char));
   //strncpy(token->charval, s, len);
-}
-
-//Juniper sends this (https://www.juniper.net/documentation/us/en/software/junos/netconf/topics/topic-map/netconf-call-home.html):
-//MSG-ID: DEVICE-CONN-INFO\r\n
-//MSG-VER: V1\r\n
-//DEVICE-ID: <device-id>\r\n
-//HOST-KEY: <public-host-key>\r\n
-//HMAC:<HMAC(pub-SSH-host-key, <secret>)>\r\n
-//
-//Calix AXOS sends this:
-//<version>1</version>
-//<identity>
-//  <mac>00:02:5d:d9:21:47</mac>
-//  <serial-number>071904926728</serial-number>
-//  <model-name>E7 System</model-name>
-//  <source-ip>192.168.35.13</source-ip>
-//</identity>
-//
-// And then expects:
-//  <ack>ok</ack>
-void process_identity(){
-  XML_Parser parser = XML_ParserCreate(NULL);
-
-  int done;
-  int depth = 0;
-
-  XML_SetUserData(parser, &depth);
-  XML_SetElementHandler(parser, start_element, end_element);
-  XML_SetCharacterDataHandler(parser, char_handler);
-  XML_ParserFree(parser);
 }
 
 static void process_assh_events (struct ssh *ssh) {
@@ -522,7 +507,7 @@ static void process_assh_events (struct ssh *ssh) {
     //printf("The next event id is %d\n", ssh->event->id);
   } while (ssh->event->id != ASSH_EVENT_READ && ssh->event->id != ASSH_EVENT_WRITE);
 
-  //puts("Bailed out of do loop. Network interface needed");
+  //puts("Fell out of do loop. Network interface needed");
   if (ssh->event->id == ASSH_EVENT_READ ) {
     ev_io_stop(loop, ssh->socket_watcher_writer);
     ev_io_start(loop, ssh->socket_watcher_reader);
@@ -533,6 +518,8 @@ static void process_assh_events (struct ssh *ssh) {
 
   goto out;
 
+// TODO: This is interactive specific and should probably go
+// somewhere else
 err:
   switch (ssh->inter->state)
     {
@@ -557,15 +544,56 @@ out:
 static void ssh_network_read (struct ev_loop *loop, ev_io *w, int revents) {
   struct ssh *ssh = w->data;
   int r;
-  if (ssh->banner_seen == 0) {
+
+  if (ssh->banner_is_complete == 0) {
     //puts("Socket is readable, and the banner has arrived");
-    char *buffer[1024];
-    ssh->banner_seen = 1;
-    r = read(w->fd, buffer, 1024);
+    //void *buffer = XML_GetBuffer(ssh->banner_parser, 2048);
+    //if (buffer == NULL) {
+    //  // TODO: Handle failure
+    //}
+    char buffer[2048];
+    r = read(w->fd, buffer, 2048);
+    uint64_t buffer_index = 0;
     //printf("%s: %.*s", ssh->call_home_remote_address, r, buffer);
-    // We need to send the ack, which is done in ssh_network_write
-    ev_io_stop(loop, ssh->socket_watcher_reader);
-    ev_io_start(loop, ssh->socket_watcher_writer);
+    // TODO: Close connection on junk/error
+    XML_Parse(ssh->banner_parser, buffer, r, 0);
+    //XML_GetErrorCode(ssh->banner_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT
+    //XML_GetErrorCode(ssh->banner_parser) != XML_ERROR_NONE
+    //XML_ErrorString(XML_GetErrorCode(ssh->banner_parser)
+    //XML_GetCurrentByteIndex(ssh->banner_parser)
+    while (XML_GetErrorCode(ssh->banner_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT) {
+      //printf("\nParse error at %llu, %llu: %s\n",
+      //       XML_GetCurrentLineNumber(ssh->banner_parser),
+      //       XML_GetCurrentByteIndex(ssh->banner_parser),
+      //       XML_ErrorString(XML_GetErrorCode(ssh->banner_parser)));
+      buffer_index += XML_GetCurrentByteIndex(ssh->banner_parser);
+      printf("buffer_index = %d\n", buffer_index);
+      //XML_ParserFree(ssh->banner_parser);
+      //ssh->banner_parser = XML_ParserCreate(NULL);
+      XML_ParserReset(ssh->banner_parser, NULL);
+      XML_SetElementHandler(ssh->banner_parser, banner_start_element, banner_end_element);
+      XML_SetCharacterDataHandler(ssh->banner_parser, banner_char_handler);
+      XML_SetUserData(ssh->banner_parser, (void *)ssh);
+      XML_Parse(ssh->banner_parser, buffer+buffer_index, r-buffer_index, 0);
+    }
+
+    if (ssh->banner_is_complete == 1) {
+      if (XML_GetErrorCode(ssh->banner_parser) == XML_ERROR_NONE) {
+        XML_Parse(ssh->banner_parser, NULL, 0, 1);
+      }
+      if (XML_GetErrorCode(ssh->banner_parser) != XML_ERROR_NONE) {
+        // TODO: Bail and close connection
+      }
+      XML_ParserFree(ssh->banner_parser);
+      // We need to send the ack, which is done in ssh_network_write
+      ev_io_stop(loop, ssh->socket_watcher_reader);
+      ev_io_start(loop, ssh->socket_watcher_writer);
+    } else {
+      if (XML_GetErrorCode(ssh->banner_parser) != XML_ERROR_NONE) {
+        // TODO: Unknown condition. Bail
+        goto out;
+      }
+    }
     goto out;
   }
 
@@ -618,16 +646,16 @@ out:
 static void ssh_network_write (struct ev_loop *loop, ev_io *w, int revents) {
   struct ssh *ssh = w->data;
   int r;
-  if (ssh->banner_seen == 0) {
+  if (ssh->banner_is_complete == 0) {
     // This shouldn't happen
     puts("Socket is writable, but no banner has been seen");
     goto out;
-  } else if (ssh->banner_seen == 1 && ssh->banner_written == 0) {
+  } else if (ssh->banner_is_complete == 1 && ssh->banner_ack_is_complete == 0) {
     //puts("Socket is writable and banner has been seen. Send ack");
-    ssh->banner_written = 1;
     //printf("\n%s: Sending: <ack>ok</ack>\n", ssh->call_home_remote_address);
     // TODO: Add error checking and support partial writes
     r = write(w->fd, "<ack>ok</ack>", 13);
+    ssh->banner_ack_is_complete = 1;
     goto out;
   }
 
@@ -737,8 +765,6 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ssh->session = session;
   ssh->inter = inter;
   ssh->auth_methods = auth_methods;
-  ssh->banner_seen = 0;
-  ssh->banner_written = 0;
   ssh->call_home_remote_address = call_home_remote_address;
   ssh->event = malloc(sizeof(struct assh_event_s));
   if (assh_event_get(ssh->session, ssh->event, time(NULL)) == 0) {
@@ -748,7 +774,15 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   }
   // TODO: Add error checking
   ssh->banner_parser = XML_ParserCreate(NULL);
+  XML_SetElementHandler(ssh->banner_parser, banner_start_element, banner_end_element);
+  XML_SetCharacterDataHandler(ssh->banner_parser, banner_char_handler);
+  XML_SetUserData(ssh->banner_parser, (void *)ssh);
+  ssh->banner_is_complete = 0;
+  ssh->banner_ack_is_complete = 0;
   ssh->message_parser = XML_ParserCreate(NULL);
+  ssh->incoming_message_is_complete = 0;
+  ssh->outgoing_message_is_complete = 0;
+  ssh->hello_seen = 0;
 
   //printf("Initial event state is %d\n", ssh->event->id);
   // The library starts in WRITE state, however the first network
@@ -784,6 +818,7 @@ static void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
   puts("catch SIGINT");
   ev_break (EV_A_ EVBREAK_ALL);
   const int enable = 1;
+  // TODO: Remove this as it probably doesn't do what I think it does
   if (setsockopt(netconf_listener_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
     perror("setsockopt(SO_REUSEADDR) failed");
   }

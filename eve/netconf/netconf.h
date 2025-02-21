@@ -19,12 +19,15 @@ struct ssh {
     enum assh_userauth_methods_e *auth_methods;
     ev_io *socket_watcher_reader;
     ev_io *socket_watcher_writer;
-    int banner_seen;
-    int banner_written;
     char *call_home_remote_address;
     struct assh_event_s *event;
     XML_Parser banner_parser;
+    int banner_is_complete;
+    int banner_ack_is_complete;
     XML_Parser message_parser;
+    int incoming_message_is_complete;
+    int outgoing_message_is_complete;
+    int hello_seen;
 };
 typedef struct ssh ssh_t;
 
