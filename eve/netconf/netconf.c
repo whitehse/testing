@@ -43,7 +43,7 @@
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
 
 // TODO: Verify and document the size. Name it something better
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 2048
 
 struct ev_loop *loop;
 int netconf_listener_fd;
@@ -277,7 +277,8 @@ static void process_assh_events (struct ssh *ssh) {
     //printf("event.id = %d, ", ssh->event->id);
     if (ssh->event->id < 0 || ssh->event->id > 50) {
       puts("event.id is either less than zero or greater than 50");
-      sleep(5);
+      //sleep(5);
+      abort();
     }
     switch (ssh->event->id) {
       case ASSH_EVENT_SESSION_ERROR:
@@ -293,9 +294,9 @@ static void process_assh_events (struct ssh *ssh) {
       case ASSH_EVENT_KEX_HOSTKEY_LOOKUP:
         //printf("Host key lookup called\n");
         struct assh_event_kex_hostkey_lookup_s *ek = &ssh->event->kex.hostkey_lookup;
+        // TODO: Actually do some verification here. This just accepts all keys
         ek->accept = 1;
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
-        //puts("Host key lookup finished");
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_BANNER:
@@ -323,9 +324,13 @@ static void process_assh_events (struct ssh *ssh) {
 
       case ASSH_EVENT_USERAUTH_CLIENT_PWCHANGE:
         //printf("Client PWChange called\n");
+        // TODO: Is this valid in a Netconf session?
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
+        break;
+
       case ASSH_EVENT_USERAUTH_CLIENT_KEYBOARD:
         //printf("Client Keyboard called\n");
+        // TODO: Handle this
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
@@ -371,8 +376,8 @@ static void process_assh_events (struct ssh *ssh) {
 
         ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_PTY);
 
-        // TODO: This runs on each new connection. Do testing to run it once
-        // or move it to the accept callback
+        // TODO: This runs on each new connection. Figure out how to run it once
+        // or move it to the accept callback near the ssh-> init.
         struct asshh_inter_subsystem_s i;
         asshh_inter_init_subsystem(&i, "netconf");
 
@@ -458,12 +463,10 @@ static void process_assh_events (struct ssh *ssh) {
         if (ev_channel_close->ch != ssh->inter->channel)
           break;
 
-        //printf("Actually Closing channel\n");
         ASSH_SET_STATE(ssh->inter, state, ASSH_CLIENT_INTER_ST_CLOSED);
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
-        //asshh_client_event_inter_session(ssh->session, ssh->event, ssh->inter);
         if (ssh->inter->state == ASSH_CLIENT_INTER_ST_CLOSED)
           assh_session_disconnect(ssh->session, SSH_DISCONNECT_BY_APPLICATION, NULL);
         break;
@@ -479,15 +482,15 @@ static void process_assh_events (struct ssh *ssh) {
 
         if (ssh->hello_is_complete == 0) {
           XML_Parse(ssh->hello_parser, ec->data.data, ec->data.size, 0);
-          // TODO: Account for a packet split within the ]]>]]>
+          // TODO: Account for a buffer split within the ]]>]]>
           if (XML_GetErrorCode(ssh->hello_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
               ec->data.size >= 6 &&
               strncmp(ec->data.data + ec->data.size-6, "]]>]]>", 6) == 0 &&
               ssh->hello_end_tag_seen == 1) {
             XML_ParserFree(ssh->hello_parser);
             ssh->hello_is_complete = 1;
-            // TODO: Handle the case where the first operational message is stacked
-            // onto the end of the hello message (by passing it to the message parser)
+            // TODO: Handle the case where the first operational message is stacked onto the
+            // end of the hello message in the same buffer (by passing it to the message parser)
           } else if (XML_GetErrorCode(ssh->hello_parser) != XML_ERROR_NONE) {
             // TODO: Bail and close connection
             puts("There was an error in the hello");
@@ -499,12 +502,12 @@ static void process_assh_events (struct ssh *ssh) {
             printf("ssh->hello_is_complete = %d\n", ssh->hello_is_complete);
             sleep(60);
           } else {
-            // Incomplete hello packet. Fall through and continue parsing with the next packet
+            // Incomplete hello buffer. Fall through and continue parsing with the next packet
           }
         } else if (ssh->hello_is_complete == 1 && ssh->hello_et_al_sent == 1) {
-          // TODO: Operational message. Figure out how to handle multiple messages in the same packet
+          // TODO: Operational message. Figure out how to handle multiple messages in the same buffer
           XML_Parse(ssh->message_parser, ec->data.data, ec->data.size, 0);
-          // TODO: Account for a packet split within the ]]>]]>
+          // TODO: Account for a buffer split in the middle of the ]]>]]>
           if (XML_GetErrorCode(ssh->hello_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
               ec->data.size >= 6 &&
               strncmp(ec->data.data + ec->data.size-6, "]]>]]>", 6) == 0) {
@@ -566,12 +569,12 @@ static void process_assh_events (struct ssh *ssh) {
         break;
 
       case ASSH_EVENT_KEX_DONE:
-        printf("Key exchange completed\n");
+        //printf("Key exchange completed\n");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
       case ASSH_EVENT_USERAUTH_CLIENT_SUCCESS:
-        printf("User authentication completed\n");
+        //printf("User authentication completed\n");
         assh_event_done(ssh->session, ssh->event, ASSH_OK);
         break;
 
@@ -764,12 +767,16 @@ static void ssh_network_write (struct ev_loop *loop, ev_io *w, int revents) {
       r = 0;
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         //break;
+        // TODO: I'm not sure this is right. Verify
+        // We should at least report 0 bytes written if we report a done, or do neither
+        transport_write->transferred = r;
         assh_event_done(ssh->session, ssh->event, assh_status);
         goto out;
       }
       break;
     case 0:
       r = -1;
+      // TODO: Is the library expecting transferred to be populated?
       assh_status = ASSH_ERR_IO;
     default:
       transport_write->transferred = r;
