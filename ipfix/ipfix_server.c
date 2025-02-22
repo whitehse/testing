@@ -410,6 +410,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
     }
   }
 
+  int has_templates = 0;
   /* The header is always 16 bytes long */
   if (read < 16) {
     return;
@@ -497,6 +498,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
       // Set ID (Template) = 00 02
       // Data Set Length = 00 7c - 124
       /* There must be a template ID and field length if a template definition is encountered */
+      has_templates = 1;
       if (bytes_remaining_in_set < 4) {
         printf("A template definition was encountered, without ID and number of fields being defined\n");
         cbor_decref(&root);
@@ -632,6 +634,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
        }
 */
 
+  if (strcmp(flow_generator_ipv4_address, "174.128.129.0") == 0 && has_templates == 1) {
+    hex_dump("Set definition, from 174.128.129.0: ", buffer, read);
+  }
   if (!success) {
     puts("\nBuilding CBOR failed");
     cbor_decref(&root);
@@ -643,10 +648,9 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   size_t cbor_buffer_size;
   cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
   cJSON* cjson_item = cbor_to_cjson(root);
-  char* json_string = cJSON_PrintUnformatted(cjson_item);
-  //char* json_string = cJSON_Print(cjson_item);
-  printf("%s\n", json_string);
-  free(json_string);
+  //char* json_string = cJSON_PrintUnformatted(cjson_item);
+  //printf("%s\n", json_string);
+  //free(json_string);
   cJSON_Delete(cjson_item);
   free(cbor_buffer);
   cbor_decref(&root);
