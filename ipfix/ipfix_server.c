@@ -14,9 +14,59 @@
 
 #include <ipfix_iana.h>
 
+// Calix AXOS:
+//{
+//   "flow_generator_ipv4_address" : "174.128.129.0",
+//   "version" : 10
+//   "message_length" : 1056,
+//   "timestamp" : 1740250579,
+//   "observation_domain_id" : 0,
+//   "sequence_number" : 977,
+//   "templates" : [
+//      {
+//         "template_id" : 286,
+//         "number_of_fields" : 22,
+//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 287,
+//         "number_of_fields" : 19,
+//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 288,
+//         "number_of_fields" : 16,
+//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 289,
+//         "number_of_fields" : 8,
+//         "fields" : [ 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 290,
+//         "number_of_fields" : 13,
+//         "fields" : [ 0, 0, 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 291,
+//         "number_of_fields" : 38,
+//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//      },
+//      {
+//         "template_id" : 292,
+//         "number_of_fields" : 7,
+//         "fields" : [ 0, 0, 0 ]
+//      }
+//   ],
+//   "flow_sets" : []
+//}
+//
+
 /* Maximum packet size for flow packets. Flow packets, and in particular
  * UDP flow packets, are unlikely to be more than 1500 bytes */
-#define PACKET_BUFFER_SIZE 2048
+/* Actually, the E7 AXOS flow source sends larger packets */
+#define PACKET_BUFFER_SIZE 50000
 int counter;
 
 //typedef HASHMAP(struct tcp_socket, struct tcp_connection) tcp_hash_t;
@@ -595,7 +645,7 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   cJSON* cjson_item = cbor_to_cjson(root);
   char* json_string = cJSON_PrintUnformatted(cjson_item);
   //char* json_string = cJSON_Print(cjson_item);
-  //printf("%s\n", json_string);
+  printf("%s\n", json_string);
   free(json_string);
   cJSON_Delete(cjson_item);
   free(cbor_buffer);
