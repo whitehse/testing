@@ -1,4 +1,3 @@
-data,ospf-stat,The,supports,running
 ie-id,ieenterprise-id,field name,Element Semantics,Element Data Type
 1,6321,hostname,identifier,string
 2,6321,shelf,identifier,uint8
