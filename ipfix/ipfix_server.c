@@ -19,44 +19,44 @@
 //   "flow_generator_ipv4_address" : "174.128.129.0",
 //   "version" : 10
 //   "message_length" : 1056,
-//   "timestamp" : 1740250579,
+//   "timestamp" : 1740257779,
 //   "observation_domain_id" : 0,
-//   "sequence_number" : 977,
+//   "sequence_number" : 8537,
 //   "templates" : [
 //      {
 //         "template_id" : 286,
 //         "number_of_fields" : 22,
-//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//         "fields" : [ 956, 1, 130, 56, 602, 978, 955, 603, 4, 206, 207, 204, 205, 631, 10, 2, 3, 202, 203, 200, 201, 632 ]
 //      },
 //      {
 //         "template_id" : 287,
 //         "number_of_fields" : 19,
-//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//         "fields" : [ 956, 1, 131, 56, 602, 978, 955, 603, 206, 207, 204, 205, 631, 10, 202, 203, 200, 201, 632 ]
 //      },
 //      {
 //         "template_id" : 288,
 //         "number_of_fields" : 16,
-//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+//         "fields" : [ 106, 20, 252, 256, 259, 258, 1, 56, 7, 22, 25, 240, 247, 250, 249, 242 ]
 //      },
 //      {
 //         "template_id" : 289,
 //         "number_of_fields" : 8,
-//         "fields" : [ 0, 0, 0, 0 ]
+//         "fields" : [ 905, 12, 1, 56, 7, 1214, 10, 904 ]
 //      },
 //      {
 //         "template_id" : 290,
 //         "number_of_fields" : 13,
-//         "fields" : [ 0, 0, 0, 0, 0, 0 ]
+//         "fields" : [ 105, 1, 233, 56, 232, 984, 7, 985, 231, 10, 234, 983, 987 ]
 //      },
 //      {
 //         "template_id" : 291,
 //         "number_of_fields" : 38,
-//         "fields" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+//         "fields" : [ 103, 956, 320, 212, 210, 323, 321, 213, 211, 209, 324, 322, 1, 56, 955, 4, 982, 622, 206, 207, 621, 205, 620, 10, 2, 3, 234, 988, 981, 627, 202, 203, 626, 201, 979, 625, 980, 208 ]
 //      },
 //      {
 //         "template_id" : 292,
 //         "number_of_fields" : 7,
-//         "fields" : [ 0, 0, 0 ]
+//         "fields" : [ 905, 1, 56, 7, 903, 10, 904 ]
 //      }
 //   ],
 //   "flow_sets" : []
@@ -375,6 +375,50 @@ void hex_dump(char *desc, void *addr, int len) {
   // Field 2 Value: ae 80 9c 14 - DestinationIPv4Address, 174.128.156.20
   // ...
 
+// Calix E7 AXOS
+// https://datatracker.ietf.org/doc/html/draft-boydseda-ipfix-psamp-bulk-data-yang-model-03 ?
+//Set definition, from 174.128.129.0: :
+//  0000  00 0a 04 20 67 ba 24 db 00 00 0b 33 00 00 00 00  ... g.$....3....
+//  0010  00 02 00 b8 01 1e 00 16 83 bc ff ff 00 00 18 b1  ................
+//  0020  80 01 ff ff 00 00 18 b1 80 82 ff ff 00 00 18 b1  ................
+//  0030  80 38 00 11 00 00 18 b1 82 5a 00 08 00 00 18 b1  .8.......Z......
+//  0040  83 d2 ff ff 00 00 18 b1 83 bb ff ff 00 00 18 b1  ................
+//  0050  82 5b 00 08 00 00 18 b1 80 04 ff ff 00 00 18 b1  .[..............
+
+// version = 00 0a (10)
+// message length = 04 20 - 1056
+// timestamp = 67 ba 24 db - Sat Feb 22 2025 13:26:19 GMT-0600 (Central Standard Time)
+// sequence number = 00 00 0b 33 - 2867
+// observation domain id = 00 00 00 00 - 0
+// Set ID (Template) = 00 02 (Template Set Definition)
+// Data Set Length = 00 b8 - 184
+// Template ID = 01 1e - 286
+// Number of fields = 00 16 - 22
+// Field 1 Type: 83 bc - 33724, 
+// Field 1 Length: 00 04 - 4 bytes
+// Field 2 Type: 00 0c - 12, destinationIPv4Address
+// Field 2 Length: 00 04 - 4 bytes
+
+//  0060  80 ce 00 08 00 00 18 b1 80 cf 00 08 00 00 18 b1  ................
+//  0070  80 cc 00 08 00 00 18 b1 80 cd 00 08 00 00 18 b1  ................
+//  0080  82 77 00 01 00 00 18 b1 80 0a 00 04 00 00 18 b1  .w..............
+//  0090  80 02 00 01 00 00 18 b1 80 03 00 01 00 00 18 b1  ................
+//  00a0  80 ca 00 08 00 00 18 b1 80 cb 00 08 00 00 18 b1  ................
+//  00b0  80 c8 00 08 00 00 18 b1 80 c9 00 08 00 00 18 b1  ................
+//  00c0  82 78 00 01 00 00 18 b1 00 02*00 a0 01 1f 00 13  .x..............
+//  00d0  83 bc ff ff 00 00 18 b1 80 01 ff ff 00 00 18 b1  ................
+//  00e0  80 83 ff ff 00 00 18 b1 80 38 00 11 00 00 18 b1  .........8......
+//  00f0  82 5a 00 08 00 00 18 b1 83 d2 ff ff 00 00 18 b1  .Z..............
+//  0100  83 bb ff ff 00 00 18 b1 82 5b 00 08 00 00 18 b1  .........[......
+//  0110  80 ce 00 08 00 00 18 b1 80 cf 00 08 00 00 18 b1  ................
+//  0120  80 cc 00 08 00 00 18 b1 80 cd 00 08 00 00 18 b1  ................
+//  0130  82 77 00 01 00 00 18 b1 80 0a 00 04 00 00 18 b1  .w..............
+//  0140  80 ca 00 08 00 00 18 b1 80 cb 00 08 00 00 18 b1  ................
+//  0150  80 c8 00 08 00 00 18 b1 80 c9 00 08 00 00 18 b1  ................
+//  0160  82 78 00 01 00 00 18 b1 00 02 00 88 01 20 00 10  .x........... ..
+//  0170  80 6a ff ff 00 00 18 b1 80 14 ff ff 00 00 18 b1  .j..............
+//  0180  80 fc 00 08 00 00 18 b1 81 00 00 08 00 00 18 b1  ...............
+
 void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   char buffer[PACKET_BUFFER_SIZE];
   ssize_t read;
@@ -535,17 +579,45 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
       while (success && number_of_fields_left_to_process > 0 && bytes_remaining_in_set >= 4) {
         uint16_t field_type = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set));
         uint16_t field_length = ntohs(*(uint16_t *) (buffer+buffer_offset_for_this_set+2));
-        if (field_type <= number_of_iana_ipfix_elements) {
-          success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
-        } else {
-          printf("Field Type %d is out of range\n", field_type);
+        cbor_item_t* field_map = cbor_new_indefinite_map();
+        if (field_map == NULL) {
+          cbor_decref(&root);
+          return;
         }
+        success &= cbor_array_push(array_of_fields, cbor_move(field_map));
+        success &= cbor_map_add(field_map, (struct cbor_pair){
+          .key = cbor_move(cbor_build_string("field_length")),
+          .value = cbor_move(cbor_build_uint16(field_length))});
+        // Is this an enterprise-specific element?
+        if (field_type > 32767) { 
+          // There will be 4 additional bytes for the enterprise number
+          if (bytes_remaining_in_set < 8) {
+            cbor_decref(&root);
+            return;
+          }
+          field_type -= 32768;
+          uint32_t enterprise_number = ntohs(*(uint32_t *) (buffer+buffer_offset_for_this_set+4));
+          success &= cbor_map_add(field_map, (struct cbor_pair){
+            .key = cbor_move(cbor_build_string("enterprise_number")),
+            .value = cbor_move(cbor_build_uint32(enterprise_number))});
+          bytes_remaining_in_set -= 8;
+          buffer_offset_for_this_set += 8;
+        } else {
+          bytes_remaining_in_set -= 4;
+          buffer_offset_for_this_set += 4;
+        }
+        success &= cbor_map_add(field_map, (struct cbor_pair){
+          .key = cbor_move(cbor_build_string("field_type")),
+          .value = cbor_move(cbor_build_uint16(field_type))});
+        //if (field_type <= number_of_iana_ipfix_elements) {
+        //  success &= cbor_array_push(array_of_fields, cbor_move(cbor_build_uint16(field_type)));
+        //} else {
+        //  printf("Field Type %d is out of range\n", field_type);
+        //}
         // Field 1 Type: 00 08 - 8, sourceIPv4Address
         // Field 1 Length: 00 04 - 4 bytes
         // Field 2 Type: 00 0c - 12, destinationIPv4Address
         // Field 2 Length: 00 04 - 4 bytes
-        bytes_remaining_in_set -= 4;
-        buffer_offset_for_this_set += 4;
         number_of_fields_left_to_process -= 1;
       }
     } else if (success && set_id == 3) { /* */
@@ -634,9 +706,6 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
        }
 */
 
-  if (strcmp(flow_generator_ipv4_address, "174.128.129.0") == 0 && has_templates == 1) {
-    hex_dump("Set definition, from 174.128.129.0: ", buffer, read);
-  }
   if (!success) {
     puts("\nBuilding CBOR failed");
     cbor_decref(&root);
@@ -648,9 +717,12 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
   size_t cbor_buffer_size;
   cbor_serialize_alloc(root, &cbor_buffer, &cbor_buffer_size);
   cJSON* cjson_item = cbor_to_cjson(root);
-  //char* json_string = cJSON_PrintUnformatted(cjson_item);
-  //printf("%s\n", json_string);
-  //free(json_string);
+  if (strcmp(flow_generator_ipv4_address, "174.128.129.0") == 0 && has_templates == 1) {
+    hex_dump("Set definition, from 174.128.129.0: ", buffer, read);
+    char* json_string = cJSON_PrintUnformatted(cjson_item);
+    printf("%s\n", json_string);
+    free(json_string);
+  }
   cJSON_Delete(cjson_item);
   free(cbor_buffer);
   cbor_decref(&root);
