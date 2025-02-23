@@ -31,6 +31,7 @@ struct ssh {
     XML_Parser message_parser;
     int incoming_message_is_complete;
     int outgoing_message_is_complete;
+    FILE *debug_file;
 };
 
 struct juniper_banner {

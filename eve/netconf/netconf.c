@@ -178,7 +178,7 @@ void hexDump(char *desc, void *addr, int len)
 // And then expects:
 //  <ack>ok</ack>
 static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  printf("B<%s>B", tag_name);
+  //printf("B<%s>B", tag_name);
 
   //for (i = 0; atts[i]; i += 2) {
   //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
@@ -195,7 +195,7 @@ static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, c
 }
 
 static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
-  printf("B</%s>B", tag_name);
+  //printf("B</%s>B", tag_name);
   if (strncmp(tag_name, "identity", 8) == 0) {
     struct ssh *ssh = (struct ssh *)data;
     ssh->banner_is_complete = 1;
@@ -228,7 +228,7 @@ static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
   if (strncmp(tag_name, "hello", 5) == 0) {
     struct ssh *ssh = (struct ssh *)data;
     ssh->hello_end_tag_seen = 1;
-    printf("H</%s>H", tag_name);
+    //printf("H</%s>H", tag_name);
   }
 }
 
@@ -239,7 +239,7 @@ static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
 }
 
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  printf("M<%s>M", tag_name);
+  //printf("M<%s>M", tag_name);
   //for (i = 0; atts[i]; i += 2) {
   //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
   //  token = malloc(sizeof(*token));
@@ -255,7 +255,7 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
 }
 
 static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
-  printf("M</%s>M", tag_name);
+  //printf("M</%s>M", tag_name);
   //if (strncmp(tag_name, "identity", 8) == 0) {
   //  struct ssh *ssh = (struct ssh *)data;
   //  ssh->banner_is_complete = 1;
@@ -477,8 +477,9 @@ static void process_assh_events (struct ssh *ssh) {
 
         err = ASSH_OK;
 
-        // Disregard any I/O errors writing to standard out since it's not important
-        //ssize_t r = write(1, ec->data.data, ec->data.size);
+        // Disregard any I/O errors writing to debug file for now
+        //ssize_t debug_length = write(ssh->debug_file, ec->data.data, ec->data.size);
+        ssize_t debug_write_length = fwrite(ec->data.data, ec->data.size, 1, ssh->debug_file);
 
         if (ssh->hello_is_complete == 0) {
           XML_Parse(ssh->hello_parser, ec->data.data, ec->data.size, 0);
@@ -812,9 +813,29 @@ void cleanup_session (struct ssh *ssh) {
   free(ssh->call_home_remote_address);
   free(ssh->event);
   XML_ParserFree(ssh->banner_parser);
+  XML_ParserFree(ssh->hello_parser);
   XML_ParserFree(ssh->message_parser);
   assh_session_release(ssh->session);
+  fclose(ssh->debug_file);
   free(ssh);
+}
+
+char* generate_random_filename(int length) {
+  // debug_asdfadsf.txt
+  //int length = 16;
+  char* random_string = (char*)malloc(sizeof(char) * length+11);
+
+  if (random_string == NULL) return NULL;
+
+  memcpy(random_string, "debug_", 6);
+  for (int i = 0; i < length; i++) {
+    random_string[i+6] = (char)(rand() % 26 + 97);
+  }
+
+  memcpy(random_string+length+6, ".txt", 4);
+  random_string[length+10] = '\0';
+
+  return random_string;
 }
 
 void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {
@@ -894,6 +915,11 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   XML_SetUserData(ssh->message_parser, (void *)ssh);
   ssh->incoming_message_is_complete = 0;
   ssh->outgoing_message_is_complete = 0;
+  ssh->debug_file = fopen(generate_random_filename(16), "a");
+  if (ssh->debug_file == NULL) {
+    perror("Error opening debug file");
+    abort();
+  }
 
   //printf("Initial event state is %d\n", ssh->event->id);
   // The library starts in WRITE state, however the first network
