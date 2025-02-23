@@ -394,10 +394,9 @@ void hex_dump(char *desc, void *addr, int len) {
 // Data Set Length = 00 b8 - 184
 // Template ID = 01 1e - 286
 // Number of fields = 00 16 - 22
-// Field 1 Type: 83 bc - 33724, 
-// Field 1 Length: 00 04 - 4 bytes
-// Field 2 Type: 00 0c - 12, destinationIPv4Address
-// Field 2 Length: 00 04 - 4 bytes
+// Field 1 Type: 83 bc - 956 (with enterprise bit set)
+// Field 1 Length: ff ff - 65535 bytes
+// Field 1 Enterprise ID: 00 00 18 b1 - 6321 (Calix)
 
 //  0060  80 ce 00 08 00 00 18 b1 80 cf 00 08 00 00 18 b1  ................
 //  0070  80 cc 00 08 00 00 18 b1 80 cd 00 08 00 00 18 b1  ................
@@ -589,14 +588,14 @@ void flow_read_cb(struct ev_loop *loop, struct ev_io *w, int revents){
           .key = cbor_move(cbor_build_string("field_length")),
           .value = cbor_move(cbor_build_uint16(field_length))});
         // Is this an enterprise-specific element?
-        if (field_type > 32767) { 
+        if (field_type >= 32768) { 
           // There will be 4 additional bytes for the enterprise number
           if (bytes_remaining_in_set < 8) {
             cbor_decref(&root);
             return;
           }
           field_type -= 32768;
-          uint32_t enterprise_number = ntohs(*(uint32_t *) (buffer+buffer_offset_for_this_set+4));
+          uint32_t enterprise_number = ntohl(*(uint32_t *) (buffer+buffer_offset_for_this_set+4));
           success &= cbor_map_add(field_map, (struct cbor_pair){
             .key = cbor_move(cbor_build_string("enterprise_number")),
             .value = cbor_move(cbor_build_uint32(enterprise_number))});
