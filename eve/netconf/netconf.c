@@ -246,11 +246,20 @@ static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
 
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
   size_t tag_len = strlen(tag_name);
-  if (tag_len > 0 < 50) {
+  //if (tag_len > 0 < 50) {
     const struct nx_parse *tag = in_word_set_nx(tag_name, tag_len);
     if (tag != NULL) {
-      printf("<%s>:%d", tag_name, tag->tag_type);
+      printf(" <%s>:%d", tag_name, tag->tag_type);
     }
+  //}
+
+  if (atts[0] && strcmp(atts[0], "xmlns") == 0) {
+    size_t xmlns_len = strlen(atts[1]);
+    const struct nx_xmlns_parse *namespace = in_word_set_nx_xmlns(atts[1], xmlns_len);
+    if (namespace != NULL) {
+      printf(":%d", namespace->namespace);
+    }
+    
   }
 
 //  printf("<%s>:%d", tag_name, tag->tag_type);
@@ -539,7 +548,7 @@ static void process_assh_events (struct ssh *ssh) {
           // TODO: Operational message. Figure out how to handle multiple messages in the same buffer
           XML_Parse(ssh->message_parser, ec->data.data, ec->data.size, 0);
           // TODO: Account for a buffer split in the middle of the ]]>]]>
-          if (XML_GetErrorCode(ssh->hello_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
+          if (XML_GetErrorCode(ssh->message_parser) == XML_ERROR_JUNK_AFTER_DOC_ELEMENT &&
               ec->data.size >= 6 &&
               strncmp(ec->data.data + ec->data.size-6, "]]>]]>", 6) == 0) {
             XML_ParserReset(ssh->message_parser, NULL);
@@ -552,7 +561,7 @@ static void process_assh_events (struct ssh *ssh) {
             // TODO: Bail and close connection
             puts("There was an error in an operational message");
             //printf("data.size=%d. Remaining data in buffer is %.*s\n", ec->data.size, ec->data.size - XML_GetCurrentByteIndex(ssh->message_parser), ec->data.data+XML_GetCurrentByteIndex(ssh->message_parser));
-            printf("data.size=%d. The last 3 bytes of the buffer are %.*s\n", ec->data.size, 3, ec->data.data + ec->data.size-3);
+            printf("data.size=%d. The last 6 bytes of the buffer are %.*s\n", ec->data.size, 6, ec->data.data + ec->data.size-6);
             printf("\nParse error at %llu, %llu: %s\n",
                    XML_GetCurrentLineNumber(ssh->message_parser),
                    XML_GetCurrentByteIndex(ssh->message_parser),

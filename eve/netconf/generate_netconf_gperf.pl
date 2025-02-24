@@ -33,11 +33,14 @@ enum xml_namespace {
 EOF
 
 foreach my $namespace (@namespaces) {
-  my $formatted_namespace = uc $namespace;
+  my $formatted_namespace = $namespace;
+  $formatted_namespace =~ s/http[^\.]+\.([^\.]+)\.[^\/]+(\/.*)$/${1}${2}/;
+  $formatted_namespace =~ s/urn:ietf:params:xml:/ietf:/;
+  $formatted_namespace =~ s/[\/:]ns//;
   $formatted_namespace =~ s/[-:\.\/]/_/g;
+  $formatted_namespace = uc $formatted_namespace;
   print $header_fd "  XML_NAMESPACE_" . $formatted_namespace . ",\n";
 }
-
 print $header_fd <<"EOF";
 };
 
@@ -47,27 +50,10 @@ struct nx_parse {
     enum xml_tag_type tag_type;
 };
 
-//static unsigned int
-//hash_nx (register const char *str, register size_t len);
-
-//struct nx_parse *
-//in_word_set_nx (register const char *str, register size_t len);
-
-// ns_xmlns_parse
-enum nx_xmlns_enum {
-  NX_XMLNS_ONT_MISSING,
-  NX_XMLNS_DESCRIPTION,
-  NX_XMLNS_PROBABLE_CAUSE,
-  NX_XMLNS_DETAIL
-};
-
 struct nx_xmlns_parse {
     char* name;
-    enum nx_xmlns_enum nx_xmlns;
+    enum xml_namespace namespace;
 };
-
-static unsigned int
-hash_nx_xmlns (register const char *str, register size_t len);
 
 // nx_tree
 enum nx_tree_enum {
@@ -76,13 +62,6 @@ enum nx_tree_enum {
   NX_TREE_PROBABLE_CAUSE,
   NX_TREE_DETAIL
 };
-
-/*
-union Strings {
-    char *string;
-    char *strings[];
-};
-*/
 
 struct nx_tree_parse {
     char* name;
@@ -97,12 +76,6 @@ struct nx_tree_parse {
     enum cbor_types[];
 */
 };
-
-static unsigned int
-hash_nx_tree (register const char *str, register size_t len);
-
-struct nx_tree_parse *
-in_word_set_nx_tree (register const char *str, register size_t len);
 
 #endif //NETCONF_GENERATED_H
 EOF
@@ -122,6 +95,12 @@ hash_nx (register const char *str, register size_t len);
 struct nx_parse *
 in_word_set_nx (register const char *str, register size_t len);
 
+static unsigned int
+hash_nx (register const char *str, register size_t len);
+
+struct nx_xmlns_parse *
+in_word_set_nx_xmlns (register const char *str, register size_t len);
+
 #endif //NETCONF_GPERF_H
 EOF
 
@@ -131,19 +110,14 @@ open(my $nx_parse_fd, '>', $filename) or die "Could not open file '$filename' $!
 print $nx_parse_fd <<'EOF';
 %{
 #include <stdlib.h>
-//#include <stdbool.h>
-//#include <assert.h>
 #include <netconf_generated.h>
-////enum nx_enum (struct nx_parse *nx_parser);
 %}
 %7bit
 %define hash-function-name hash_nx
 %define lookup-function-name in_word_set_nx
 %define constants-prefix NX_
 %define word-array-name wordlist_nx
-//%struct-type TODO: Figure out how this works
 %includes
-//%enum
 struct nx_parse;
 %%
 EOF
@@ -157,6 +131,36 @@ print $nx_parse_fd <<'EOF';
 EOF
 close($nx_parse_fd);
 
+my $filename = 'nx_xmlns_parse.gperf';
+open(my $nx_xmlns_parse_fd, '>', $filename) or die "Could not open file '$filename' $!";
+
+print $nx_xmlns_parse_fd <<'EOF';
+%{
+#include <stdlib.h>
+#include <netconf_generated.h>
+%}
+%7bit
+%define hash-function-name hash_nx
+%define lookup-function-name in_word_set_nx_xmlns
+%define constants-prefix NX_XMLNS_
+%define word-array-name wordlist_nx_xmlns
+%includes
+struct nx_xmlns_parse;
+%%
+EOF
+foreach my $namespace (@namespaces) {
+  my $formatted_namespace = $namespace;
+  $formatted_namespace =~ s/http[^\.]+\.([^\.]+)\.[^\/]+(\/.*)$/${1}${2}/;
+  $formatted_namespace =~ s/urn:ietf:params:xml:/ietf:/;
+  $formatted_namespace =~ s/[\/:]ns//;
+  $formatted_namespace =~ s/[-:\.\/]/_/g;
+  $formatted_namespace = uc $formatted_namespace;
+  print $nx_xmlns_parse_fd "$namespace, XML_NAMESPACE_" . $formatted_namespace . "\n";
+}
+print $nx_xmlns_parse_fd <<'EOF';
+%%
+EOF
+close($nx_parse_fd);
 __END__
 
 #foreach my $file (@ARGV) {

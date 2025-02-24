@@ -202,27 +202,10 @@ struct nx_parse {
     enum xml_tag_type tag_type;
 };
 
-//static unsigned int
-//hash_nx (register const char *str, register size_t len);
-
-//struct nx_parse *
-//in_word_set_nx (register const char *str, register size_t len);
-
-// ns_xmlns_parse
-enum nx_xmlns_enum {
-  NX_XMLNS_ONT_MISSING,
-  NX_XMLNS_DESCRIPTION,
-  NX_XMLNS_PROBABLE_CAUSE,
-  NX_XMLNS_DETAIL
-};
-
 struct nx_xmlns_parse {
     char* name;
-    enum nx_xmlns_enum nx_xmlns;
+    enum xml_namespace namespace;
 };
-
-static unsigned int
-hash_nx_xmlns (register const char *str, register size_t len);
 
 // nx_tree
 enum nx_tree_enum {
@@ -231,13 +214,6 @@ enum nx_tree_enum {
   NX_TREE_PROBABLE_CAUSE,
   NX_TREE_DETAIL
 };
-
-/*
-union Strings {
-    char *string;
-    char *strings[];
-};
-*/
 
 struct nx_tree_parse {
     char* name;
@@ -252,11 +228,5 @@ struct nx_tree_parse {
     enum cbor_types[];
 */
 };
-
-static unsigned int
-hash_nx_tree (register const char *str, register size_t len);
-
-struct nx_tree_parse *
-in_word_set_nx_tree (register const char *str, register size_t len);
 
 #endif //NETCONF_GENERATED_H
