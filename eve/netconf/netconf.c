@@ -1094,7 +1094,7 @@ int main(int argc, char **argv) {
 //    free(token_item);
 //  }
 
-  const char *x = in_word_set_nx("detail", 6);
+  const struct nx_parse *x = in_word_set_nx("detail", 6);
   ev_run (loop, 0);
 
   abort();

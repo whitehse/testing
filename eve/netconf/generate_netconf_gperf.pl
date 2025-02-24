@@ -28,16 +28,9 @@ print $header_fd <<'EOF';
 };
 
 // nx_parse
-enum nx_enum {
-  NX_ONT_MISSING,
-  NX_DESCRIPTION,
-  NX_PROBABLE_CAUSE,
-  NX_DETAIL
-};
-
 struct nx_parse {
     char* name;
-    enum nx_enum nx;
+    enum xml_tag_type tag_type;
 };
 
 //static unsigned int
@@ -119,7 +112,7 @@ print $nx_parse_fd <<'EOF';
 %define constants-prefix NX_
 %define word-array-name wordlist_nx
 //%struct-type TODO: Figure out how this works
-%includes
+//%includes
 //%enum
 struct nx_parse;
 %%

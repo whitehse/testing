@@ -184,16 +184,9 @@ enum xml_tag_type {
 };
 
 // nx_parse
-enum nx_enum {
-  NX_ONT_MISSING,
-  NX_DESCRIPTION,
-  NX_PROBABLE_CAUSE,
-  NX_DETAIL
-};
-
 struct nx_parse {
     char* name;
-    enum nx_enum nx;
+    enum xml_tag_type tag_type;
 };
 
 //static unsigned int
