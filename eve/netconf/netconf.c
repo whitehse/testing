@@ -40,6 +40,7 @@
 #include <expat.h>
 #include <netconf_generated.h>
 #include <netconf.h>
+#include <nx_parse.h>
 
 // TODO: Get rid of this and replace
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
@@ -1093,6 +1094,7 @@ int main(int argc, char **argv) {
 //    free(token_item);
 //  }
 
+  const char *x = in_word_set_nx("detail", 6);
   ev_run (loop, 0);
 
   abort();

@@ -7,9 +7,12 @@ use XML::LibXML;
 use XML::LibXML::PrettyPrint;
 use strict;
 
+my $filename = 'netconf_generated.h';
+open(my $header_fd, '>', $filename) or die "Could not open file '$filename' $!";
+
 my @tags = split '\n', `./pretty_print_debug_file.pl debug_* 2> /dev/null | ./create_tags_from_pretty_prints.sh`;
 
-print <<"EOF";
+print $header_fd <<"EOF";
 #ifndef NETCONF_GENERATED_H
 #define NETCONF_GENERATED_H
 
@@ -17,15 +20,119 @@ enum xml_tag_type {
   XML_TAG_TYPE_NONE,
 EOF
 foreach my $tag (@tags) {
-  $tag = uc $tag;
-  $tag =~ s/-/_/g;
-  print "  XML_TAG_TYPE_" . $tag . ",\n";
+  my $formatted_tag = uc $tag;
+  $formatted_tag =~ s/-/_/g;
+  print $header_fd "  XML_TAG_TYPE_" . $formatted_tag . ",\n";
 }
-print <<'EOF';
+print $header_fd <<'EOF';
 };
+
+// nx_parse
+enum nx_enum {
+  NX_ONT_MISSING,
+  NX_DESCRIPTION,
+  NX_PROBABLE_CAUSE,
+  NX_DETAIL
+};
+
+struct nx_parse {
+    char* name;
+    enum nx_enum nx;
+};
+
+//static unsigned int
+//hash_nx (register const char *str, register size_t len);
+
+//struct nx_parse *
+//in_word_set_nx (register const char *str, register size_t len);
+
+// ns_xmlns_parse
+enum nx_xmlns_enum {
+  NX_XMLNS_ONT_MISSING,
+  NX_XMLNS_DESCRIPTION,
+  NX_XMLNS_PROBABLE_CAUSE,
+  NX_XMLNS_DETAIL
+};
+
+struct nx_xmlns_parse {
+    char* name;
+    enum nx_xmlns_enum nx_xmlns;
+};
+
+static unsigned int
+hash_nx_xmlns (register const char *str, register size_t len);
+
+// nx_tree
+enum nx_tree_enum {
+  NX_TREE_ONT_MISSING,
+  NX_TREE_DESCRIPTION,
+  NX_TREE_PROBABLE_CAUSE,
+  NX_TREE_DETAIL
+};
+
+/*
+union Strings {
+    char *string;
+    char *strings[];
+};
+*/
+
+struct nx_tree_parse {
+    char* name;
+    enum nx_tree_enum nx_tree;
+/*
+    enum cbor_actions action;
+    // This string is empty or NULL if it is a direct match and there is no regex to do
+    // Only the first element in each array will be used in that case, since there is
+    // only one match (the entire string returned from libexpat)
+    char *regex_match_string;
+    char *keys[];
+    enum cbor_types[];
+*/
+};
+
+static unsigned int
+hash_nx_tree (register const char *str, register size_t len);
+
+struct nx_tree_parse *
+in_word_set_nx_tree (register const char *str, register size_t len);
 
 #endif //NETCONF_GENERATED_H
 EOF
+
+close($header_fd);
+
+my $filename = 'nx_parse.gperf';
+open(my $nx_parse_fd, '>', $filename) or die "Could not open file '$filename' $!";
+
+print $nx_parse_fd <<'EOF';
+%{
+//#include <stdlib.h>
+//#include <stdbool.h>
+//#include <assert.h>
+//#include <netconf_generated.h>
+////enum nx_enum (struct nx_parse *nx_parser);
+%}
+%7bit
+%define hash-function-name hash_nx
+%define lookup-function-name in_word_set_nx
+%define constants-prefix NX_
+%define word-array-name wordlist_nx
+//%struct-type TODO: Figure out how this works
+%includes
+//%enum
+struct nx_parse;
+%%
+EOF
+foreach my $tag (@tags) {
+  my $formatted_tag = uc $tag;
+  $formatted_tag =~ s/-/_/g;
+  print $nx_parse_fd "$tag, XML_TAG_TYPE_" . $formatted_tag . "\n";
+}
+print $nx_parse_fd <<'EOF';
+%%
+EOF
+close($nx_parse_fd);
 
 __END__
 
