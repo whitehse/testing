@@ -248,7 +248,9 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
   size_t tag_len = strlen(tag_name);
   if (tag_len > 0 < 50) {
     const struct nx_parse *tag = in_word_set_nx(tag_name, tag_len);
-    printf("<%s>:%d", tag_name, tag->tag_type);
+    if (tag != NULL) {
+      printf("<%s>:%d", tag_name, tag->tag_type);
+    }
   }
 
 //  printf("<%s>:%d", tag_name, tag->tag_type);
@@ -549,10 +551,16 @@ static void process_assh_events (struct ssh *ssh) {
           } else if (XML_GetErrorCode(ssh->message_parser) != XML_ERROR_NONE) {
             // TODO: Bail and close connection
             puts("There was an error in an operational message");
+            //printf("data.size=%d. Remaining data in buffer is %.*s\n", ec->data.size, ec->data.size - XML_GetCurrentByteIndex(ssh->message_parser), ec->data.data+XML_GetCurrentByteIndex(ssh->message_parser));
+            printf("data.size=%d. The last 3 bytes of the buffer are %.*s\n", ec->data.size, 3, ec->data.data + ec->data.size-3);
             printf("\nParse error at %llu, %llu: %s\n",
                    XML_GetCurrentLineNumber(ssh->message_parser),
                    XML_GetCurrentByteIndex(ssh->message_parser),
                    XML_ErrorString(XML_GetErrorCode(ssh->message_parser)));
+            XML_ParserReset(ssh->message_parser, NULL);
+            XML_SetElementHandler(ssh->message_parser, message_start_element, message_end_element);
+            XML_SetCharacterDataHandler(ssh->message_parser, message_char_handler);
+            XML_SetUserData(ssh->message_parser, (void *)ssh);
             sleep(5);
           } else {
             // Incomplete operational message. Fall through and continue parsing with the next packet

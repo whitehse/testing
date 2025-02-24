@@ -21,10 +21,10 @@ enum netconf_server_type {
 //  XML_TAG_TYPE_DETAIL
 //};
 
-enum xml_namespace {
-  XML_NAMESPACE_NONE,
-  XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS,
-};
+//enum xml_namespace {
+//  XML_NAMESPACE_NONE,
+//  XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS,
+//};
 
 enum xml_tag_stack {
   XML_TAG_STACK_NONE,

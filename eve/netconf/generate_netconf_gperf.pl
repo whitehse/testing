@@ -11,6 +11,7 @@ my $filename = 'netconf_generated.h';
 open(my $header_fd, '>', $filename) or die "Could not open file '$filename' $!";
 
 my @tags = split '\n', `./pretty_print_debug_file.pl debug_* 2> /dev/null | ./create_tags_from_pretty_prints.sh`;
+my @namespaces = split '\n', `./generate_namespaces.sh`;
 
 print $header_fd <<"EOF";
 #ifndef NETCONF_GENERATED_H
@@ -21,10 +22,23 @@ enum xml_tag_type {
 EOF
 foreach my $tag (@tags) {
   my $formatted_tag = uc $tag;
-  $formatted_tag =~ s/-/_/g;
+  $formatted_tag =~ s/[-:\.]/_/g;
   print $header_fd "  XML_TAG_TYPE_" . $formatted_tag . ",\n";
 }
 print $header_fd <<'EOF';
+};
+
+enum xml_namespace {
+  XML_NAMESPACE_NONE,
+EOF
+
+foreach my $namespace (@namespaces) {
+  my $formatted_namespace = uc $namespace;
+  $formatted_namespace =~ s/[-:\.\/]/_/g;
+  print $header_fd "  XML_NAMESPACE_" . $formatted_namespace . ",\n";
+}
+
+print $header_fd <<"EOF";
 };
 
 // nx_parse
@@ -135,7 +149,7 @@ struct nx_parse;
 EOF
 foreach my $tag (@tags) {
   my $formatted_tag = uc $tag;
-  $formatted_tag =~ s/-/_/g;
+  $formatted_tag =~ s/[-:\.]/_/g;
   print $nx_parse_fd "$tag, XML_TAG_TYPE_" . $formatted_tag . "\n";
 }
 print $nx_parse_fd <<'EOF';
