@@ -40,7 +40,7 @@
 #include <expat.h>
 #include <netconf_generated.h>
 #include <netconf.h>
-#include <nx_parse.h>
+#include <nx_gperf.h>
 
 // TODO: Get rid of this and replace
 #define ERROR(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while (0)
@@ -241,39 +241,34 @@ static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
   //strncpy(token->charval, s, len);
 }
 
-int unroll_message_stack() {
-}
+//int unroll_message_stack() {
+//}
 
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  if (atts[0] && atts[1] && (strcmp(atts[0], "xmlns") == 0 || strcmp(atts[0], "XMLNS") == 0)) {
-    struct ssh *ssh = (struct ssh *)data;
-    if (strcmp(tag_name, "dhcp-lease-establishment") == 0 
-        && strcmp(atts[1], "http://www.calix.com/ns/exa/layer2-service-protocols") == 0) {
-      //ssh->xml_namespace = XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS;
-      ssh->previous_tag_stack = ssh->tag_stack;
-      ssh->tag_stack = XML_TAG_STACK_DHCP_LEASE_CREATED;
-    }
-    //ssh->xml_namespace = XML_NAMESPACE_NONE;
+  size_t tag_len = strlen(tag_name);
+  if (tag_len > 0 < 50) {
+    const struct nx_parse *tag = in_word_set_nx(tag_name, tag_len);
+    printf("<%s>:%d", tag_name, tag->tag_type);
   }
-  //printf("M<%s>M", tag_name);
-  //for (i = 0; atts[i]; i += 2) {
-  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTENAME;
-  //  token->charval = strdup(atts[i]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
 
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTEVALUE;
-  //  token->charval = strdup(atts[i+1]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
-  //}
+//  printf("<%s>:%d", tag_name, tag->tag_type);
+//  printf("<%s>:", tag_name);
+//  if (atts[0] && atts[1] && (strcmp(atts[0], "xmlns") == 0 || strcmp(atts[0], "XMLNS") == 0)) {
+//    struct ssh *ssh = (struct ssh *)data;
+//    if (strcmp(tag_name, "dhcp-lease-establishment") == 0 
+//        && strcmp(atts[1], "http://www.calix.com/ns/exa/layer2-service-protocols") == 0) {
+//      //ssh->xml_namespace = XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS;
+//      ssh->previous_tag_stack = ssh->tag_stack;
+//      ssh->tag_stack = XML_TAG_STACK_DHCP_LEASE_CREATED;
+//    }
+//    //ssh->xml_namespace = XML_NAMESPACE_NONE;
+//  }
 }
 
 static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
-  struct ssh *ssh = (struct ssh *)data;
-  switch(ssh->server_type) {
-    case (NETCONF_SERVER_TYPE_CALIX):
+//  struct ssh *ssh = (struct ssh *)data;
+//  switch(ssh->server_type) {
+//    case (NETCONF_SERVER_TYPE_CALIX):
 
 
 
@@ -287,7 +282,7 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
 //        default:
 //          break; 
 //      }
-  }
+//  }
   //printf("M</%s>M", tag_name);
   //if (strncmp(tag_name, "identity", 8) == 0) {
   //  struct ssh *ssh = (struct ssh *)data;
@@ -554,7 +549,11 @@ static void process_assh_events (struct ssh *ssh) {
           } else if (XML_GetErrorCode(ssh->message_parser) != XML_ERROR_NONE) {
             // TODO: Bail and close connection
             puts("There was an error in an operational message");
-            sleep(60);
+            printf("\nParse error at %llu, %llu: %s\n",
+                   XML_GetCurrentLineNumber(ssh->message_parser),
+                   XML_GetCurrentByteIndex(ssh->message_parser),
+                   XML_ErrorString(XML_GetErrorCode(ssh->message_parser)));
+            sleep(5);
           } else {
             // Incomplete operational message. Fall through and continue parsing with the next packet
           }
@@ -1054,22 +1053,22 @@ int main(int argc, char **argv) {
   ev_signal_start (loop, &signal_watcher);
 
 // Goes in header
-  struct tag_stack_tailq {
-    enum xml_tag_type tag_type;
-    TAILQ_ENTRY(tag_stack_tailq) tags;
-  };
+//  struct tag_stack_tailq {
+//    enum xml_tag_type tag_type;
+//    TAILQ_ENTRY(tag_stack_tailq) tags;
+//  };
 
-  TAILQ_HEAD(tag_stack_tailq_head, tag_stack_tailq);
-  struct tag_stack_tailq_head  *tag_stack_head;
+//  TAILQ_HEAD(tag_stack_tailq_head, tag_stack_tailq);
+//  struct tag_stack_tailq_head  *tag_stack_head;
 //
 
 // Goes in c code
-  tag_stack_head = malloc(sizeof(struct tag_stack_tailq_head));
-  TAILQ_INIT(tag_stack_head);
-
-  struct tag_stack_tailq *tag = malloc(sizeof(*tag));
-  tag->tag_type = XML_TAG_TYPE_NONE;
-  TAILQ_INSERT_TAIL(tag_stack_head, tag, tags);
+//  tag_stack_head = malloc(sizeof(struct tag_stack_tailq_head));
+//  TAILQ_INIT(tag_stack_head);
+//
+//  struct tag_stack_tailq *tag = malloc(sizeof(*tag));
+//  tag->tag_type = XML_TAG_TYPE_NONE;
+//  TAILQ_INSERT_TAIL(tag_stack_head, tag, tags);
 
 //  token = malloc(sizeof(*token));
 //  token->token_id = ATTRIBUTENAME;
@@ -1094,7 +1093,6 @@ int main(int argc, char **argv) {
 //    free(token_item);
 //  }
 
-  const struct nx_parse *x = in_word_set_nx("detail", 6);
   ev_run (loop, 0);
 
   abort();

@@ -95,15 +95,31 @@ EOF
 
 close($header_fd);
 
+my $filename = 'nx_gperf.h';
+open(my $nx_gperf_header_fd, '>', $filename) or die "Could not open file '$filename' $!";
+
+print $nx_gperf_header_fd <<'EOF';
+#ifndef NETCONF_GPERF_H
+#define NETCONF_GPERF_H
+
+static unsigned int
+hash_nx (register const char *str, register size_t len);
+
+struct nx_parse *
+in_word_set_nx (register const char *str, register size_t len);
+
+#endif //NETCONF_GPERF_H
+EOF
+
 my $filename = 'nx_parse.gperf';
 open(my $nx_parse_fd, '>', $filename) or die "Could not open file '$filename' $!";
 
 print $nx_parse_fd <<'EOF';
 %{
-//#include <stdlib.h>
+#include <stdlib.h>
 //#include <stdbool.h>
 //#include <assert.h>
-//#include <netconf_generated.h>
+#include <netconf_generated.h>
 ////enum nx_enum (struct nx_parse *nx_parser);
 %}
 %7bit
@@ -112,7 +128,7 @@ print $nx_parse_fd <<'EOF';
 %define constants-prefix NX_
 %define word-array-name wordlist_nx
 //%struct-type TODO: Figure out how this works
-//%includes
+%includes
 //%enum
 struct nx_parse;
 %%
