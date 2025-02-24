@@ -10,6 +10,30 @@
 #define EVE_SSH_AGGREGATOR_BAD_DATA        -5 // Invalid Packet
 */
 
+enum netconf_server_type {
+  NETCONF_SERVER_TYPE_NONE,
+  NETCONF_SERVER_TYPE_CALIX,
+  NETCONF_SERVER_TYPE_JUNIPER
+};
+
+//enum xml_tag_type {
+//  XML_TAG_TYPE_NONE,
+//  XML_TAG_TYPE_DETAIL
+//};
+
+enum xml_namespace {
+  XML_NAMESPACE_NONE,
+  XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS,
+};
+
+enum xml_tag_stack {
+  XML_TAG_STACK_NONE,
+  XML_TAG_STACK_SKIP,
+  XML_TAG_STACK_DHCP_LEASE_CREATED,
+  XML_TAG_STACK_DHCP_LEASE_CREATED_DETAIL,
+  XML_TAG_STACK_RPC_REPLY
+};
+
 struct ssh {
     struct assh_session_s *session;
     struct asshh_client_inter_session_s *inter;
@@ -31,7 +55,16 @@ struct ssh {
     XML_Parser message_parser;
     int incoming_message_is_complete;
     int outgoing_message_is_complete;
+    //enum xml_tag_type message_tag_type;
+    enum xml_namespace xml_namespace;
+    enum xml_tag_stack tag_stack;
+    enum xml_tag_stack previous_tag_stack;
+    uint32_t rpc_reply_message_id;
+    char *xmlns; 
     FILE *debug_file;
+    enum netconf_server_type server_type;
+    uint64_t calix_storage_object;
+    uint64_t juniper_storage_object;
 };
 
 struct juniper_banner {

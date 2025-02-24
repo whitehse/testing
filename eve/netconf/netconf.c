@@ -18,6 +18,7 @@
 #include <sys/eventfd.h>
 #include <liburing.h>
 #include <fcntl.h>
+#include <sys/queue.h>
 
 #include <assh/assh_session.h>
 #include <assh/assh_context.h>
@@ -37,6 +38,7 @@
 #include <cbor.h>
 #include <cjson/cJSON.h>
 #include <expat.h>
+#include <netconf_generated.h>
 #include <netconf.h>
 
 // TODO: Get rid of this and replace
@@ -238,7 +240,20 @@ static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
   //strncpy(token->charval, s, len);
 }
 
+int unroll_message_stack() {
+}
+
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  if (atts[0] && atts[1] && (strcmp(atts[0], "xmlns") == 0 || strcmp(atts[0], "XMLNS") == 0)) {
+    struct ssh *ssh = (struct ssh *)data;
+    if (strcmp(tag_name, "dhcp-lease-establishment") == 0 
+        && strcmp(atts[1], "http://www.calix.com/ns/exa/layer2-service-protocols") == 0) {
+      //ssh->xml_namespace = XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS;
+      ssh->previous_tag_stack = ssh->tag_stack;
+      ssh->tag_stack = XML_TAG_STACK_DHCP_LEASE_CREATED;
+    }
+    //ssh->xml_namespace = XML_NAMESPACE_NONE;
+  }
   //printf("M<%s>M", tag_name);
   //for (i = 0; atts[i]; i += 2) {
   //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
@@ -255,6 +270,23 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
 }
 
 static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
+  struct ssh *ssh = (struct ssh *)data;
+  switch(ssh->server_type) {
+    case (NETCONF_SERVER_TYPE_CALIX):
+
+
+
+//      switch (ssh->tag_stack) {
+//        case (XML_TAG_STACK_DHCP_LEASE_CREATED):
+//          break;
+//        case (XML_TAG_STACK_DHCP_LEASE_CREATED_DETAIL):
+//          break;
+//        case (XML_TAG_STACK_NONE):
+//          break;
+//        default:
+//          break; 
+//      }
+  }
   //printf("M</%s>M", tag_name);
   //if (strncmp(tag_name, "identity", 8) == 0) {
   //  struct ssh *ssh = (struct ssh *)data;
@@ -915,6 +947,13 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   XML_SetUserData(ssh->message_parser, (void *)ssh);
   ssh->incoming_message_is_complete = 0;
   ssh->outgoing_message_is_complete = 0;
+  ssh->server_type = NETCONF_SERVER_TYPE_CALIX;
+  //ssh->message_tag_type = XML_TAG_TYPE_NONE;
+  ssh->xml_namespace = XML_NAMESPACE_NONE;
+  ssh->tag_stack = XML_TAG_STACK_NONE;
+  ssh->rpc_reply_message_id = 0;
+  ssh->calix_storage_object = 0;
+  ssh->juniper_storage_object = 0;
   ssh->debug_file = fopen(generate_random_filename(16), "a");
   if (ssh->debug_file == NULL) {
     perror("Error opening debug file");
@@ -1012,6 +1051,47 @@ int main(int argc, char **argv) {
   ev_signal_init (&signal_watcher, sigint_cb, SIGINT);
   ev_signal_init (&signal_watcher, sigint_cb, SIGHUP);
   ev_signal_start (loop, &signal_watcher);
+
+// Goes in header
+  struct tag_stack_tailq {
+    enum xml_tag_type tag_type;
+    TAILQ_ENTRY(tag_stack_tailq) tags;
+  };
+
+  TAILQ_HEAD(tag_stack_tailq_head, tag_stack_tailq);
+  struct tag_stack_tailq_head  *tag_stack_head;
+//
+
+// Goes in c code
+  tag_stack_head = malloc(sizeof(struct tag_stack_tailq_head));
+  TAILQ_INIT(tag_stack_head);
+
+  struct tag_stack_tailq *tag = malloc(sizeof(*tag));
+  tag->tag_type = XML_TAG_TYPE_NONE;
+  TAILQ_INSERT_TAIL(tag_stack_head, tag, tags);
+
+//  token = malloc(sizeof(*token));
+//  token->token_id = ATTRIBUTENAME;
+//  token->charval = strdup(atts[i]);
+//  TAILQ_INSERT_TAIL(token_head, token, tokens);
+//
+//  token = malloc(sizeof(*token));
+//  token->token_id = ATTRIBUTEVALUE;
+//  token->charval = strdup(atts[i+1]);
+//  TAILQ_INSERT_TAIL(token_head, token, tokens);
+//
+//  token = malloc(sizeof(*token));
+//  token->token_id = TAGEND;
+//  TAILQ_INSERT_TAIL(token_head, token, tokens);
+//
+//  struct token_tailq *token_item;
+//  token_item = TAILQ_FIRST(token_head);
+//  if (token_item != NULL) {
+//    yylval.charval = token_item->charval;
+//    ret = token_item->token_id;
+//    TAILQ_REMOVE(token_head, token_item, tokens);
+//    free(token_item);
+//  }
 
   ev_run (loop, 0);
 

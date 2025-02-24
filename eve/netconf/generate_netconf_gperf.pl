@@ -7,6 +7,28 @@ use XML::LibXML;
 use XML::LibXML::PrettyPrint;
 use strict;
 
+my @tags = split '\n', `./pretty_print_debug_file.pl debug_* 2> /dev/null | ./create_tags_from_pretty_prints.sh`;
+
+print <<"EOF";
+#ifndef NETCONF_GENERATED_H
+#define NETCONF_GENERATED_H
+
+enum xml_tag_type {
+  XML_TAG_TYPE_NONE,
+EOF
+foreach my $tag (@tags) {
+  $tag = uc $tag;
+  $tag =~ s/-/_/g;
+  print "  XML_TAG_TYPE_" . $tag . ",\n";
+}
+print <<'EOF';
+};
+
+#endif //NETCONF_GENERATED_H
+EOF
+
+__END__
+
 #foreach my $file (@ARGV) {
 #  my $file_content = read_file($file);
 #  my (@messages) = split "]]>]]>", $file_content;
@@ -19,10 +41,8 @@ use strict;
 #  }
 #}
 
-print <<"EOF";
-#ifndef NX_PARSE_H
-#define NX_PARSE_H
 
+print <<"EOF";
 enum nx_enum {
   NX_ONT_MISSING,
   NX_DESCRIPTION,
@@ -158,10 +178,20 @@ union Strings {
     char *strings[];
 };
 
+enum cbor_actions{
+  CBOR_NEW_ROOT_MAP,
+  CBOR_NEW_MAP,
+  CBOR_NEW_ARRAY,
+  CBOR_NEW_INT,
+  CBOR_NEW_STRING,
+  CBOR_NEW_BOOLEAN,
+  CBOR_NEW_PAIR
+};
+
 enum cbor_types {
   CBOR_TYPE_INT,
-  CBOR_TYPE_NEGINT,
   CBOR_TYPE_STRING,
+  CBOR_TYPE_BOOLEAN,
   CBOR_TYPE_ARRAY,
   CBOR_TYPE_MAP
 };
@@ -169,6 +199,7 @@ enum cbor_types {
 struct nx_tree_parse {
     char* name;
     enum nx_tree_enum nx_tree;
+    enum cbor_actions action;
     // This string is empty or NULL if it is a direct match and there is no regex to do
     // Only the first element in each array will be used in that case, since there is
     // only one match (the entire string returned from libexpat)
@@ -204,8 +235,17 @@ in_word_set_nx_tree (register const char *str, register size_t len);
 //%enum
 struct nx_tree_parse;
 %%
-\000\001\002\003,         NX_TREE_X,{"ont_id"},{CBOR_TYPE_INT}
-\004\005\006\007,         NX_TREE_Y,"^([A-Z][a-z]+) ([A-Z][a-z]+)$",["ip_adress", "mac_address"],[CBOR_TYPE_STRING, CBOR_TYPE_STRING]
+#Top level
+#\000\000\000\000\000\000\000\000
+# Notification
+\000\000\000\001\000\000\000\000
+# RPC Reply
+\000\000\000\002
+#Store ONT_FULL_DETAIL
+\000\000\000\003
+\000\000\000\003\000\000\000\001, NX_TREE_Z,CBOR_NEW_ROOT_MAP,"",{"ont_full_detail"},{CBOR_NEW_ROOT_MAP}
+\000\000\000\003\000\000\000\002, NX_TREE_X,CBOR_NEW_PAIR,"",{"ont_id"},{CBOR_TYPE_INT}
+\000\000\000\003\000\000\000\003, NX_TREE_Y,CBOR_NEW_PAIR,"^([A-Z][a-z]+) ([A-Z][a-z]+)$",["ip_adress", "mac_address"],[CBOR_TYPE_STRING, CBOR_TYPE_STRING]
 %%
 // Other code or declarations
 ===========
