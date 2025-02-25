@@ -239,7 +239,7 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
 
   if (tag_tailq->tag_type == XML_TAG_TYPE_ONT 
       && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
-    puts("Storage ONT element encountered");
+    //puts("Storage ONT element encountered");
     ssh->calix_storage_object = CALIX_STORE_ONT_DETAIL;
     ssh->cbor_root = cbor_new_indefinite_map();
     if (ssh->cbor_root == NULL) {
@@ -285,7 +285,7 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
   if (ssh->calix_storage_object == CALIX_STORE_ONT_DETAIL
       && tag_tailq->tag_type == XML_TAG_TYPE_ONT 
       && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
-    puts("Storage ONT element ended");
+    //puts("Storage ONT element ended");
     ssh->calix_storage_object = CALIX_STORE_NONE;
     //ssh->cbor_root = cbor_new_indefinite_map();
     unsigned char* cbor_buffer;
