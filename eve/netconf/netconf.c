@@ -185,20 +185,50 @@ static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, c
 }
 
 static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
+  struct ssh *ssh = (struct ssh *)data;
   //printf("B</%s>B", tag_name);
-  if (strncmp(tag_name, "identity", 8) == 0) {
-    struct ssh *ssh = (struct ssh *)data;
+  //if (strncmp(tag_name, "identity", 8) == 0) {
+  if (strcmp(tag_name, "identity") == 0) {
     ssh->banner_is_complete = 1;
+  //} else if (strncmp(tag_name, "source-ip", 9) == 0) {
+  } else if (strcmp(tag_name, "source-ip") == 0) {
+    if (ssh->calix_remote_ip != NULL) {
+      free(ssh->calix_remote_ip);
+    }
+    size_t char_buffer_len = strlen(ssh->xml_char_buffer);
+    ssh->calix_remote_ip = malloc(sizeof(char) * char_buffer_len + 1);
+    strncpy(ssh->calix_remote_ip, ssh->xml_char_buffer, char_buffer_len);
+    ssh->calix_remote_ip[char_buffer_len] = 0;
+  }
+
+  if (ssh->xml_char_buffer != NULL) {
+    free(ssh->xml_char_buffer);
+    ssh->xml_char_buffer = NULL;
   }
 }
 
 static void XMLCALL banner_char_handler(void *data, const XML_Char *s, int len) {
+  struct ssh *ssh = (struct ssh *)data;
+  if (ssh->xml_char_buffer == NULL) {
+    ssh->xml_char_buffer = malloc(sizeof(char)*len + 1);
+    strncpy(ssh->xml_char_buffer, s, len);
+    ssh->xml_char_buffer_len = len;
+    // zero terminate
+    ssh->xml_char_buffer[ssh->xml_char_buffer_len] = 0;
+  } else {
+    ssh->xml_char_buffer = realloc(ssh->xml_char_buffer, ssh->xml_char_buffer_len + len + 1);
+    strncpy(ssh->xml_char_buffer+ssh->xml_char_buffer_len, s, len);
+    ssh->xml_char_buffer_len += len;
+    // zero terminate
+    ssh->xml_char_buffer[ssh->xml_char_buffer_len] = 0;
+  }
 }
 
 static void XMLCALL hello_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
 }
 
 static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
+  struct ssh *ssh = (struct ssh *)data;
   if (strncmp(tag_name, "hello", 5) == 0) {
     struct ssh *ssh = (struct ssh *)data;
     ssh->hello_end_tag_seen = 1;
@@ -249,8 +279,60 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
     ssh->cbor_current_item = ssh->cbor_root;
     // TODO: Do some error checking
     bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("calix_system_ip")),
+      .value = cbor_move(cbor_build_string(ssh->calix_remote_ip))});
+    success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
       .key = cbor_move(cbor_build_string("message_type")),
       .value = cbor_move(cbor_build_string("ont_detail"))});
+  } else if (tag_tailq->tag_type == XML_TAG_TYPE_USER_LOGIN
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_BASE) {
+    ssh->calix_storage_object = CALIX_STORE_USER_LOGIN;
+    ssh->cbor_root = cbor_new_indefinite_map();
+    if (ssh->cbor_root == NULL) {
+      // TODO: Do proper error checking
+      abort();
+    } 
+    ssh->cbor_current_item = ssh->cbor_root;
+    // TODO: Do some error checking
+    bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("calix_system_ip")),
+      .value = cbor_move(cbor_build_string(ssh->calix_remote_ip))});
+    success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("message_type")),
+      .value = cbor_move(cbor_build_string("user_login"))});
+  } else if (tag_tailq->tag_type == XML_TAG_TYPE_USER_LOGOUT
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_BASE) {
+    ssh->calix_storage_object = CALIX_STORE_USER_LOGOUT;
+    ssh->cbor_root = cbor_new_indefinite_map();
+    if (ssh->cbor_root == NULL) {
+      // TODO: Do proper error checking
+      abort();
+    } 
+    ssh->cbor_current_item = ssh->cbor_root;
+    // TODO: Do some error checking
+    bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("calix_system_ip")),
+      .value = cbor_move(cbor_build_string(ssh->calix_remote_ip))});
+    success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("message_type")),
+      .value = cbor_move(cbor_build_string("user_logout"))});
+  } else if (tag_tailq->tag_type == XML_TAG_ONT_US_SDBER
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
+    ssh->calix_storage_object = CALIX_STORE_ONT_US_SDBER;
+    ssh->storage_struct = malloc(sizeof(struct ont_us_sdber_table));
+    ssh->cbor_root = cbor_new_indefinite_map();
+    if (ssh->cbor_root == NULL) {
+      // TODO: Do proper error checking
+      abort();
+    } 
+    ssh->cbor_current_item = ssh->cbor_root;
+    // TODO: Do some error checking
+    //bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+    //  .key = cbor_move(cbor_build_string("calix_system_ip")),
+    //  .value = cbor_move(cbor_build_string(ssh->calix_remote_ip))});
+    //success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+    //  .key = cbor_move(cbor_build_string("message_type")),
+    //  .value = cbor_move(cbor_build_string("user_logout"))});
   }
 }
 
@@ -276,11 +358,70 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
             break;
         }
         break;
+      case (CALIX_STORE_USER_LOGIN):
+        switch (tag_tailq->tag_type) {
+          case (XML_TAG_TYPE_SESSION_IP):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("remote_ip")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+          case (XML_TAG_TYPE_USER_NAME):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("user_name")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+          case (XML_TAG_TYPE_SESSION_MANAGER):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("connection_type")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+        }
+        break;
+      case (CALIX_STORE_USER_LOGOUT):
+        switch (tag_tailq->tag_type) {
+          case (XML_TAG_TYPE_SESSION_IP):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("remote_ip")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+          case (XML_TAG_TYPE_USER_NAME):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("user_name")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+          case (XML_TAG_TYPE_SESSION_MANAGER):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("connection_type")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+        }
+        break;
+      case (CALIX_STORE_ONT_US_SDBER):
+        struct ont_us_sdber_table *sdber_table = ssh->storage_struct;
+        switch (tag_tailq->tag_type) {
+          case (XML_TAG_TYPE_ONT_ID):
+            sdber_table->ont_id = atoi(ssh->xml_char_buffer);
+            break;
+          case (XML_TAG_TYPE_SHELF):
+            sdber_table->shelf = atoi(ssh->xml_char_buffer);
+            break;
+          case (XML_TAG_TYPE_SLOT):
+            sdber_table->slot = atoi(ssh->xml_char_buffer);
+            break;
+          case (XML_TAG_TYPE_PORT):
+            sdber_table->port = malloc(sizeof(char) * ssh->char_buffer_len + 1);
+            strcpy(sdber_table->port, ssh->xml_char_buffer, ssh->char_buffer_len);
+            sdber_table-port[ssh->char_buffer_len] = 0;
+            break;
+        }
+        break;
     }
   }
 
-  free(ssh->xml_char_buffer);
-  ssh->xml_char_buffer = NULL;
+  if (ssh->xml_char_buffer != NULL) {
+    free(ssh->xml_char_buffer);
+    ssh->xml_char_buffer = NULL;
+  }
 
   if (ssh->calix_storage_object == CALIX_STORE_ONT_DETAIL
       && tag_tailq->tag_type == XML_TAG_TYPE_ONT 
@@ -298,7 +439,45 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
     cJSON_Delete(cjson_item);
     free(cbor_buffer);
     cbor_decref(&ssh->cbor_root);
+  } else if (ssh->calix_storage_object == CALIX_STORE_USER_LOGIN
+      && tag_tailq->tag_type == XML_TAG_TYPE_USER_LOGIN
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_BASE) {
+    //puts("Storage ONT element ended");
+    ssh->calix_storage_object = CALIX_STORE_NONE;
+    //ssh->cbor_root = cbor_new_indefinite_map();
+    unsigned char* cbor_buffer;
+    size_t cbor_buffer_size;
+    cbor_serialize_alloc(ssh->cbor_root, &cbor_buffer, &cbor_buffer_size);
+    cJSON* cjson_item = cbor_to_cjson(ssh->cbor_root);
+    char* json_string = cJSON_PrintUnformatted(cjson_item);
+    printf("%s\n", json_string);
+    free(json_string);
+    cJSON_Delete(cjson_item);
+    free(cbor_buffer);
+    cbor_decref(&ssh->cbor_root);
+  } else if (ssh->calix_storage_object == CALIX_STORE_USER_LOGOUT
+      && tag_tailq->tag_type == XML_TAG_TYPE_USER_LOGOUT
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_BASE) {
+    //puts("Storage ONT element ended");
+    ssh->calix_storage_object = CALIX_STORE_NONE;
+    //ssh->cbor_root = cbor_new_indefinite_map();
+    unsigned char* cbor_buffer;
+    size_t cbor_buffer_size;
+    cbor_serialize_alloc(ssh->cbor_root, &cbor_buffer, &cbor_buffer_size);
+    cJSON* cjson_item = cbor_to_cjson(ssh->cbor_root);
+    char* json_string = cJSON_PrintUnformatted(cjson_item);
+    printf("%s\n", json_string);
+    free(json_string);
+    cJSON_Delete(cjson_item);
+    free(cbor_buffer);
+    cbor_decref(&ssh->cbor_root);
   }
+
+  if (ssh->storage_struct != NULL) {
+    free(ssh->storage_struct);
+    ssh->storage_struct = NULL;
+  }
+
   TAILQ_REMOVE(ssh->tag_stack_head, tag_tailq, tags);
   free(tag_tailq);
 }
@@ -882,6 +1061,9 @@ void cleanup_session (struct ssh *ssh) {
   XML_ParserFree(ssh->message_parser);
   assh_session_release(ssh->session);
   fclose(ssh->debug_file);
+  if (ssh->calix_remote_ip != NULL) {
+    free(ssh->calix_remote_ip);
+  }
   free(ssh);
 }
 
@@ -990,6 +1172,8 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ssh->xml_char_buffer = NULL;
   ssh->xml_char_buffer_len = 0;
   ssh->calix_storage_object = CALIX_STORE_NONE;
+  ssh->storage_struct = NULL;
+  ssh->calix_remote_ip = NULL;
   //ssh->juniper_storage_object = 0;
   ssh->debug_file = fopen(generate_random_filename(16), "a");
   if (ssh->debug_file == NULL) {

@@ -77,6 +77,47 @@ struct nx_tree_parse {
 */
 };
 
+struct ont_us_sdber_table {
+  uint32_t ont_id,
+  uint8_t shelf,
+  uint8_t slot,
+  char *port,
+  char *vendor_id,
+  char *serial_number,
+  bool in_alarm,
+};
+
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+  <eventTime>2025-02-21T12:31:49-06:00</eventTime>
+  <ont-us-sdber xmlns="http://www.calix.com/ns/exa/gpon-interface-base">
+    <description>ONT Upstream SDBER rate exceeded</description>
+    <probable-cause>Upstream Signal Degrade Bit Error Rate (SDBER) exceeded. </probable-cause>
+    <details>SerialNo=12C6BB6</details>
+    <device-sequence-number>6798</device-sequence-number>
+    <instance-id>10.6796</instance-id>
+    <id>5033</id>
+    <name>ont-us-sdber</name>
+    <perceived-severity>CLEAR</perceived-severity>
+    <prev-severity>MINOR</prev-severity>
+    <alarm>true</alarm>
+    <service-impacting>true</service-impacting>
+    <service-affecting>false</service-affecting>
+    <alarm-type>QOS</alarm-type>
+    <category>PON</category>
+    <hw-failure-event>false</hw-failure-event>
+    <repair-action>Check optical power and attenuation. Fiber cleaning maybe needed. </repair-action>
+    <address>/config/system/ont[ont-id='33318']</address>
+    <port>gp4</port>
+    <ont-id>33318</ont-id>
+    <phys-pon-shelf>1</phys-pon-shelf>
+    <phys-pon-slot>1</phys-pon-slot>
+    <phys-pon-port>gp4</phys-pon-port>
+    <serial-number>12C6BB6</serial-number>
+    <equipment-type>ONT</equipment-type>
+    <vendor-id>CXNK</vendor-id>
+  </ont-us-sdber>
+</notification>
+
 #endif //NETCONF_GENERATED_H
 EOF
 
@@ -566,3 +607,109 @@ struct nx_tree_parse;
           </qos>
         </ont>
 
+{
+  "message_type": "ont_us_sdber_active",
+  "calix_system_ip": "192.168.35.14",
+  "rpc_message_id": 487,
+  "ont_id": 33318,
+  "fsan": "CXNK7DD02A",
+  "shelf": 1,
+  "slot": 1,
+  "port": "gp4"
+}
+
+struct ont_us_sdber_table {
+  uint32_t ont_id,
+  uint8_t shelf,
+  uint8_t slot,
+  char *port,
+  char *vendor_id,
+  char *serial_number,
+  bool in_alarm,
+};
+
+  <ont-us-sdber xmlns="http://www.calix.com/ns/exa/gpon-interface-base">
+    <description>ONT Upstream SDBER rate exceeded</description>
+    <probable-cause>Upstream Signal Degrade Bit Error Rate (SDBER) exceeded. </probable-cause>
+    <details>SerialNo=12C6BB6</details>
+    <device-sequence-number>6801</device-sequence-number>
+    <instance-id>10.6801</instance-id>
+    <id>5033</id>
+    <name>ont-us-sdber</name>
+    <perceived-severity>MINOR</perceived-severity>
+    <alarm>true</alarm>
+    <service-impacting>true</service-impacting>
+    <service-affecting>false</service-affecting>
+    <alarm-type>QOS</alarm-type>
+    <category>PON</category>
+    <hw-failure-event>false</hw-failure-event>
+    <repair-action>Check optical power and attenuation. Fiber cleaning maybe needed. </repair-action>
+    <address>/config/system/ont[ont-id='33318']</address>
+    <port>gp4</port>
+    <ont-id>33318</ont-id>
+    <phys-pon-shelf>1</phys-pon-shelf>
+    <phys-pon-slot>1</phys-pon-slot>
+    <phys-pon-port>gp4</phys-pon-port>
+    <serial-number>12C6BB6</serial-number>
+    <equipment-type>ONT</equipment-type>
+    <vendor-id>CXNK</vendor-id>
+  </ont-us-sdber>
+
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+  <eventTime>2025-02-21T12:31:49-06:00</eventTime>
+  <ont-us-sdber xmlns="http://www.calix.com/ns/exa/gpon-interface-base">
+    <description>ONT Upstream SDBER rate exceeded</description>
+    <probable-cause>Upstream Signal Degrade Bit Error Rate (SDBER) exceeded. </probable-cause>
+    <details>SerialNo=12C6BB6</details>
+    <device-sequence-number>6798</device-sequence-number>
+    <instance-id>10.6796</instance-id>
+    <id>5033</id>
+    <name>ont-us-sdber</name>
+    <perceived-severity>CLEAR</perceived-severity>
+    <prev-severity>MINOR</prev-severity>
+    <alarm>true</alarm>
+    <service-impacting>true</service-impacting>
+    <service-affecting>false</service-affecting>
+    <alarm-type>QOS</alarm-type>
+    <category>PON</category>
+    <hw-failure-event>false</hw-failure-event>
+    <repair-action>Check optical power and attenuation. Fiber cleaning maybe needed. </repair-action>
+    <address>/config/system/ont[ont-id='33318']</address>
+    <port>gp4</port>
+    <ont-id>33318</ont-id>
+    <phys-pon-shelf>1</phys-pon-shelf>
+    <phys-pon-slot>1</phys-pon-slot>
+    <phys-pon-port>gp4</phys-pon-port>
+    <serial-number>12C6BB6</serial-number>
+    <equipment-type>ONT</equipment-type>
+    <vendor-id>CXNK</vendor-id>
+  </ont-us-sdber>
+</notification>
+
+{
+  "message_type": "user_login",
+  "remote_ip": "192.168.32.40",
+  "user_name": "sysadmin",
+  "connection_type": "cli"
+}
+
+<notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
+  <eventTime>2025-02-21T12:42:03-06:00</eventTime>
+  <user-login xmlns="http://www.calix.com/ns/exa/base">
+    <description>User login from CLI/Netconf/EWI</description>
+    <probable-cause>User login from CLI/Netconf/EWI</probable-cause>
+    <details>This event is generated when a user logs into CLI/Netconf/EWI</details>
+    <device-sequence-number>2738</device-sequence-number>
+    <instance-id>10.6799</instance-id>
+    <id>101</id>
+    <name>user-login</name>
+    <alarm>false</alarm>
+    <category>SECURITY</category>
+    <address>/config/system/aaa/user[name='sysadmin']</address>
+    <session-id>1144</session-id>
+    <session-login>sysadmin</session-login>
+    <session-manager>cli</session-manager>
+    <session-ip>192.168.32.40</session-ip>
+    <user-name>sysadmin</user-name>
+  </user-login>
+</notification>

@@ -19,6 +19,9 @@ enum netconf_server_type {
 enum calix_storage_type {
   CALIX_STORE_NONE,
   CALIX_STORE_ONT_DETAIL,
+  CALIX_STORE_USER_LOGIN,
+  CALIX_STORE_USER_LOGOUT,
+  CALIX_STORE_ONT_US_SDBER,
 };
 
 struct tag_stack_tailq {
@@ -66,6 +69,8 @@ struct ssh {
     cbor_item_t* cbor_current_item;
     //uint32_t storage_type;
     enum calix_storage_type calix_storage_object;
+    void *storage_struct;
+    char *calix_remote_ip;
     //uint64_t juniper_storage_object;
 };
 
