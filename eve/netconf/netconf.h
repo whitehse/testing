@@ -16,23 +16,19 @@ enum netconf_server_type {
   NETCONF_SERVER_TYPE_JUNIPER
 };
 
-//enum xml_tag_type {
-//  XML_TAG_TYPE_NONE,
-//  XML_TAG_TYPE_DETAIL
-//};
-
-//enum xml_namespace {
-//  XML_NAMESPACE_NONE,
-//  XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS,
-//};
-
-enum xml_tag_stack {
-  XML_TAG_STACK_NONE,
-  XML_TAG_STACK_SKIP,
-  XML_TAG_STACK_DHCP_LEASE_CREATED,
-  XML_TAG_STACK_DHCP_LEASE_CREATED_DETAIL,
-  XML_TAG_STACK_RPC_REPLY
+enum calix_storage_type {
+  CALIX_STORE_NONE,
+  CALIX_STORE_ONT_DETAIL,
 };
+
+struct tag_stack_tailq {
+  enum xml_tag_type tag_type;
+  enum xml_namespace namespace;
+  char unknown_tag_text[51];
+  TAILQ_ENTRY(tag_stack_tailq) tags;
+};
+
+TAILQ_HEAD(tag_stack_tailq_head, tag_stack_tailq);
 
 struct ssh {
     struct assh_session_s *session;
@@ -56,15 +52,21 @@ struct ssh {
     int incoming_message_is_complete;
     int outgoing_message_is_complete;
     //enum xml_tag_type message_tag_type;
-    enum xml_namespace xml_namespace;
-    enum xml_tag_stack tag_stack;
-    enum xml_tag_stack previous_tag_stack;
+    //enum xml_namespace xml_namespace;
+    //enum xml_tag_stack tag_stack;
+    //enum xml_tag_stack previous_tag_stack;
+    struct tag_stack_tailq_head *tag_stack_head;
     uint32_t rpc_reply_message_id;
+    char *xml_char_buffer;
+    size_t xml_char_buffer_len;
     char *xmlns; 
     FILE *debug_file;
     enum netconf_server_type server_type;
-    uint64_t calix_storage_object;
-    uint64_t juniper_storage_object;
+    cbor_item_t* cbor_root;
+    cbor_item_t* cbor_current_item;
+    //uint32_t storage_type;
+    enum calix_storage_type calix_storage_object;
+    //uint64_t juniper_storage_object;
 };
 
 struct juniper_banner {

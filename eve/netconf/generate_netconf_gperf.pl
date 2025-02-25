@@ -18,7 +18,7 @@ print $header_fd <<"EOF";
 #define NETCONF_GENERATED_H
 
 enum xml_tag_type {
-  XML_TAG_TYPE_NONE,
+  XML_TAG_TYPE_UNKNOWN,
 EOF
 foreach my $tag (@tags) {
   my $formatted_tag = uc $tag;
@@ -29,7 +29,7 @@ print $header_fd <<'EOF';
 };
 
 enum xml_namespace {
-  XML_NAMESPACE_NONE,
+  XML_NAMESPACE_UNKNOWN,
 EOF
 
 foreach my $namespace (@namespaces) {
@@ -420,6 +420,25 @@ struct nx_tree_parse;
     <c-vlan-id>3</c-vlan-id>
   </dhcp-lease-establishment>
 </notification>
+
+{
+  "message_type": "ont_detail",
+  "rpc_message_id": 487,
+  "ont_id": 23621,
+  "fsan": "CXNK7DD02A",
+  #<mfg-serial-number>422004004992</mfg-serial-number>
+  "serial_number": "422004004992",
+
+
+  "shelf": 1,
+  "slot": 1,
+  "ont_id": 108,
+  "port": "g1",
+  "vlan_s_tag": 2026,
+  "vlan_c_tag": 3,
+  "ip_address": "209.95.109.207",
+  "mac_address": "48:77:46:d3:a2:69"
+}
 
 
 <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="487">

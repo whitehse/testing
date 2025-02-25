@@ -182,19 +182,6 @@ void hexDump(char *desc, void *addr, int len)
 //  <ack>ok</ack>
 static void XMLCALL banner_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
   //printf("B<%s>B", tag_name);
-
-  //for (i = 0; atts[i]; i += 2) {
-  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTENAME;
-  //  token->charval = strdup(atts[i]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
-
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTEVALUE;
-  //  token->charval = strdup(atts[i+1]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
-  //}
 }
 
 static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
@@ -206,25 +193,9 @@ static void XMLCALL banner_end_element(void *data, const XML_Char *tag_name) {
 }
 
 static void XMLCALL banner_char_handler(void *data, const XML_Char *s, int len) {
-  //token->token_id = CONTENT;
-  //token->charval = calloc(len+1, sizeof(char));
-  //strncpy(token->charval, s, len);
 }
 
 static void XMLCALL hello_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
-  //printf("H<%s>H", tag_name);
-  //for (i = 0; atts[i]; i += 2) {
-  //  //printf(" %" XML_FMT_STR "='%" XML_FMT_STR "'", atts[i], atts[i + 1]);
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTENAME;
-  //  token->charval = strdup(atts[i]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
-
-  //  token = malloc(sizeof(*token));
-  //  token->token_id = ATTRIBUTEVALUE;
-  //  token->charval = strdup(atts[i+1]);
-  //  TAILQ_INSERT_TAIL(token_head, token, tokens);
-  //}
 }
 
 static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
@@ -236,75 +207,120 @@ static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
 }
 
 static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
-  //token->token_id = CONTENT;
-  //token->charval = calloc(len+1, sizeof(char));
-  //strncpy(token->charval, s, len);
 }
 
-//int unroll_message_stack() {
-//}
-
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
+  struct ssh *ssh = (struct ssh *)data;
   size_t tag_len = strlen(tag_name);
-  //if (tag_len > 0 < 50) {
-    const struct nx_parse *tag = in_word_set_nx(tag_name, tag_len);
-    if (tag != NULL) {
-      printf(" <%s>:%d", tag_name, tag->tag_type);
-    }
-  //}
+
+  struct tag_stack_tailq *tag_tailq = malloc(sizeof(*tag_tailq));
+  TAILQ_INSERT_HEAD(ssh->tag_stack_head, tag_tailq, tags);
+
+  const struct nx_parse *tag_parsed = in_word_set_nx(tag_name, tag_len);
+  if (tag_parsed != NULL) {
+    tag_tailq->tag_type = tag_parsed->tag_type;
+  } else {
+    tag_tailq->tag_type = XML_TAG_TYPE_UNKNOWN;
+    size_t size_of_text_to_copy = (tag_len > 50) ? 50 : tag_len;
+    strncpy(tag_tailq->unknown_tag_text, tag_name, size_of_text_to_copy);
+    // Null terminate string
+    tag_tailq->unknown_tag_text[size_of_text_to_copy] = 0;
+  }
 
   if (atts[0] && strcmp(atts[0], "xmlns") == 0) {
     size_t xmlns_len = strlen(atts[1]);
-    const struct nx_xmlns_parse *namespace = in_word_set_nx_xmlns(atts[1], xmlns_len);
-    if (namespace != NULL) {
-      printf(":%d", namespace->namespace);
+    const struct nx_xmlns_parse *namespace_parsed = in_word_set_nx_xmlns(atts[1], xmlns_len);
+    if (namespace_parsed != NULL) {
+      tag_tailq->namespace = namespace_parsed->namespace;
+    } else {
+      tag_tailq->namespace = XML_NAMESPACE_UNKNOWN;
     }
-    
   }
 
-//  printf("<%s>:%d", tag_name, tag->tag_type);
-//  printf("<%s>:", tag_name);
-//  if (atts[0] && atts[1] && (strcmp(atts[0], "xmlns") == 0 || strcmp(atts[0], "XMLNS") == 0)) {
-//    struct ssh *ssh = (struct ssh *)data;
-//    if (strcmp(tag_name, "dhcp-lease-establishment") == 0 
-//        && strcmp(atts[1], "http://www.calix.com/ns/exa/layer2-service-protocols") == 0) {
-//      //ssh->xml_namespace = XML_NAMESPACE_CALIX_LAYER2_SERVICE_PROTOCOLS;
-//      ssh->previous_tag_stack = ssh->tag_stack;
-//      ssh->tag_stack = XML_TAG_STACK_DHCP_LEASE_CREATED;
-//    }
-//    //ssh->xml_namespace = XML_NAMESPACE_NONE;
-//  }
+  if (tag_tailq->tag_type == XML_TAG_TYPE_ONT 
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
+    puts("Storage ONT element encountered");
+    ssh->calix_storage_object = CALIX_STORE_ONT_DETAIL;
+    ssh->cbor_root = cbor_new_indefinite_map();
+    if (ssh->cbor_root == NULL) {
+      // TODO: Do proper error checking
+      abort();
+    } 
+    ssh->cbor_current_item = ssh->cbor_root;
+    // TODO: Do some error checking
+    bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+      .key = cbor_move(cbor_build_string("message_type")),
+      .value = cbor_move(cbor_build_string("ont_detail"))});
+  }
 }
 
 static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
-//  struct ssh *ssh = (struct ssh *)data;
-//  switch(ssh->server_type) {
-//    case (NETCONF_SERVER_TYPE_CALIX):
+  struct ssh *ssh = (struct ssh *)data;
+  struct tag_stack_tailq *tag_tailq;
+  tag_tailq = TAILQ_FIRST(ssh->tag_stack_head);
 
+  bool success = true;
+  if (ssh->calix_storage_object != CALIX_STORE_NONE) {
+    switch (ssh->calix_storage_object) {
+      case (CALIX_STORE_ONT_DETAIL):
+        switch (tag_tailq->tag_type) {
+          case (XML_TAG_TYPE_MFG_SERIAL_NUMBER):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("serial_number")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+          case (XML_TAG_TYPE_ONT_ID):
+            success &= cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
+              .key = cbor_move(cbor_build_string("ont_id")),
+              .value = cbor_move(cbor_build_string(ssh->xml_char_buffer))});
+            break;
+        }
+        break;
+    }
+  }
 
+  free(ssh->xml_char_buffer);
+  ssh->xml_char_buffer = NULL;
 
-//      switch (ssh->tag_stack) {
-//        case (XML_TAG_STACK_DHCP_LEASE_CREATED):
-//          break;
-//        case (XML_TAG_STACK_DHCP_LEASE_CREATED_DETAIL):
-//          break;
-//        case (XML_TAG_STACK_NONE):
-//          break;
-//        default:
-//          break; 
-//      }
-//  }
-  //printf("M</%s>M", tag_name);
-  //if (strncmp(tag_name, "identity", 8) == 0) {
-  //  struct ssh *ssh = (struct ssh *)data;
-  //  ssh->banner_is_complete = 1;
-  //}
+  if (ssh->calix_storage_object == CALIX_STORE_ONT_DETAIL
+      && tag_tailq->tag_type == XML_TAG_TYPE_ONT 
+      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
+    puts("Storage ONT element ended");
+    ssh->calix_storage_object = CALIX_STORE_NONE;
+    //ssh->cbor_root = cbor_new_indefinite_map();
+    unsigned char* cbor_buffer;
+    size_t cbor_buffer_size;
+    cbor_serialize_alloc(ssh->cbor_root, &cbor_buffer, &cbor_buffer_size);
+    cJSON* cjson_item = cbor_to_cjson(ssh->cbor_root);
+    char* json_string = cJSON_PrintUnformatted(cjson_item);
+    printf("%s\n", json_string);
+    free(json_string);
+    cJSON_Delete(cjson_item);
+    free(cbor_buffer);
+    cbor_decref(&ssh->cbor_root);
+  }
+  TAILQ_REMOVE(ssh->tag_stack_head, tag_tailq, tags);
+  free(tag_tailq);
 }
 
 static void XMLCALL message_char_handler(void *data, const XML_Char *s, int len) {
-  //token->token_id = CONTENT;
-  //token->charval = calloc(len+1, sizeof(char));
-  //strncpy(token->charval, s, len);
+  struct ssh *ssh = (struct ssh *)data;
+
+  if (ssh->calix_storage_object != CALIX_STORE_NONE) {
+    if (ssh->xml_char_buffer == NULL) {
+      ssh->xml_char_buffer = malloc(sizeof(char)*len + 1);
+      strncpy(ssh->xml_char_buffer, s, len);
+      ssh->xml_char_buffer_len = len;
+      // zero terminate
+      ssh->xml_char_buffer[ssh->xml_char_buffer_len] = 0;
+    } else {
+      ssh->xml_char_buffer = realloc(ssh->xml_char_buffer, ssh->xml_char_buffer_len + len + 1);
+      strncpy(ssh->xml_char_buffer+ssh->xml_char_buffer_len, s, len);
+      ssh->xml_char_buffer_len += len;
+      // zero terminate
+      ssh->xml_char_buffer[ssh->xml_char_buffer_len] = 0;
+    }
+  }
 }
 
 static void process_assh_events (struct ssh *ssh) {
@@ -965,12 +981,16 @@ void netconf_listener_cb(struct ev_loop *loop, struct ev_io *watcher, int revent
   ssh->incoming_message_is_complete = 0;
   ssh->outgoing_message_is_complete = 0;
   ssh->server_type = NETCONF_SERVER_TYPE_CALIX;
-  //ssh->message_tag_type = XML_TAG_TYPE_NONE;
-  ssh->xml_namespace = XML_NAMESPACE_NONE;
-  ssh->tag_stack = XML_TAG_STACK_NONE;
+  //ssh->message_tag_type = XML_TAG_TYPE_UNKNOWN;
+  //ssh->xml_namespace = XML_NAMESPACE_UNKNOWN;
+  //ssh->tag_stack = XML_TAG_STACK_NONE;
+  ssh->tag_stack_head = malloc(sizeof(struct tag_stack_tailq_head));
+  TAILQ_INIT(ssh->tag_stack_head);
   ssh->rpc_reply_message_id = 0;
-  ssh->calix_storage_object = 0;
-  ssh->juniper_storage_object = 0;
+  ssh->xml_char_buffer = NULL;
+  ssh->xml_char_buffer_len = 0;
+  ssh->calix_storage_object = CALIX_STORE_NONE;
+  //ssh->juniper_storage_object = 0;
   ssh->debug_file = fopen(generate_random_filename(16), "a");
   if (ssh->debug_file == NULL) {
     perror("Error opening debug file");
@@ -1069,20 +1089,6 @@ int main(int argc, char **argv) {
   ev_signal_init (&signal_watcher, sigint_cb, SIGHUP);
   ev_signal_start (loop, &signal_watcher);
 
-// Goes in header
-//  struct tag_stack_tailq {
-//    enum xml_tag_type tag_type;
-//    TAILQ_ENTRY(tag_stack_tailq) tags;
-//  };
-
-//  TAILQ_HEAD(tag_stack_tailq_head, tag_stack_tailq);
-//  struct tag_stack_tailq_head  *tag_stack_head;
-//
-
-// Goes in c code
-//  tag_stack_head = malloc(sizeof(struct tag_stack_tailq_head));
-//  TAILQ_INIT(tag_stack_head);
-//
 //  struct tag_stack_tailq *tag = malloc(sizeof(*tag));
 //  tag->tag_type = XML_TAG_TYPE_NONE;
 //  TAILQ_INSERT_TAIL(tag_stack_head, tag, tags);
