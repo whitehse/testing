@@ -38,6 +38,8 @@
 #include <cbor.h>
 #include <cjson/cJSON.h>
 #include <expat.h>
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <netconf_generated.h>
 #include <netconf.h>
 #include <nx_gperf.h>
@@ -239,6 +241,35 @@ static void XMLCALL hello_end_element(void *data, const XML_Char *tag_name) {
 static void XMLCALL hello_char_handler(void *data, const XML_Char *s, int len) {
 }
 
+struct ont_us_sdber_table {
+  uint32_t ont_id;
+  uint8_t shelf;
+  uint8_t slot;
+  char *port;
+  char *vendor_id;
+  char *serial_number;
+  bool in_alarm;
+};
+
+void ont_us_sdber_feed (struct ont_us_sdber_table *table, enum xml_tag_type tag_type, char* text) {
+  // Fill out table
+  if (text == NULL) return;
+
+  switch (tag_type) {
+    case (XML_TAG_TYPE_ONT_ID):
+    break;
+  }
+}
+
+cbor_item_t* ont_us_sdber_finalize (struct ont_us_sdber_table *table) {
+  if (table == NULL) return NULL; 
+  //cbor_item_t* root;
+  free(table->port);
+  free(table->vendor_id);
+  free(table->serial_number);
+  free(table);
+}
+
 static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, const XML_Char **atts) {
   struct ssh *ssh = (struct ssh *)data;
   size_t tag_len = strlen(tag_name);
@@ -316,23 +347,16 @@ static void XMLCALL message_start_element(void *data, const XML_Char *tag_name, 
     success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
       .key = cbor_move(cbor_build_string("message_type")),
       .value = cbor_move(cbor_build_string("user_logout"))});
-  } else if (tag_tailq->tag_type == XML_TAG_ONT_US_SDBER
-      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
-    ssh->calix_storage_object = CALIX_STORE_ONT_US_SDBER;
-    ssh->storage_struct = malloc(sizeof(struct ont_us_sdber_table));
-    ssh->cbor_root = cbor_new_indefinite_map();
-    if (ssh->cbor_root == NULL) {
-      // TODO: Do proper error checking
-      abort();
-    } 
-    ssh->cbor_current_item = ssh->cbor_root;
-    // TODO: Do some error checking
-    //bool success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
-    //  .key = cbor_move(cbor_build_string("calix_system_ip")),
-    //  .value = cbor_move(cbor_build_string(ssh->calix_remote_ip))});
-    //success = cbor_map_add(ssh->cbor_current_item, (struct cbor_pair){
-    //  .key = cbor_move(cbor_build_string("message_type")),
-    //  .value = cbor_move(cbor_build_string("user_logout"))});
+//  } else if (tag_tailq->tag_type == XML_TAG_ONT_US_SDBER
+//      && tag_tailq->namespace == XML_NAMESPACE_CALIX_EXA_GPON_INTERFACE_BASE) {
+//    ssh->calix_storage_object = CALIX_STORE_ONT_US_SDBER;
+//    ssh->storage_struct = malloc(sizeof(struct ont_us_sdber_table));
+//    ssh->cbor_root = cbor_new_indefinite_map();
+//    if (ssh->cbor_root == NULL) {
+//      // TODO: Do proper error checking
+//      abort();
+//    } 
+//    ssh->cbor_current_item = ssh->cbor_root;
   }
 }
 
@@ -396,25 +420,25 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
             break;
         }
         break;
-      case (CALIX_STORE_ONT_US_SDBER):
-        struct ont_us_sdber_table *sdber_table = ssh->storage_struct;
-        switch (tag_tailq->tag_type) {
-          case (XML_TAG_TYPE_ONT_ID):
-            sdber_table->ont_id = atoi(ssh->xml_char_buffer);
-            break;
-          case (XML_TAG_TYPE_SHELF):
-            sdber_table->shelf = atoi(ssh->xml_char_buffer);
-            break;
-          case (XML_TAG_TYPE_SLOT):
-            sdber_table->slot = atoi(ssh->xml_char_buffer);
-            break;
-          case (XML_TAG_TYPE_PORT):
-            sdber_table->port = malloc(sizeof(char) * ssh->char_buffer_len + 1);
-            strcpy(sdber_table->port, ssh->xml_char_buffer, ssh->char_buffer_len);
-            sdber_table-port[ssh->char_buffer_len] = 0;
-            break;
-        }
-        break;
+//      case (CALIX_STORE_ONT_US_SDBER):
+//        struct ont_us_sdber_table *sdber_table = ssh->storage_struct;
+//        switch (tag_tailq->tag_type) {
+//          case (XML_TAG_TYPE_ONT_ID):
+//            sdber_table->ont_id = atoi(ssh->xml_char_buffer);
+//            break;
+//          case (XML_TAG_TYPE_SHELF):
+//            sdber_table->shelf = atoi(ssh->xml_char_buffer);
+//            break;
+//          case (XML_TAG_TYPE_SLOT):
+//            sdber_table->slot = atoi(ssh->xml_char_buffer);
+//            break;
+//          case (XML_TAG_TYPE_PORT):
+//            sdber_table->port = malloc(sizeof(char) * ssh->char_buffer_len + 1);
+//            strcpy(sdber_table->port, ssh->xml_char_buffer, ssh->char_buffer_len);
+//            sdber_table-port[ssh->char_buffer_len] = 0;
+//            break;
+//        }
+//        break;
     }
   }
 
@@ -473,10 +497,10 @@ static void XMLCALL message_end_element(void *data, const XML_Char *tag_name) {
     cbor_decref(&ssh->cbor_root);
   }
 
-  if (ssh->storage_struct != NULL) {
-    free(ssh->storage_struct);
-    ssh->storage_struct = NULL;
-  }
+//  if (ssh->storage_struct != NULL) {
+//    free(ssh->storage_struct);
+//    ssh->storage_struct = NULL;
+//  }
 
   TAILQ_REMOVE(ssh->tag_stack_head, tag_tailq, tags);
   free(tag_tailq);
